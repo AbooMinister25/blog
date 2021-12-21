@@ -1,0 +1,29 @@
+[package]
+name = "blog"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = { version = "0.5.0-rc.1", features = ["json"] }
+env_logger = "0.9.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+pulldown-cmark = { version = "0.8.0", default-features = false }
+syntect = { version = "4.2", default-features = false, features = [
+    "default-fancy",
+] }
+chrono = "0.4"
+regex = "1.5"
+lazy_static = "1.4.0"
+diesel = { version = "1.4.4", features = ["postgres", "chrono"] }
+dotenv = "0.15.0"
+thiserror = "1.0.30"
+anyhow = "1.0.51"
+
+
+[dependencies.rocket_sync_db_pools]
+version = "0.1.0-rc.1"
+default-features = false
+features = ["diesel_postgres_pool"]

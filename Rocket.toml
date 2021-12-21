@@ -1,0 +1,2 @@
+[global.databases]
+blog_db = { url = "postgres://postgres:postgres@localhost/blog" }
