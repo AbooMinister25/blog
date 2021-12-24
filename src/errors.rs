@@ -8,10 +8,18 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum ApiError {
-    #[error("Post {0} not found")]
-    PostNotFound(i32),
+    #[error("Post not found")]
+    PostNotFound,
+    #[error("Error while parsing date {0}, invalid date format")]
+    DateParsingError(String),
+    #[error("Error while inserting post")]
+    PostInsertionError(#[source] diesel::result::Error),
+    #[error("Error while deleting post")]
+    PostDeletionError(#[source] diesel::result::Error),
+    #[error("Missing required header {0}")]
+    MissingHeader(String),
     #[error("Error while loading post")]
-    PostLoadError(#[from] diesel::result::Error),
+    PostLoadError(#[source] diesel::result::Error),
 }
 
 #[derive(Serialize)]
@@ -37,7 +45,11 @@ impl<'r> Responder<'r, 'static> for ApiError {
 impl ApiError {
     fn status_code(&self) -> Status {
         match self {
-            ApiError::PostNotFound(_) => Status::NotFound,
+            ApiError::PostNotFound => Status::NotFound,
+            ApiError::DateParsingError(_) => Status::BadRequest,
+            ApiError::PostInsertionError(_) => Status::InternalServerError,
+            ApiError::PostDeletionError(_) => Status::InternalServerError,
+            ApiError::MissingHeader(_) => Status::UnprocessableEntity,
             ApiError::PostLoadError(_) => Status::InternalServerError,
         }
     }

@@ -1,7 +1,8 @@
 use crate::schema::posts;
 use crate::DATE_FORMAT;
 use chrono::NaiveDateTime;
-use serde::Serialize;
+use rocket::form::FromForm;
+use serde::{Deserialize, Serialize};
 
 #[derive(Queryable)]
 pub struct Post {
@@ -23,7 +24,6 @@ pub struct NewPost {
     pub published: bool,
 }
 
-
 impl Post {
     pub fn to_json(self) -> PostJson {
         PostJson {
@@ -43,4 +43,18 @@ pub struct PostJson {
     pub body: String,
     pub published: bool,
     pub published_date: String,
+}
+
+#[derive(FromForm)]
+pub struct PostQueryForm {
+    pub title: Option<String>,
+    pub published: Option<bool>,
+    pub limit: Option<i64>,
+    pub published_date: Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct NewPostJson {
+    pub body: String,
+    pub summary: String,
 }
