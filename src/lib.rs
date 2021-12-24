@@ -7,6 +7,7 @@ extern crate rocket;
 #[macro_use]
 extern crate serde_json;
 
+pub mod catchers;
 pub mod crud;
 pub mod endpoints;
 pub mod errors;
@@ -24,13 +25,19 @@ pub struct DBPool(PgConnection);
 pub const DATE_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
 
 pub async fn app() -> rocket::Rocket<rocket::Build> {
-    rocket::build().attach(DBPool::fairing()).mount(
-        "/",
-        routes![
-            endpoints::posts::fetch_post,
-            endpoints::posts::fetch_posts,
-            endpoints::posts::create_post,
-            endpoints::posts::delete_post,
-        ],
-    )
+    rocket::build()
+        .attach(DBPool::fairing())
+        .mount(
+            "/",
+            routes![
+                endpoints::posts::fetch_post,
+                endpoints::posts::fetch_posts,
+                endpoints::posts::create_post,
+                endpoints::posts::delete_post,
+            ],
+        )
+        .register(
+            "/",
+            catchers![catchers::not_found, catchers::internal_server_error],
+        )
 }

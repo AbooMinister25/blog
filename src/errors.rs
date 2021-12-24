@@ -10,6 +10,10 @@ use thiserror::Error;
 pub enum ApiError {
     #[error("Post not found")]
     PostNotFound,
+    #[error("URL {0} not found")]
+    PageNotFound(String),
+    #[error("Internal Server Error")]
+    InternalServerError,
     #[error("Error while parsing date {0}, invalid date format")]
     DateParsingError(String),
     #[error("Error while inserting post")]
@@ -46,6 +50,8 @@ impl ApiError {
     fn status_code(&self) -> Status {
         match self {
             ApiError::PostNotFound => Status::NotFound,
+            ApiError::PageNotFound(_) => Status::NotFound,
+            ApiError::InternalServerError => Status::InternalServerError,
             ApiError::DateParsingError(_) => Status::BadRequest,
             ApiError::PostInsertionError(_) => Status::InternalServerError,
             ApiError::PostDeletionError(_) => Status::InternalServerError,
