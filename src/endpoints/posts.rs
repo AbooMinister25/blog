@@ -1,6 +1,6 @@
 use crate::crud;
 use crate::errors::ApiError;
-use crate::models::post::{NewPostJson, PostJson, PostQueryForm};
+use crate::models::post::{NewPostJson, PostJson};
 use crate::response::ApiResponse;
 use crate::DBPool;
 use rocket::serde::json::{Json, Value};
@@ -20,10 +20,16 @@ pub async fn fetch_post(conn: DBPool, id: i32) -> Result<ApiResponse, ApiError> 
     })
 }
 
-#[get("/posts?<options..>")]
-pub async fn fetch_posts(conn: DBPool, options: PostQueryForm) -> Result<ApiResponse, ApiError> {
+#[get("/posts?<title>&<published>&<limit>&<published_date>")]
+pub async fn fetch_posts(
+    conn: DBPool,
+    title: String,
+    published: bool,
+    limit: i64,
+    published_date: String,
+) -> Result<ApiResponse, ApiError> {
     let posts = conn
-        .run(move |c| crud::posts::find_many(c, options))
+        .run(move |c| crud::posts::find_many(c, title, published, limit, published_date))
         .await?;
 
     if posts.is_empty() {

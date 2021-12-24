@@ -21,7 +21,7 @@ use rocket_sync_db_pools::database;
 #[database("blog_db")]
 pub struct DBPool(PgConnection);
 
-pub const DATE_FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.3fz";
+pub const DATE_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
 
 pub async fn app() -> rocket::Rocket<rocket::Build> {
     rocket::build().attach(DBPool::fairing()).mount(

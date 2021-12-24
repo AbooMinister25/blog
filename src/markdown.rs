@@ -50,7 +50,7 @@ fn parse_content(lines: &[&str]) -> Result<String, ApiError> {
     let ss = SyntaxSet::load_defaults_newlines();
     let ts = ThemeSet::load_defaults();
     let mut syntax = String::from("py");
-    let theme = &ts.themes["base16-ocean-dark"];
+    let theme = &ts.themes["base16-ocean.dark"];
 
     let mut options = Options::empty();
     options.insert(Options::ENABLE_STRIKETHROUGH);

@@ -1,6 +1,6 @@
 use crate::errors::ApiError;
 use crate::markdown;
-use crate::models::post::{NewPost, Post, PostQueryForm};
+use crate::models::post::{NewPost, Post};
 use crate::schema::posts::dsl::*;
 use crate::DATE_FORMAT;
 use chrono::NaiveDateTime;
@@ -16,32 +16,52 @@ pub fn find_one(conn: &PgConnection, post_id: i32) -> Result<Vec<Post>, ApiError
     Ok(posts_vec)
 }
 
-pub fn find_many(conn: &PgConnection, post_options: PostQueryForm) -> Result<Vec<Post>, ApiError> {
-    let mut query = posts.into_boxed();
+pub fn find_many(
+    conn: &PgConnection,
+    p_title: String,
+    p_published: bool,
+    limit: i64,
+    p_date: String,
+) -> Result<Vec<Post>, ApiError> {
+    // let mut query = posts.into_boxed();
 
-    if let Some(p_title) = post_options.title {
-        query = query.filter(title.eq(p_title));
+    let parsed_dt = NaiveDateTime::parse_from_str(&p_date, DATE_FORMAT);
+
+    if parsed_dt.is_err() {
+        return Err(ApiError::DateParsingError(p_date));
     }
 
-    if let Some(p_published) = post_options.published {
-        query = query.filter(published.eq(p_published));
-    }
+    posts
+        .filter(title.eq(p_title))
+        .filter(published.eq(p_published))
+        .filter(published_date.eq(parsed_dt.unwrap()))
+        .limit(limit)
+        .load::<Post>(conn)
+        .map_err(ApiError::PostLoadError)
 
-    if let Some(limit) = post_options.limit {
-        query = query.limit(limit);
-    }
+    // if let Some(t) = p_title {
+    //     query = query.filter(title.eq(t));
+    // }
 
-    if let Some(p_date) = post_options.published_date {
-        let parsed_dt = NaiveDateTime::parse_from_str(&p_date, DATE_FORMAT);
-        if parsed_dt.is_err() {
-            return Err(ApiError::DateParsingError(p_date));
-        }
+    // if let Some(p) = p_published {
+    //     query = query.filter(published.eq(p));
+    // }
 
-        let dt = parsed_dt.unwrap();
-        query = query.filter(published_date.eq(dt));
-    }
+    // if let Some(l) = limit {
+    //     query = query.limit(l);
+    // }
 
-    query.load::<Post>(conn).map_err(ApiError::PostLoadError)
+    // if let Some(p_date) = p_published_date {
+    //     let parsed_dt = NaiveDateTime::parse_from_str(&p_date, DATE_FORMAT);
+    //     if parsed_dt.is_err() {
+    //         return Err(ApiError::DateParsingError(p_date));
+    //     }
+
+    //     let dt = parsed_dt.unwrap();
+    //     query = query.filter(published_date.eq(dt));
+    // }
+
+    // query.load::<Post>(conn).map_err(ApiError::PostLoadError)
 }
 
 pub fn new(conn: &PgConnection, p_body: &str, p_summary: &str) -> Result<(), ApiError> {
