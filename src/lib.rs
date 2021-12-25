@@ -34,6 +34,8 @@ pub async fn app() -> rocket::Rocket<rocket::Build> {
                 endpoints::posts::fetch_posts,
                 endpoints::posts::create_post,
                 endpoints::posts::delete_post,
+                endpoints::users::create_user,
+                endpoints::users::delete_user,
             ],
         )
         .register(
