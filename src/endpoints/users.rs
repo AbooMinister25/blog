@@ -16,9 +16,9 @@ pub async fn create_user(conn: DBPool, user: Json<NewUserJson>) -> Result<ApiRes
     })
 }
 
-#[delete("/users/<username>")]
-pub async fn delete_user(conn: DBPool, username: String) -> Result<ApiResponse, ApiError> {
-    conn.run(move |c| crud::users::delete(c, &username)).await?;
+#[delete("/users/<uid>")]
+pub async fn delete_user(conn: DBPool, uid: i32) -> Result<ApiResponse, ApiError> {
+    conn.run(move |c| crud::users::delete(c, uid)).await?;
 
     Ok(ApiResponse {
         status: "success",

@@ -35,10 +35,10 @@ pub fn validate(conn: &PgConnection, password: &str, uname: &str) -> Result<bool
     }
 
     Err(ApiError::UserNotFound)
-} 
+}
 
-pub fn delete(conn: &PgConnection, uname: &str) -> Result<(), ApiError> {
-    diesel::delete(users.filter(username.eq(uname)))
+pub fn delete(conn: &PgConnection, uid: i32) -> Result<(), ApiError> {
+    diesel::delete(users.filter(id.eq(uid)))
         .execute(conn)
         .map_err(ApiError::UserDeleteError)?;
 
