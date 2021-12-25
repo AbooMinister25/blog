@@ -23,8 +23,6 @@ pub fn find_many(
     limit: i64,
     p_date: String,
 ) -> Result<Vec<Post>, ApiError> {
-    // let mut query = posts.into_boxed();
-
     let parsed_dt = NaiveDateTime::parse_from_str(&p_date, DATE_FORMAT);
 
     if parsed_dt.is_err() {
@@ -38,30 +36,6 @@ pub fn find_many(
         .limit(limit)
         .load::<Post>(conn)
         .map_err(ApiError::PostLoadError)
-
-    // if let Some(t) = p_title {
-    //     query = query.filter(title.eq(t));
-    // }
-
-    // if let Some(p) = p_published {
-    //     query = query.filter(published.eq(p));
-    // }
-
-    // if let Some(l) = limit {
-    //     query = query.limit(l);
-    // }
-
-    // if let Some(p_date) = p_published_date {
-    //     let parsed_dt = NaiveDateTime::parse_from_str(&p_date, DATE_FORMAT);
-    //     if parsed_dt.is_err() {
-    //         return Err(ApiError::DateParsingError(p_date));
-    //     }
-
-    //     let dt = parsed_dt.unwrap();
-    //     query = query.filter(published_date.eq(dt));
-    // }
-
-    // query.load::<Post>(conn).map_err(ApiError::PostLoadError)
 }
 
 pub fn new(conn: &PgConnection, p_body: &str, p_summary: &str) -> Result<(), ApiError> {

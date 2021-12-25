@@ -21,6 +21,8 @@ diesel = { version = "1.4.4", features = ["postgres", "chrono"] }
 dotenv = "0.15.0"
 thiserror = "1.0.30"
 anyhow = "1.0.51"
+rand = "0.8.4"
+rust-argon2 = "0.8"
 
 
 [dependencies.rocket_sync_db_pools]

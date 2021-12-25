@@ -24,6 +24,18 @@ pub enum ApiError {
     MissingHeader(String),
     #[error("Error while loading post")]
     PostLoadError(#[source] diesel::result::Error),
+    #[error("Unexpected error while hashing password")]
+    PasswordHashingError(#[source] argon2::Error),
+    #[error("Error while inserting user")]
+    UserInsertionError(#[source] diesel::result::Error),
+    #[error("Error while loading user")]
+    UserLoadError(#[source] diesel::result::Error),
+    #[error("User Not Found")]
+    UserNotFound,
+    #[error("Error while authenticating user")]
+    AuthenticationError(#[source] argon2::Error),
+    #[error("Error while deleting user")]
+    UserDeleteError(#[source] diesel::result::Error),
 }
 
 #[derive(Serialize)]
@@ -57,6 +69,12 @@ impl ApiError {
             ApiError::PostDeletionError(_) => Status::InternalServerError,
             ApiError::MissingHeader(_) => Status::UnprocessableEntity,
             ApiError::PostLoadError(_) => Status::InternalServerError,
+            ApiError::PasswordHashingError(_) => Status::InternalServerError,
+            ApiError::UserInsertionError(_) => Status::InternalServerError,
+            ApiError::UserLoadError(_) => Status::InternalServerError,
+            ApiError::UserNotFound => Status::NotFound,
+            ApiError::AuthenticationError(_) => Status::InternalServerError,
+            ApiError::UserDeleteError(_) => Status::InternalServerError,
         }
     }
 }
