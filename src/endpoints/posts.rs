@@ -1,3 +1,4 @@
+use crate::auth::AuthenticatedUser;
 use crate::crud;
 use crate::errors::ApiError;
 use crate::models::post::{NewPostJson, PostJson};
@@ -7,12 +8,9 @@ use rocket::serde::json::{Json, Value};
 
 #[get("/posts/<id>")]
 pub async fn fetch_post(conn: DBPool, id: i32) -> Result<ApiResponse, ApiError> {
-    let mut posts = conn.run(move |c| crud::posts::find_one(c, id)).await?;
-    if posts.is_empty() {
-        return Err(ApiError::PostNotFound);
-    }
+    let post = conn.run(move |c| crud::posts::find_one(c, id)).await?;
 
-    let post_json = posts.pop().unwrap().to_json();
+    let post_json = post.to_json();
 
     Ok(ApiResponse {
         status: "success",
@@ -48,7 +46,13 @@ pub async fn fetch_posts(
 }
 
 #[post("/posts", format = "json", data = "<post>")]
-pub async fn create_post(conn: DBPool, post: Json<NewPostJson>) -> Result<ApiResponse, ApiError> {
+pub async fn create_post(
+    conn: DBPool,
+    post: Json<NewPostJson>,
+    auth: Result<AuthenticatedUser, ApiError>,
+) -> Result<ApiResponse, ApiError> {
+    auth?;
+
     conn.run(move |c| crud::posts::new(c, &post.body, &post.summary))
         .await?;
 
@@ -59,7 +63,13 @@ pub async fn create_post(conn: DBPool, post: Json<NewPostJson>) -> Result<ApiRes
 }
 
 #[delete("/posts/<id>")]
-pub async fn delete_post(conn: DBPool, id: i32) -> Result<ApiResponse, ApiError> {
+pub async fn delete_post(
+    conn: DBPool,
+    id: i32,
+    auth: Result<AuthenticatedUser, ApiError>,
+) -> Result<ApiResponse, ApiError> {
+    auth?;
+
     conn.run(move |c| crud::posts::delete(c, id)).await?;
 
     Ok(ApiResponse {

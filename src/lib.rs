@@ -7,6 +7,7 @@ extern crate rocket;
 #[macro_use]
 extern crate serde_json;
 
+pub mod auth;
 pub mod catchers;
 pub mod crud;
 pub mod endpoints;
@@ -36,6 +37,7 @@ pub async fn app() -> rocket::Rocket<rocket::Build> {
                 endpoints::posts::delete_post,
                 endpoints::users::create_user,
                 endpoints::users::delete_user,
+                endpoints::users::fetch_user,
             ],
         )
         .register(

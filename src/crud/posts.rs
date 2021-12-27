@@ -6,14 +6,19 @@ use crate::DATE_FORMAT;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 
-pub fn find_one(conn: &PgConnection, post_id: i32) -> Result<Vec<Post>, ApiError> {
-    let posts_vec = posts
+pub fn find_one(conn: &PgConnection, post_id: i32) -> Result<Post, ApiError> {
+    let post = posts
         .filter(id.eq(post_id))
         .limit(1)
-        .load::<Post>(conn)
+        .first::<Post>(conn)
+        .optional()
         .map_err(ApiError::PostLoadError)?;
 
-    Ok(posts_vec)
+    if let Some(p) = post {
+        return Ok(p);
+    }
+
+    Err(ApiError::PostNotFound)
 }
 
 pub fn find_many(

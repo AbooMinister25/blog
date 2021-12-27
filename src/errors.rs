@@ -36,6 +36,12 @@ pub enum ApiError {
     AuthenticationError(#[source] argon2::Error),
     #[error("Error while deleting user")]
     UserDeleteError(#[source] diesel::result::Error),
+    #[error("Invalid Credentials")]
+    InvalidCredentials,
+    #[error("Missing required request data")]
+    MissingData,
+    #[error("Error while fetching connection from database pool")]
+    PoolError,
 }
 
 #[derive(Serialize)]
@@ -59,7 +65,7 @@ impl<'r> Responder<'r, 'static> for ApiError {
 }
 
 impl ApiError {
-    fn status_code(&self) -> Status {
+    pub fn status_code(&self) -> Status {
         match self {
             ApiError::PostNotFound => Status::NotFound,
             ApiError::PageNotFound(_) => Status::NotFound,
@@ -75,6 +81,9 @@ impl ApiError {
             ApiError::UserNotFound => Status::NotFound,
             ApiError::AuthenticationError(_) => Status::InternalServerError,
             ApiError::UserDeleteError(_) => Status::InternalServerError,
+            ApiError::InvalidCredentials => Status::Forbidden,
+            ApiError::MissingData => Status::BadRequest,
+            ApiError::PoolError => Status::InternalServerError,
         }
     }
 }

@@ -1,7 +1,7 @@
 use crate::schema::users;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)]
 pub struct User {
     pub id: i32,
     pub username: String,
@@ -17,7 +17,6 @@ pub struct NewUser {
 
 #[derive(Deserialize)]
 pub struct NewUserJson {
-    pub id: i32,
     pub username: String,
     pub passwd: String,
 }

@@ -5,6 +5,21 @@ use argon2::{self, Config};
 use diesel::prelude::*;
 use rand::{thread_rng, Rng};
 
+pub fn find_one(conn: &PgConnection, uid: i32) -> Result<User, ApiError> {
+    let user = users
+        .filter(id.eq(uid))
+        .limit(1)
+        .first::<User>(conn)
+        .optional()
+        .map_err(ApiError::UserLoadError)?;
+
+    if let Some(u) = user {
+        return Ok(u);
+    }
+
+    Err(ApiError::UserNotFound)
+}
+
 pub fn new(conn: &PgConnection, uname: &str, password: &str) -> Result<(), ApiError> {
     let hashed = hash_password(password)?;
     let new_user = NewUser {
@@ -23,12 +38,12 @@ pub fn new(conn: &PgConnection, uname: &str, password: &str) -> Result<(), ApiEr
 pub fn validate(conn: &PgConnection, password: &str, uname: &str) -> Result<bool, ApiError> {
     let user = users
         .filter(username.eq(uname))
-        .limit(1)
         .first::<User>(conn)
         .optional()
         .map_err(ApiError::UserLoadError)?;
 
     if let Some(u) = user {
+        println!("HERE");
         let hash = u.passwd;
         return argon2::verify_encoded(&hash, password.as_bytes())
             .map_err(ApiError::AuthenticationError);
