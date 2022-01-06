@@ -31,14 +31,23 @@ pub fn find_many(
     let parsed_dt = NaiveDateTime::parse_from_str(&p_date, DATE_FORMAT);
 
     if parsed_dt.is_err() {
-        return Err(ApiError::DateParsingError(p_date));
+        if p_date != "any" {
+            return Err(ApiError::DateParsingError(p_date));
+        }
     }
 
-    posts
-        .filter(title.eq(p_title))
+    let mut query = posts.limit(limit).into_boxed();
+
+    if p_title != "any" {
+        query = query.filter(title.eq(p_title))
+    }
+
+    if p_date != "any" {
+        query = query.filter(published_date.eq(parsed_dt.unwrap()))
+    }
+
+    query
         .filter(published.eq(p_published))
-        .filter(published_date.eq(parsed_dt.unwrap()))
-        .limit(limit)
         .load::<Post>(conn)
         .map_err(ApiError::PostLoadError)
 }

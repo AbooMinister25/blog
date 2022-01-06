@@ -30,17 +30,19 @@ impl Post {
             id: self.id,
             title: self.title,
             body: self.body,
+            summary: self.summary,
             published: self.published,
             published_date: self.published_date.format(DATE_FORMAT).to_string(),
         }
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct PostJson {
     pub id: i32,
     pub title: String,
     pub body: String,
+    pub summary: String,
     pub published: bool,
     pub published_date: String,
 }

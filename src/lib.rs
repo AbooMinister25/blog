@@ -9,6 +9,7 @@ extern crate serde_json;
 
 pub mod auth;
 pub mod catchers;
+pub mod cors;
 pub mod crud;
 pub mod endpoints;
 pub mod errors;
@@ -17,6 +18,7 @@ pub mod models;
 pub mod response;
 pub mod schema;
 
+use crate::cors::CORS;
 use diesel::pg::PgConnection;
 use rocket_sync_db_pools::database;
 
@@ -28,8 +30,9 @@ pub const DATE_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
 pub async fn app() -> rocket::Rocket<rocket::Build> {
     rocket::build()
         .attach(DBPool::fairing())
+        .attach(CORS)
         .mount(
-            "/",
+            "/api",
             routes![
                 endpoints::posts::fetch_post,
                 endpoints::posts::fetch_posts,

@@ -48,9 +48,10 @@ fn parse_content(lines: &[&str]) -> Result<String, ApiError> {
     }
 
     let ss = SyntaxSet::load_defaults_newlines();
-    let ts = ThemeSet::load_defaults();
+    // let ts = ThemeSet::load_defaults();
     let mut syntax = String::from("py");
-    let theme = &ts.themes["base16-ocean.dark"];
+    let theme =
+        &ThemeSet::get_theme("themes/base16-onedark.tmTheme").expect("Unable to parse theme file");
 
     let mut options = Options::empty();
     options.insert(Options::ENABLE_STRIKETHROUGH);
@@ -78,10 +79,10 @@ fn parse_content(lines: &[&str]) -> Result<String, ApiError> {
             }
             Event::End(Tag::CodeBlock(_)) => {
                 if in_codeblock {
-                    if syntax == *"default" {
-                        let mut html = String::from("<code>");
+                    if syntax == "default" {
+                        let mut html = String::from("<pre><code>");
                         html.push_str(&to_highlight);
-                        html.push_str("</code>");
+                        html.push_str("</code></pre>");
 
                         new_parser.push(Event::Html(html.into()));
                     } else {
@@ -151,8 +152,8 @@ fn is_header(line: &str) -> bool {
 
 fn get_syntax_extension(name: &str) -> String {
     match name {
-        "rust" => String::from("rs"),
-        "python" => String::from("py"),
+        "rust" | "rs" => String::from("rs"),
+        "python" | "py" => String::from("py"),
         _ => String::from("default"),
     }
 }
