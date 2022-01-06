@@ -6,6 +6,8 @@ Written in Rust, and powered by Rocket and Svelte.
 
 ## Cloning and building
 
+### Backend
+
 The backend of the blog is written in Rust, so you'll need the latest stable, as well as `cargo`. The blog also uses PostgreSQL as the database, so you'll need that installed too. Currently, this has only been tested on Linux. The following instructions will walk you through cloning the repository and building the server.
 
 ```
@@ -30,4 +32,21 @@ cargo build --release
 
 # Run the server
 cargo run --release
+```
+
+### Frontend
+
+The frontend of the API is written in Svelte, and TypeScript/JavaScript. You'll need to have node, and either npm/yarn installed. The following instructions will walk you through building the frontend, assuming you've already cloned the repository.
+
+```
+# Set the required environment variables (for local dev)
+export VITE_API_URL="http://127.0.0.1:8000/api" # For local dev
+
+# Build the server
+npm run build # With Npm
+yarn build # With Yarn
+
+# Run the server
+npm run dev # with Npm
+yarn dev # with Yarn
 ```
