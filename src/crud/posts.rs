@@ -36,7 +36,7 @@ pub fn find_many(
         }
     }
 
-    let mut query = posts.limit(limit).into_boxed();
+    let mut query = posts.into_boxed();
 
     if p_title != "any" {
         query = query.filter(title.eq(p_title))
@@ -44,6 +44,10 @@ pub fn find_many(
 
     if p_date != "any" {
         query = query.filter(published_date.eq(parsed_dt.unwrap()))
+    }
+
+    if limit != 1000 {
+        query = query.limit(limit);
     }
 
     query

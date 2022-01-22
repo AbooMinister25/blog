@@ -6,7 +6,7 @@
     export const load: Load = async ({ fetch }) => {
         const res = await fetch(
             variables.apiUrl +
-                "/posts?title=any&published=true&limit=5&published_date=any"
+                "/posts?title=any&published=true&limit=1000&published_date=any"
         );
         const data = await res.json();
 

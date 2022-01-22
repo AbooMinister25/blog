@@ -1,5 +1,5 @@
 <script lang="ts">
-    import "../styles/tailwind.css";
+    import "../styles/style.styl";
 
     import Nav from "$lib/Nav.svelte";
     import Sidebar from "$lib/Sidebar.svelte";
@@ -31,8 +31,9 @@
     />
 </svelte:head>
 
-<Nav />
-<div class="flex">
+<div class='main-container'>
     <Sidebar />
-    <slot />
+    <div>
+        <slot />
+    </div>
 </div>

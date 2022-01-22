@@ -1,0 +1,45 @@
+@require "fonts"
+
+.post
+    position: absolute
+    right: 1rem
+    left: 1rem
+
+    @media screen and (min-width: 820px)
+        left: 0
+        right: 0
+        position: relative
+
+.post p
+    font-size: 1.1rem
+    line-height: 1.65rem
+    font-family: $sans-serif
+    font-weight: 590
+    color: $grey4
+
+    @media screen and (min-width: 1024px)
+        width: 60%
+
+.post h1,
+.post h2,
+.post h3,
+.post h4,
+.post h5,
+.post h6
+    width: 100%
+
+pre
+    overflow: auto
+    font-size: 0.875rem
+    line-height: 1.25rem
+    font-weight: 100
+    border-radius: 5px
+    padding: 10px
+    margin: 10px 0px 10px 0px
+    font-family: $monospace
+
+    @media screen and (min-width: 820px)
+        max-width: 90%
+
+    @media screen and (min-width: 1024px)
+        width: 60%

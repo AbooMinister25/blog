@@ -1,0 +1,40 @@
+@require "colors"
+
+nav
+    border-bottom: 2px solid $black
+
+.nav-container
+    display: flex
+    margin-top: 0.4rem
+    padding: 0.5rem
+
+.nav-end
+    text-align: center
+    margin-top: 0.5rem
+    justify-self: flex-end
+    margin-left: auto
+    font-weight: 600
+    color: $black
+    font-size: 1rem
+    line-height: 1.5rem
+
+    @media screen and (min-width: 820px)
+        display: none
+
+.nav-end-link
+    margin-left: 1rem
+
+.header
+    flex-shrink: 0
+    font-size: 2.25rem
+    line-height: 2.5rem
+    color: $black
+
+.nav-link
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem
+    font-weight: 600
+    color: $grey3
+
+    @media screen and (max-width: 920px)
+        padding-top: 0.5rem
+

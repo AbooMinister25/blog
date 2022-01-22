@@ -1,0 +1,94 @@
+@require "colors"
+
+.sidebar
+    flex: none
+    width: 30%
+    border-right: 2px solid $black
+    min-height: 100vh
+    padding: 1rem 1rem 0 0.5rem
+    margin-right: 1rem
+    display: none
+    position: sticky
+    position: -webkit-sticky
+
+    @media screen and (min-width: 820px)
+        display: block
+
+    @media screen and (min-width: 1024px)
+        width: 20%
+        margin-right: 3rem
+
+.sidebar-top
+    padding: 0.5rem 0 1rem 0
+    border-bottom: 1px solid $black
+
+.sidebar-bio
+    font-weight: 500
+    color: $grey3
+    margin-top: 2rem
+
+.search
+    margin-top: 2rem
+    position: relative
+    display: flex
+    width: 100%
+
+.search-input
+    border: 1px solid $grey5
+    opacity: 75%
+    padding: 0 0.75rem 0 0.75rem
+    color: $grey2
+    border-radius: 0.25rem
+    height: 2.5rem
+    width: 100%
+
+.search-input:focus
+    border: 2px solid $grey2
+    outline: none
+    color: $black
+
+.contact-info
+    display: flex
+    justify-content: flex-start
+    margin-top: 2rem
+
+.email-wrapper
+    margin-top: 1rem
+
+.contact-icon
+    height: 2rem
+    width: 2rem
+    margin-right: 2rem
+
+    @media screen and (min-width: 768px)
+        margin-right: 1.5rem
+
+.email-info
+    display: flex
+    color: $black
+    font-weight: 600
+
+.email-icon
+    height: 2.2rem
+    width: 2.2rem
+    padding: 0.8rem
+
+.hvr-float
+    vertical-align: middle
+    -webkit-transform: perspective(1px) translateZ(0)
+    transform: perspective(1px) translateZ(0)
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0)
+    -webkit-transition-duration: 0.3s
+    transition-duration: 0.3s
+    -webkit-transition-property: transform
+    transition-property: transform
+    -webkit-transition-timing-function: ease-out
+    transition-timing-function: ease-out
+
+.hvr-float:hover,
+.hvr-float:focus,
+.hvr-float:active
+    -webkit-transform: translateY(-8px)
+    transform: translateY(-8px)
+    fill: $red
+
