@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
     import type { Load } from "@sveltejs/kit";
     import { variables } from "$lib/variables";
-    import Nav from "$lib/Nav.svelte";
+    import Sidebar from "$lib/Sidebar.svelte";
 
     export const load: Load = async ({ fetch }) => {
         const res = await fetch(
@@ -20,9 +20,8 @@
     export let posts: Post[];
 </script>
 
-<div>
-    <Nav />
-    <div>
+<div class='main-container'>
+    <div class='feed'>
         {#each posts as post}
             <div class="post-item">
                 <a href={`/posts/${post.id}`} class="post-title">{post.title}</a
@@ -32,4 +31,5 @@
             </div>
         {/each}
     </div>
+    <Sidebar />
 </div>

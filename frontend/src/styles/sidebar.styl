@@ -1,13 +1,15 @@
 @require "colors"
 
 .sidebar
+    height: auto
+    align-self: flex-start
     flex: none
     width: 30%
-    border-right: 2px solid $black
     min-height: 100vh
     padding: 1rem 1rem 0 0.5rem
-    margin-right: 1rem
+    margin-left: 3rem
     display: none
+    top: 0
     position: sticky
     position: -webkit-sticky
 
@@ -51,9 +53,19 @@
     display: flex
     justify-content: flex-start
     margin-top: 2rem
+    padding-bottom: 1rem
+    border-bottom: 1px solid $grey7
 
 .email-wrapper
-    margin-top: 1rem
+    margin-top: 2rem
+    color: $grey3
+    font-weight: 600
+
+.email-link
+    color: $red
+
+.email-link:hover
+    text-decoration: underline
 
 .contact-icon
     height: 2rem
@@ -62,16 +74,6 @@
 
     @media screen and (min-width: 768px)
         margin-right: 1.5rem
-
-.email-info
-    display: flex
-    color: $black
-    font-weight: 600
-
-.email-icon
-    height: 2.2rem
-    width: 2.2rem
-    padding: 0.8rem
 
 .hvr-float
     vertical-align: middle

@@ -2,7 +2,6 @@
     import "../styles/style.styl";
 
     import Nav from "$lib/Nav.svelte";
-    import Sidebar from "$lib/Sidebar.svelte";
 </script>
 
 <svelte:head>
@@ -31,8 +30,8 @@
     />
 </svelte:head>
 
-<div class='main-container'>
-    <Sidebar />
+<div class=''>
+    <Nav />
     <div>
         <slot />
     </div>

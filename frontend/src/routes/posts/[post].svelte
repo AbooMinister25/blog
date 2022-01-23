@@ -1,12 +1,11 @@
 <script lang="ts" context="module">
     import type { Load } from "@sveltejs/kit";
     import { variables } from "$lib/variables";
-    import Nav from "$lib/Nav.svelte";
 
     export const load: Load = async ({ page: { params }, fetch }) => {
         const { slug } = params;
 
-        const res = await fetch(variables.apiUrl + "/posts/" + params['post']);
+        const res = await fetch(variables.apiUrl + "/posts/" + params["post"]);
 
         if (res.status != 200) {
             const data = await res.json();
@@ -27,9 +26,10 @@
     export let post: Post;
 </script>
 
-<div class='post'>
-    <Nav />
-    <div>
-        {@html post.body}
+<div class="post-container">
+    <div class="post">
+        <div>
+            {@html post.body}
+        </div>
     </div>
 </div>

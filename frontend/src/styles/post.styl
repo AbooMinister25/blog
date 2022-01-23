@@ -1,14 +1,18 @@
 @require "fonts"
 
-.post
-    position: absolute
-    right: 1rem
-    left: 1rem
+.post-container
+    width: 100%
+    display: flex
 
     @media screen and (min-width: 820px)
-        left: 0
-        right: 0
-        position: relative
+        margin-left: auto
+        margin-right: auto
+        max-width: 50rem
+        min-width: 50rem
+
+.post
+    flex: none
+    width: 100%
 
 .post p
     font-size: 1.1rem
@@ -17,16 +21,17 @@
     font-weight: 590
     color: $grey4
 
-    @media screen and (min-width: 1024px)
-        width: 60%
+//.post h1,
+//.post h2,
+//.post h3,
+//.post h4,
+//.post h5,
+//.post h6
+//    //width: 50%
 
-.post h1,
-.post h2,
-.post h3,
-.post h4,
-.post h5,
-.post h6
-    width: 100%
+.post h1
+    font-size: 3rem
+    line-height: 1
 
 pre
     overflow: auto
@@ -35,11 +40,11 @@ pre
     font-weight: 100
     border-radius: 5px
     padding: 10px
-    margin: 10px 0px 10px 0px
+    margin: 2rem 0 2rem 0
     font-family: $monospace
 
     @media screen and (min-width: 820px)
-        max-width: 90%
+        max-width: 100%
 
     @media screen and (min-width: 1024px)
         width: 60%
