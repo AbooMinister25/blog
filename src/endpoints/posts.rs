@@ -49,7 +49,7 @@ pub async fn fetch_posts(
 
 #[post("/posts", format = "json", data = "<post>")]
 pub async fn create_post(
-    conn: DBPool,
+    conn: DBPool,   
     post: Json<NewPostJson>,
     auth: Result<AuthenticatedUser, ApiError>,
 ) -> Result<ApiResponse, ApiError> {
