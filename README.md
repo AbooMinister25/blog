@@ -47,6 +47,6 @@ npm run build # With Npm
 yarn build # With Yarn
 
 # Run the server
-npm run dev # with Npm
-yarn dev # with Yarn
+npm run preview # with Npm
+yarn preview # with Yarn
 ```
