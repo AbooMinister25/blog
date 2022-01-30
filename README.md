@@ -2,8 +2,6 @@
 
 Written in Rust, and powered by Rocket and Svelte.
 
-**Unfinished, in active development**
-
 ## Cloning and building
 
 ### Backend
