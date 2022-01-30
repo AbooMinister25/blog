@@ -8,9 +8,18 @@
             variables.apiUrl +
                 "/posts?title=any&published=true&limit=5&published_date=any"
         );
-        const data = await res.json();
 
-        return { props: { posts: data["data"] } };
+        if (!res.ok) {
+            const data = await res.json();
+            const message = data["message"];
+
+            const error = new Error(message);
+            return { status: res.status, error };
+        } else {
+            const data = await res.json();
+
+            return { props: { posts: data["data"] } };
+        }
     };
 </script>
 
@@ -20,8 +29,8 @@
     export let posts: Post[];
 </script>
 
-<div class='main-container'>
-    <div class='feed'>
+<div class="main-container">
+    <div class="feed">
         {#each posts as post}
             <div class="post-item">
                 <a href={`/posts/${post.id}`} class="post-title">{post.title}</a

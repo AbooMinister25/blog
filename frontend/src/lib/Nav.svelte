@@ -13,7 +13,7 @@
                 <a href="/all_posts" class="nav-end-link link-underline">
                     All Posts
                 </a>
-                <a href="" class="nav-end-link link-underline"> Playlists </a>
+                <a href="/playlists" class="nav-end-link link-underline"> Playlists </a>
             </div>
         </div>
     </div>

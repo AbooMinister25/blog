@@ -1,11 +1,14 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
+
+    let title = "";
+
+    async function handleSearch() {
+        await goto(`/search/${title}`)
+    }
 </script>
 
 <div class="sidebar">
-    <!--    <div class="sidebar-top">-->
-    <!--        <a href="/all_posts" class="nav-link link-underline"> All Posts </a>-->
-    <!--        <a href="" class="nav-link link-underline"> Playlists </a>-->
-    <!--    </div>-->
     <p class="sidebar-bio">
         Hi, I'm Rayyan Cyclegar, a 15-year-old programming enthusiast. I program
         in Python, Rust, C, and Typescript. I enjoy web development, and dabble
@@ -78,12 +81,13 @@
             >
         </p>
     </div>
-    <div class="search">
+    <form class="search" on:submit|preventDefault={handleSearch}>
         <input
             class="search-input"
             type="search"
             name="search"
             placeholder="Explore the depths..."
+            bind:value={title}
         />
-    </div>
+    </form>
 </div>

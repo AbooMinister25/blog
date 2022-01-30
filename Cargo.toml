@@ -23,7 +23,7 @@ thiserror = "1.0.30"
 anyhow = "1.0.51"
 rand = "0.8.4"
 rust-argon2 = "0.8"
-
+rocket_cors = { git = "https://github.com/lawliet89/rocket_cors", branch = "master" }
 
 [dependencies.rocket_sync_db_pools]
 version = "0.1.0-rc.1"

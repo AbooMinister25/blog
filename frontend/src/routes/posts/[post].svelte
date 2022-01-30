@@ -2,12 +2,10 @@
     import type { Load } from "@sveltejs/kit";
     import { variables } from "$lib/variables";
 
-    export const load: Load = async ({ page: { params }, fetch }) => {
-        const { slug } = params;
-
+    export const load: Load = async ({ url, params, fetch }) => {
         const res = await fetch(variables.apiUrl + "/posts/" + params["post"]);
 
-        if (res.status != 200) {
+        if (!res.ok) {
             const data = await res.json();
             const message = data["message"];
 

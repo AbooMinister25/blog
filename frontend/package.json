@@ -14,6 +14,7 @@
     "devDependencies": {
         "@sveltejs/adapter-auto": "next",
         "@sveltejs/kit": "next",
+        "@types/simplemde": "^1.11.8",
         "autoprefixer": "^10.4.0",
         "postcss": "^8.4.5",
         "prettier": "^2.4.1",
@@ -25,5 +26,6 @@
         "tslib": "^2.3.1",
         "typescript": "^4.4.3"
     },
-    "type": "module"
+    "type": "module",
+    "dependencies": {}
 }

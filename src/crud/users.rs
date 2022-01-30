@@ -43,7 +43,6 @@ pub fn validate(conn: &PgConnection, password: &str, uname: &str) -> Result<bool
         .map_err(ApiError::UserLoadError)?;
 
     if let Some(u) = user {
-        println!("HERE");
         let hash = u.passwd;
         return argon2::verify_encoded(&hash, password.as_bytes())
             .map_err(ApiError::AuthenticationError);

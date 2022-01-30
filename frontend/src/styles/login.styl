@@ -1,0 +1,48 @@
+@require "colors"
+
+.login-form
+    border: 2px solid $magenta
+    padding: 1rem
+    display: flex
+    flex-direction: column
+    width: 40%
+    margin: 10rem auto auto auto
+
+.login-error
+    text-align: center
+    padding: 1rem
+    width: 40%
+    background-color: $red
+    margin: 1rem auto
+    color: $black
+    opacity: 0.8
+
+.form-fields
+    display: flex
+    border-bottom: 1px solid $grey4
+    flex-direction: column
+    margin-bottom: 1rem
+
+.form-field
+    border-radius: 0.25rem
+    margin-bottom: 2rem
+    padding-left: 1rem
+    padding-top: 1rem
+    padding-bottom: 1rem
+    border: none
+
+.form-field:focus
+    outline: 1px solid $grey6
+
+.submit-button
+    color: $grey4
+    border: 1px solid $grey7
+    padding: 0.4rem
+    margin: 0.5rem
+    font-size: 1rem
+    line-height: 1.5rem
+
+.submit-button:hover
+    color: $black
+    background-color: $red
+    opacity: 0.5

@@ -1,0 +1,89 @@
+.dashboard-container
+    display: flex
+
+.default-view
+    align-self: center
+    margin: auto
+
+.dashboard-sidebar
+    position: sticky
+    height: 92vh
+    display: flex
+    flex-direction: column
+    flex: none
+    width: 15%
+    border-right: 1px solid $grey6
+
+.dashboard-sidebar-header
+    font-size: 1.875rem
+    line-height: 2.25rem
+    padding: 0.5rem
+
+.sidebar-item
+    font-weight: 600
+    color: $grey1
+    padding: 0.5rem
+    display: flex
+    font-size: 1.125rem
+    line-height: 1.75rem
+
+.sidebar-item:hover
+    color: $grey4
+
+.sidebar-item a
+    padding-left: 0.3rem
+
+.sidebar-item-logo
+    width: 1.5rem
+    height: 1.5rem
+
+.dashboard-posts-view
+    width: 85%
+
+.dpost-header
+    text-align: center
+
+.dpost-item
+    display: flex
+    border-bottom: 1px solid $black
+    padding: 1rem
+
+.dpost-title
+    font-size: 1.875rem
+    line-height: 2.25rem
+
+.dpost-buttons
+    margin-left: auto
+
+.dpost-button
+    width: 1.5rem
+    height: 1.5rem
+    margin-top: 0.4rem
+
+.dpost-button:hover
+    color: $grey3
+
+.post-edit
+    width: 100%
+    display: flex
+
+.editor
+    width: 50%
+    height: 90%
+    border: unset
+    margin: 1rem
+
+.editor-input
+    border: 1px solid $grey1
+    resize: none
+    height: 100%
+    width: 100%
+
+.editor-input:focus
+    border: unset
+
+.preview
+    width: 50%
+    height: 90%
+    background-color: $red
+    margin: 1rem

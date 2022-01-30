@@ -30,7 +30,7 @@
     />
 </svelte:head>
 
-<div class=''>
+<div>
     <Nav />
     <div>
         <slot />

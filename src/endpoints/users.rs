@@ -6,6 +6,19 @@ use crate::response::ApiResponse;
 use crate::DBPool;
 use rocket::serde::json::{Json, Value};
 
+#[get("/users/login")]
+pub async fn validate_user(
+    _conn: DBPool,
+    auth: Result<AuthenticatedUser, ApiError>,
+) -> Result<ApiResponse, ApiError> {
+    auth?;
+
+    Ok(ApiResponse {
+        status: "success",
+        data: Value::Null,
+    })
+}
+
 #[post("/users", format = "json", data = "<user>")]
 pub async fn create_user(
     conn: DBPool,
