@@ -26,15 +26,13 @@ pub async fn fetch_posts(
     limit: i64,
     published_date: String,
 ) -> Result<ApiResponse, ApiError> {
-    let mut posts = conn
+    let posts = conn
         .run(move |c| crud::posts::find_many(c, title, published, limit, published_date))
         .await?;
 
     if posts.is_empty() {
         return Err(ApiError::PostNotFound);
     }
-
-    posts.reverse();
 
     let posts_vec = posts
         .into_iter()

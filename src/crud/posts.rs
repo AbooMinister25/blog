@@ -51,6 +51,7 @@ pub fn find_many(
     }
 
     query
+        .order(id.desc())
         .filter(published.eq(p_published))
         .load::<Post>(conn)
         .map_err(ApiError::PostLoadError)

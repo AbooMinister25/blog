@@ -2,7 +2,7 @@
     import type { Load } from "@sveltejs/kit";
     import { variables } from "$lib/variables";
 
-    export const load: Load = async ({ page: { params }, fetch }) => {
+    export const load: Load = async ({ url, params, fetch }) => {
         const res = await fetch(
             variables.apiUrl +
                 `/posts?title=${params["title"]}&published=true&limit=5&published_date=any`
