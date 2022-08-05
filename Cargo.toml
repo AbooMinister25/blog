@@ -7,5 +7,10 @@ edition = "2021"
 
 [dependencies]
 rocket = "0.5.0-rc.2"
-diesel = { version = "1.4.4", features = ["postgres"] }
+diesel = { version = "1.4.4", features = ["postgres", "chrono"] }
 dotenv = "0.15.0"
+
+[dependencies.rocket_sync_db_pools]
+version = "0.1.0-rc.2"
+default-features = false
+features = ["diesel_postgres_pool"]

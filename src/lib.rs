@@ -14,6 +14,11 @@ use diesel::prelude::*;
 use dotenv::dotenv;
 use std::env;
 
+use rocket_sync_db_pools::database;
+
+#[database("blog_dev")]
+pub struct DBPool(PgConnection);
+
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
 
@@ -23,5 +28,7 @@ pub fn establish_connection() -> PgConnection {
 }
 
 pub fn build_app() -> rocket::Rocket<rocket::Build> {
-    rocket::build().mount("/", routes![health_check::health_check])
+    rocket::build()
+        .attach(DBPool::fairing())
+        .mount("/", routes![health_check::health_check])
 }

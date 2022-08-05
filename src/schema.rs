@@ -6,5 +6,6 @@ table! {
         summary -> Text,
         published -> Bool,
         published_at -> Timestamp,
+        tags -> Nullable<Array<Text>>,
     }
 }
