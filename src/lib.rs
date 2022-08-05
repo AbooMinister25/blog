@@ -12,23 +12,28 @@ pub use endpoints::health_check;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
-use std::env;
-
+use rocket::figment::{
+    util::map,
+    value::{Map, Value},
+};
 use rocket_sync_db_pools::database;
+use std::env;
 
 #[database("blog_dev")]
 pub struct DBPool(PgConnection);
 
-pub fn establish_connection() -> PgConnection {
+pub fn build_app() -> rocket::Rocket<rocket::Build> {
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
-}
+    let db: Map<_, Value> = map! {
+        "url" => database_url.into(),
+        "pool_size" => 10.into(),
+    };
 
-pub fn build_app() -> rocket::Rocket<rocket::Build> {
-    rocket::build()
+    let figment = rocket::Config::figment().merge(("databases", map!["blog_dev" =>  db]));
+
+    rocket::custom(figment)
         .attach(DBPool::fairing())
         .mount("/", routes![health_check::health_check])
 }
