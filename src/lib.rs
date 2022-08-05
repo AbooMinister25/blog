@@ -3,6 +3,7 @@ extern crate rocket;
 #[macro_use]
 extern crate diesel;
 
+pub mod crud;
 pub mod endpoints;
 pub mod models;
 pub mod schema;
@@ -10,7 +11,6 @@ pub mod schema;
 pub use endpoints::health_check;
 
 use diesel::pg::PgConnection;
-use diesel::prelude::*;
 use dotenv::dotenv;
 use rocket::figment::{
     util::map,
