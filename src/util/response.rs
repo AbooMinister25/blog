@@ -27,6 +27,8 @@ pub enum ErrorKind {
     PostNotFound,
     #[error("Missing required header {0}")]
     MissingHeader(String),
+    #[error("Problem while highlighting codeblocks in markdown")]
+    SyntaxHighlightingError,
 }
 
 impl<'r> Responder<'r, 'static> for ApiResponse {
@@ -63,6 +65,7 @@ impl ErrorKind {
         match self {
             ErrorKind::PostNotFound => Status::NotFound,
             ErrorKind::MissingHeader(_) => Status::UnprocessableEntity,
+            ErrorKind::SyntaxHighlightingError => Status::InternalServerError,
         }
     }
 }
