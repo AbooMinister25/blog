@@ -25,6 +25,8 @@ pub struct ApiError {
 pub enum ErrorKind {
     #[error("Post not found")]
     PostNotFound,
+    #[error("Missing required header {0}")]
+    MissingHeader(String),
 }
 
 impl<'r> Responder<'r, 'static> for ApiResponse {
@@ -60,6 +62,7 @@ impl ErrorKind {
     pub fn status_code(&self) -> Status {
         match self {
             ErrorKind::PostNotFound => Status::NotFound,
+            ErrorKind::MissingHeader(_) => Status::UnprocessableEntity,
         }
     }
 }

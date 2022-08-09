@@ -1,3 +1,6 @@
+#![warn(clippy::pedantic, clippy::nursery)]
+#![allow(clippy::must_use_candidate)]
+
 #[macro_use]
 extern crate rocket;
 #[macro_use]
