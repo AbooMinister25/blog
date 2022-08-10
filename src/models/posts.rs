@@ -7,6 +7,8 @@ pub struct Post {
     pub id: i32,
     pub title: String,
     pub body: String,
+    pub summary: String,
     pub published: bool,
     pub published_at: NaiveDateTime,
+    pub tags: Option<Vec<String>>,
 }

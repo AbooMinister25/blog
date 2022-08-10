@@ -21,7 +21,7 @@ pub struct ApiError {
     message: String,
 }
 
-#[derive(Error, Debug, Serialize)]
+#[derive(Error, Debug)]
 pub enum ErrorKind {
     #[error("Post not found")]
     PostNotFound,
@@ -29,6 +29,8 @@ pub enum ErrorKind {
     MissingHeader(String),
     #[error("Problem while highlighting codeblocks in markdown")]
     SyntaxHighlightingError,
+    #[error("Error while loading post")]
+    PostLoadError(#[source] diesel::result::Error),
 }
 
 impl<'r> Responder<'r, 'static> for ApiResponse {
@@ -65,7 +67,9 @@ impl ErrorKind {
         match self {
             ErrorKind::PostNotFound => Status::NotFound,
             ErrorKind::MissingHeader(_) => Status::UnprocessableEntity,
-            ErrorKind::SyntaxHighlightingError => Status::InternalServerError,
+            ErrorKind::SyntaxHighlightingError | ErrorKind::PostLoadError(_) => {
+                Status::InternalServerError
+            }
         }
     }
 }
