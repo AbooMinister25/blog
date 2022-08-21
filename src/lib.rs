@@ -26,6 +26,8 @@ use std::env;
 #[database("blog_dev")]
 pub struct DBPool(PgConnection);
 
+pub const DATE_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
+
 pub fn build_app() -> rocket::Rocket<rocket::Build> {
     dotenv().ok();
 

@@ -16,6 +16,7 @@ pub struct ParsedPost {
     pub title: String,
     pub date: NaiveDateTime,
     pub content: String,
+    pub tags: Vec<String>,
 }
 
 /// Parse some markdown and return a `ParsedPost`rust
@@ -50,6 +51,13 @@ pub fn parse(content: &str) -> Result<ParsedPost, ErrorKind> {
         .ok_or_else(|| ErrorKind::MissingHeader("title".to_string()))?
         .clone();
 
+    let tags = headers
+        .get("tags")
+        .ok_or_else(|| ErrorKind::MissingHeader("title".to_string()))?
+        .split_whitespace()
+        .map(String::from)
+        .collect::<Vec<String>>();
+
     let today = Utc::now();
     let date = NaiveDate::from_ymd(today.year(), today.month(), today.day()).and_hms(
         today.hour(),
@@ -64,6 +72,7 @@ pub fn parse(content: &str) -> Result<ParsedPost, ErrorKind> {
         title,
         date,
         content: parsed_content,
+        tags,
     })
 }
 

@@ -31,6 +31,12 @@ pub enum ErrorKind {
     SyntaxHighlightingError,
     #[error("Error while loading post")]
     PostLoadError(#[source] diesel::result::Error),
+    #[error("Error while parsing date {0}, invalid date format")]
+    DateParsingError(String),
+    #[error("Error while inserting post into database")]
+    PostInsertionError(#[source] diesel::result::Error),
+    #[error("Error while deleting post from the database")]
+    PostDeletionError(#[source] diesel::result::Error),
 }
 
 impl<'r> Responder<'r, 'static> for ApiResponse {
@@ -67,9 +73,11 @@ impl ErrorKind {
         match self {
             ErrorKind::PostNotFound => Status::NotFound,
             ErrorKind::MissingHeader(_) => Status::UnprocessableEntity,
-            ErrorKind::SyntaxHighlightingError | ErrorKind::PostLoadError(_) => {
-                Status::InternalServerError
-            }
+            ErrorKind::SyntaxHighlightingError
+            | ErrorKind::PostLoadError(_)
+            | ErrorKind::PostInsertionError(_)
+            | ErrorKind::PostDeletionError(_) => Status::InternalServerError,
+            ErrorKind::DateParsingError(_) => Status::BadRequest,
         }
     }
 }
