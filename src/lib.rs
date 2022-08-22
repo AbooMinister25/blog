@@ -20,6 +20,8 @@ use rocket::figment::{
     util::map,
     value::{Map, Value},
 };
+use rocket_okapi::settings::UrlObject;
+use rocket_okapi::{openapi_get_routes, rapidoc::*, swagger_ui::*};
 use rocket_sync_db_pools::database;
 use std::env;
 
@@ -41,5 +43,27 @@ pub fn build_app() -> rocket::Rocket<rocket::Build> {
 
     rocket::custom(figment)
         .attach(DBPool::fairing())
-        .mount("/", routes![health_check::health_check])
+        .mount("/api", openapi_get_routes![health_check::health_check])
+        .mount(
+            "/api/swagger-ui/",
+            make_swagger_ui(&SwaggerUIConfig {
+                url: "../openapi.json".to_owned(),
+                ..Default::default()
+            }),
+        )
+        .mount(
+            "/api/rapidoc/",
+            make_rapidoc(&RapiDocConfig {
+                general: GeneralConfig {
+                    spec_urls: vec![UrlObject::new("General", "../openapi.json")],
+                    ..Default::default()
+                },
+                hide_show: HideShowConfig {
+                    allow_spec_url_load: false,
+                    allow_spec_file_load: false,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        )
 }

@@ -31,7 +31,7 @@ pub fn find_one(conn: &PgConnection, post_id: i32) -> Result<Post, ErrorKind> {
 
 /// Fetch multiple posts
 ///
-/// Fetch multiple posts based on the given
+/// Fetch multiple posts based on the given parameters.
 ///
 /// # Errors
 /// Returns an `ErrorKind::DateParsingError` if an error occurred while
