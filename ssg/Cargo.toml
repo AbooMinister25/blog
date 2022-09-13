@@ -1,0 +1,22 @@
+[package]
+name = "ssg"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = "0.5.16"
+diesel = { version = "1.4.4", features = ["sqlite", "chrono"] }
+dotenv = "0.15.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+syntect = { version = "5", default-features = false, features = [
+    "default-fancy",
+] }
+
+[dependencies.rocket_sync_db_pools]
+version = "0.1.0-rc.2"
+default-features = false
+features = ["diesel_sqlite_pool"]
