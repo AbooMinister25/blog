@@ -71,6 +71,7 @@ impl From<&str> for HeaderValue {
 /// This function can return an error if a required
 /// header is found to be missing, or some error occurred during
 /// parsing.
+#[tracing::instrument]
 pub fn parse(content: &str) -> Result<ParsedPost> {
     // Parse the headers in the markdown
     let headers = parse_headers(content)?;

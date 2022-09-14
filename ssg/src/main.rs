@@ -6,7 +6,8 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc)]
 
-pub mod markdown;
+mod markdown;
+mod build;
 
 use color_eyre::eyre::Result;
 use rusqlite::Connection;
@@ -27,7 +28,7 @@ fn setup() -> Result<()> {
         "CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY,
             title VARCHAR NOT NULL,
-            content TEXT NOT NULL,
+            hash TEXT NOT NULL,
             summary TEXT NOT NULL,
             tags TEXT NOT NULL,
             published BOOLEAN NOT NULL DEFAULT 'f',
