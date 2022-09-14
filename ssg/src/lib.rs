@@ -9,8 +9,9 @@
 #[macro_use]
 extern crate diesel;
 
-pub mod schema;
+pub mod markdown;
 pub mod models;
+pub mod schema;
 
 use diesel::{Connection, SqliteConnection};
 use dotenv::dotenv;

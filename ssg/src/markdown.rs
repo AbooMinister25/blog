@@ -1,22 +1,50 @@
-use crate::util::response::ErrorKind;
-
 use chrono::prelude::*;
-use lazy_static::lazy_static;
 use pulldown_cmark::{html, CodeBlockKind, Event, Options, Parser, Tag};
-use regex::Regex;
 use std::collections::HashMap;
 use syntect::highlighting::ThemeSet;
 use syntect::html::highlighted_html_for_string;
 use syntect::parsing::SyntaxSet;
 
+use color_eyre::eyre::{eyre, Result};
+
 /// A parsed blog post.
 /// Contains the content parsed from a markdown document.
 #[derive(Debug)]
 pub struct ParsedPost {
-    pub title: String,
     pub date: NaiveDateTime,
     pub content: String,
-    pub tags: Vec<String>,
+    pub headers: HashMap<String, HeaderValue>,
+}
+
+#[derive(Debug)]
+pub enum HeaderValue {
+    Single(String),
+    List(Vec<String>),
+    Boolean(bool),
+}
+
+impl From<&str> for HeaderValue {
+    fn from(s: &str) -> Self {
+        match s {
+            "true" => Self::Boolean(true),
+            "false" => Self::Boolean(false),
+            s if s.starts_with('[') => {
+                let mut splitted = s.split(',');
+                splitted.next(); // Consume opening bracket
+
+                let mut values = splitted
+                    .map(std::string::ToString::to_string)
+                    .collect::<Vec<String>>();
+
+                if let Some(s) = values.last_mut() {
+                    *s = s.replace(']', "");
+                } // Replace the closing bracket from the last string.
+
+                Self::List(values)
+            }
+            s => Self::Single(s.to_string()),
+        }
+    }
 }
 
 /// Parse some markdown and return a `ParsedPost`
@@ -40,24 +68,12 @@ pub struct ParsedPost {
 /// ```
 ///
 /// # Errors
-/// This function can return an `Err(ErrorKind)` if a required
+/// This function can return an error if a required
 /// header is found to be missing, or some error occurred during
 /// parsing.
-pub fn parse(content: &str) -> Result<ParsedPost, ErrorKind> {
+pub fn parse(content: &str) -> Result<ParsedPost> {
     // Parse the headers in the markdown
-    let headers = parse_headers(content);
-    let title = headers
-        .get("title")
-        .ok_or_else(|| ErrorKind::MissingHeader("title".to_string()))?
-        .clone();
-
-    let tags = headers
-        .get("tags")
-        .ok_or_else(|| ErrorKind::MissingHeader("title".to_string()))?
-        .split_whitespace()
-        .map(String::from)
-        .collect::<Vec<String>>();
-
+    let headers = parse_headers(content)?;
     let today = Utc::now();
     let date = NaiveDate::from_ymd(today.year(), today.month(), today.day()).and_hms(
         today.hour(),
@@ -69,57 +85,43 @@ pub fn parse(content: &str) -> Result<ParsedPost, ErrorKind> {
     let parsed_content = parse_content(content)?;
 
     Ok(ParsedPost {
-        title,
         date,
         content: parsed_content,
-        tags,
+        headers,
     })
 }
 
-fn is_header(line: &str) -> bool {
-    lazy_static! {
-        static ref IS_HEADER: Regex = Regex::new("^[a-z]+:").unwrap();
-    }
+fn parse_headers(content: &str) -> Result<HashMap<String, HeaderValue>> {
+    let mut headers = HashMap::new();
 
-    // A line is considered a header if it is empty, or the content matches the `IS_HEADER` regex
-    line.trim().is_empty() || IS_HEADER.is_match(line)
-}
-
-fn parse_headers(content: &str) -> HashMap<String, String> {
-    lazy_static! {
-        static ref QUOTED_HEADER_VALUE: Regex = Regex::new("^([a-z]+):\\s+\"([^\"]*)\"").unwrap();
-        static ref HEADER_VALUE: Regex = Regex::new("^([a-z]+):\\s+(.*)$").unwrap();
-    }
-
-    // Take all the lines which are headers, leaving the rest of the content
-    let header_lines = content
+    let lines = content
         .lines()
-        .take_while(|l| is_header(l))
+        .take_while(|l| !l.contains("<!-- End Headers -->"))
         .map(std::string::ToString::to_string)
         .collect::<Vec<String>>();
 
-    // Construct the headers hashmap
-    let mut headers = HashMap::new();
-    for line in &header_lines {
-        if let Some(c) = QUOTED_HEADER_VALUE.captures(line) {
-            let key = String::from(&c[1]);
-            let value = String::from(&c[2]);
-            headers.insert(key, value);
-        } else if let Some(c) = HEADER_VALUE.captures(line) {
-            let key = String::from(&c[1]);
-            let value = String::from(&c[2]);
-            headers.insert(key, value);
-        }
+    for line in lines {
+        let mut splitted = line.split('=');
+        let name = splitted
+            .next()
+            .ok_or_else(|| eyre!("Missing key for a header"))?;
+        let value = splitted
+            .next()
+            .ok_or_else(|| eyre!("Missing value for a header"))?;
+
+        let header_value = HeaderValue::from(value);
+
+        headers.insert(name.to_string(), header_value);
     }
 
-    headers
+    Ok(headers)
 }
 
-fn parse_content(content: &str) -> Result<String, ErrorKind> {
+fn parse_content(content: &str) -> Result<String> {
     // Collect all of the markdown content which isn't a header
     let markdown = content
         .lines()
-        .filter(|l| !is_header(l))
+        .filter(|l| !l.contains("<!-- End Headers -->"))
         .collect::<Vec<_>>()
         .join("\n");
 
@@ -164,8 +166,7 @@ fn parse_content(content: &str) -> Result<String, ErrorKind> {
                     } else {
                         let code_syntax = ss.find_syntax_by_extension(&syntax).unwrap();
                         let html =
-                            highlighted_html_for_string(&to_highlight, &ss, code_syntax, theme)
-                                .map_err(|_| ErrorKind::SyntaxHighlightingError)?;
+                            highlighted_html_for_string(&to_highlight, &ss, code_syntax, theme)?;
 
                         new_parser.push(Event::Html(html.into()));
                         to_highlight = String::new();
