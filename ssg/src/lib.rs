@@ -6,27 +6,27 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc)]
 
-#[macro_use]
-extern crate diesel;
-
 pub mod markdown;
 pub mod models;
 pub mod schema;
 
-use diesel::{Connection, SqliteConnection};
-use dotenv::dotenv;
-use rocket_sync_db_pools::database;
-use std::env;
+use color_eyre::eyre::Result;
+use rusqlite::Connection;
 
-#[database("blog")]
-pub struct DBPool(SqliteConnection);
+fn setup() -> Result<()> {
+    let conn = Connection::open("blog.db")?;
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS posts (
+            id INTEGER PRIMARY KEY,
+            title VARCHAR NOT NULL,
+            content TEXT NOT NULL,
+            summary TEXT NOT NULL,
+            tags TEXT NOT NULL,
+            published BOOLEAN NOT NULL DEFAULT 'f',
+            published_at TIMESTAMP NOT NULL
+        )",
+        (),
+    )?;
 
-pub const DATE_FORMAT: &str = "%Y-%m-%d %H:%M:%S";
-
-pub fn establish_connection() -> SqliteConnection {
-    dotenv().ok();
-
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    SqliteConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {database_url}"))
+    Ok(())
 }
