@@ -7,8 +7,6 @@
 #![allow(clippy::missing_panics_doc)]
 
 pub mod markdown;
-pub mod models;
-pub mod schema;
 
 use color_eyre::eyre::Result;
 use rusqlite::Connection;
