@@ -10,8 +10,18 @@ pub mod markdown;
 
 use color_eyre::eyre::Result;
 use rusqlite::Connection;
+use tracing::{info, Level};
+use tracing_subscriber::FmtSubscriber;
 
 fn setup() -> Result<()> {
+    // Setting up logging
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::TRACE)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber)?;
+    info!("Set up logging");
+
+    // Establishing database connection
     let conn = Connection::open("blog.db")?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS posts (
@@ -25,6 +35,7 @@ fn setup() -> Result<()> {
         )",
         (),
     )?;
+    info!("Established connection to database");
 
     Ok(())
 }
