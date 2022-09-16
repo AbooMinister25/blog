@@ -1243,6 +1243,7 @@ dependencies = [
  "chrono",
  "color-eyre",
  "ignore",
+ "lazy_static",
  "pulldown-cmark",
  "rayon",
  "rusqlite",

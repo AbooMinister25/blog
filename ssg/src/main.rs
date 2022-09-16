@@ -6,15 +6,17 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc)]
 
-mod markdown;
 mod build;
+mod markdown;
 
+use build::build;
 use color_eyre::eyre::Result;
 use rusqlite::Connection;
+use tera::Tera;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
-fn setup() -> Result<()> {
+fn setup() -> Result<Connection> {
     // Setting up logging
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::TRACE)
@@ -38,10 +40,14 @@ fn setup() -> Result<()> {
     )?;
     info!("Established connection to database");
 
-    Ok(())
+    Ok(conn)
 }
 
 fn main() -> Result<()> {
-    setup()?;
+    let conn = setup()?;
+    let tera = Tera::new("templates/**/*.html")?;
+
+    build(conn, &tera)?;
+
     Ok(())
 }

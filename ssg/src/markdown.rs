@@ -1,11 +1,10 @@
 use chrono::prelude::*;
+use color_eyre::eyre::{eyre, Result};
 use pulldown_cmark::{html, CodeBlockKind, Event, Options, Parser, Tag};
 use std::collections::HashMap;
 use syntect::highlighting::ThemeSet;
 use syntect::html::highlighted_html_for_string;
 use syntect::parsing::SyntaxSet;
-
-use color_eyre::eyre::{eyre, Result};
 
 /// A parsed blog post.
 /// Contains the content parsed from a markdown document.
@@ -97,7 +96,7 @@ fn parse_headers(content: &str) -> Result<HashMap<String, HeaderValue>> {
 
     let lines = content
         .lines()
-        .take_while(|l| !l.contains("<!-- End Headers -->"))
+        .take_while(|l| !l.contains("<!-- End Headers -->") && !l.trim().is_empty())
         .map(std::string::ToString::to_string)
         .collect::<Vec<String>>();
 
@@ -105,10 +104,13 @@ fn parse_headers(content: &str) -> Result<HashMap<String, HeaderValue>> {
         let mut splitted = line.split('=');
         let name = splitted
             .next()
-            .ok_or_else(|| eyre!("Missing key for a header"))?;
+            .ok_or_else(|| eyre!("Missing key for a header"))?
+            .trim();
+
         let value = splitted
             .next()
-            .ok_or_else(|| eyre!("Missing value for a header"))?;
+            .ok_or_else(|| eyre!("Missing value for header {name}"))?
+            .trim();
 
         let header_value = HeaderValue::from(value);
 
@@ -121,10 +123,9 @@ fn parse_headers(content: &str) -> Result<HashMap<String, HeaderValue>> {
 fn parse_content(content: &str) -> Result<String> {
     // Collect all of the markdown content which isn't a header
     let markdown = content
-        .lines()
-        .filter(|l| !l.contains("<!-- End Headers -->"))
-        .collect::<Vec<_>>()
-        .join("\n");
+        .split("<!-- End Headers -->")
+        .last()
+        .ok_or_else(|| eyre!("No content after headers"))?;
 
     // Load syntax highlighting information
     let ss = SyntaxSet::load_defaults_newlines();
@@ -134,7 +135,7 @@ fn parse_content(content: &str) -> Result<String> {
 
     // Set up parser
     let options = Options::all();
-    let parser = Parser::new_ext(&markdown, options);
+    let parser = Parser::new_ext(markdown, options);
 
     let mut new_parser = Vec::new();
     let mut to_highlight = String::new();
