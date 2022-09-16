@@ -1,10 +1,15 @@
 use chrono::prelude::*;
-use color_eyre::eyre::{eyre, Result};
-use pulldown_cmark::{html, CodeBlockKind, Event, Options, Parser, Tag};
-use std::collections::HashMap;
-use syntect::highlighting::ThemeSet;
-use syntect::html::highlighted_html_for_string;
-use syntect::parsing::SyntaxSet;
+use color_eyre::Result;
+use comrak::plugins::syntect::SyntectAdapter;
+use comrak::{markdown_to_html_with_plugins, ComrakOptions, ComrakPlugins};
+use serde::Deserialize;
+
+// Represents the frontmatter to a blog post.
+#[derive(Deserialize, Debug)]
+pub struct Frontmatter {
+    pub title: String,
+    pub tags: Vec<String>,
+}
 
 /// A parsed blog post.
 /// Contains the content parsed from a markdown document.
@@ -12,38 +17,7 @@ use syntect::parsing::SyntaxSet;
 pub struct ParsedPost {
     pub date: NaiveDateTime,
     pub content: String,
-    pub headers: HashMap<String, HeaderValue>,
-}
-
-#[derive(Debug)]
-pub enum HeaderValue {
-    Single(String),
-    List(Vec<String>),
-    Boolean(bool),
-}
-
-impl From<&str> for HeaderValue {
-    fn from(s: &str) -> Self {
-        match s {
-            "true" => Self::Boolean(true),
-            "false" => Self::Boolean(false),
-            s if s.starts_with('[') => {
-                let mut splitted = s.split(',');
-                splitted.next(); // Consume opening bracket
-
-                let mut values = splitted
-                    .map(std::string::ToString::to_string)
-                    .collect::<Vec<String>>();
-
-                if let Some(s) = values.last_mut() {
-                    *s = s.replace(']', "");
-                } // Replace the closing bracket from the last string.
-
-                Self::List(values)
-            }
-            s => Self::Single(s.to_string()),
-        }
-    }
+    pub frontmatter: Frontmatter,
 }
 
 /// Parse some markdown and return a `ParsedPost`
@@ -70,10 +44,17 @@ impl From<&str> for HeaderValue {
 /// This function can return an error if a required
 /// header is found to be missing, or some error occurred during
 /// parsing.
-#[tracing::instrument]
 pub fn parse(content: &str) -> Result<ParsedPost> {
-    // Parse the headers in the markdown
-    let headers = parse_headers(content)?;
+    let adapter = SyntectAdapter::new("Solarized (light)");
+    let mut options = ComrakOptions::default();
+    options.extension.front_matter_delimiter = Some("---".to_owned());
+
+    let mut plugins = ComrakPlugins::default();
+    plugins.render.codefence_syntax_highlighter = Some(&adapter);
+
+    let frontmatter = parse_frontmatter(content)?;
+    let html = markdown_to_html_with_plugins(content, &options, &plugins);
+
     let today = Utc::now();
     let date = NaiveDate::from_ymd(today.year(), today.month(), today.day()).and_hms(
         today.hour(),
@@ -81,122 +62,31 @@ pub fn parse(content: &str) -> Result<ParsedPost> {
         today.second(),
     );
 
-    // Parse the markdown and retrieve the content
-    let parsed_content = parse_content(content)?;
-
     Ok(ParsedPost {
         date,
-        content: parsed_content,
-        headers,
+        content: html,
+        frontmatter,
     })
 }
 
-fn parse_headers(content: &str) -> Result<HashMap<String, HeaderValue>> {
-    let mut headers = HashMap::new();
+fn parse_frontmatter(content: &str) -> Result<Frontmatter> {
+    let mut frontmatter_content = String::new();
+    let mut opening_delim = false;
 
-    let lines = content
-        .lines()
-        .take_while(|l| !l.contains("<!-- End Headers -->") && !l.trim().is_empty())
-        .map(std::string::ToString::to_string)
-        .collect::<Vec<String>>();
-
-    for line in lines {
-        let mut splitted = line.split('=');
-        let name = splitted
-            .next()
-            .ok_or_else(|| eyre!("Missing key for a header"))?
-            .trim();
-
-        let value = splitted
-            .next()
-            .ok_or_else(|| eyre!("Missing value for header {name}"))?
-            .trim();
-
-        let header_value = HeaderValue::from(value);
-
-        headers.insert(name.to_string(), header_value);
-    }
-
-    Ok(headers)
-}
-
-fn parse_content(content: &str) -> Result<String> {
-    // Collect all of the markdown content which isn't a header
-    let markdown = content
-        .split("<!-- End Headers -->")
-        .last()
-        .ok_or_else(|| eyre!("No content after headers"))?;
-
-    // Load syntax highlighting information
-    let ss = SyntaxSet::load_defaults_newlines();
-    let mut syntax = String::from("py");
-    let theme =
-        &ThemeSet::get_theme("themes/base16-onedark.tmTheme").expect("Unable to parse theme file");
-
-    // Set up parser
-    let options = Options::all();
-    let parser = Parser::new_ext(markdown, options);
-
-    let mut new_parser = Vec::new();
-    let mut to_highlight = String::new();
-    let mut in_codeblock = false;
-
-    for event in parser {
-        match event {
-            Event::Start(Tag::CodeBlock(c)) => {
-                match c {
-                    CodeBlockKind::Indented => {}
-                    CodeBlockKind::Fenced(c) => {
-                        syntax = if c.is_empty() {
-                            "default".to_string()
-                        } else {
-                            get_syntax_extension(&c[..])
-                        }
-                    }
-                }
-
-                in_codeblock = true;
+    for line in content.lines() {
+        if line.trim() == "---" {
+            if opening_delim {
+                break;
             }
-            Event::End(Tag::CodeBlock(_)) => {
-                if in_codeblock {
-                    if syntax == "default" {
-                        let mut html = String::from("<pre><code>");
-                        html.push_str(to_highlight.as_str());
-                        html.push_str("</code></pre>");
 
-                        new_parser.push(Event::Html(html.into()));
-                    } else {
-                        let code_syntax = ss.find_syntax_by_extension(&syntax).unwrap();
-                        let html =
-                            highlighted_html_for_string(&to_highlight, &ss, code_syntax, theme)?;
-
-                        new_parser.push(Event::Html(html.into()));
-                        to_highlight = String::new();
-
-                        in_codeblock = false;
-                    }
-                }
-            }
-            Event::Text(t) => {
-                if in_codeblock {
-                    to_highlight.push_str(&t);
-                } else {
-                    new_parser.push(Event::Text(t));
-                }
-            }
-            e => new_parser.push(e),
+            opening_delim = true;
+            continue;
         }
+
+        frontmatter_content.push_str(line);
+        frontmatter_content.push('\n');
     }
 
-    let mut html_output = String::new();
-    html::push_html(&mut html_output, new_parser.into_iter());
-    Ok(html_output)
-}
-
-fn get_syntax_extension(name: &str) -> String {
-    match name {
-        "rust" | "rs" => "rs".to_string(),
-        "python" | "py" => "py".to_string(),
-        _ => "default".to_string(),
-    }
+    let frontmatter: Frontmatter = toml::from_str(&frontmatter_content)?;
+    Ok(frontmatter)
 }
