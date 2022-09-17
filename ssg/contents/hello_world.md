@@ -1,6 +1,7 @@
 ---
 title = "hello world"
 tags = ["programming"]
+summary = "hello world"
 ---
 
 # Hello World

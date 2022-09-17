@@ -30,6 +30,7 @@ fn setup() -> Result<Connection> {
         "CREATE TABLE IF NOT EXISTS posts (
             id INTEGER PRIMARY KEY,
             title VARCHAR NOT NULL,
+            path VARCHAR NOT NULL,
             hash TEXT NOT NULL,
             summary TEXT NOT NULL,
             tags TEXT NOT NULL,

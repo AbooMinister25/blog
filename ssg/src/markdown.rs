@@ -9,6 +9,7 @@ use serde::Deserialize;
 pub struct Frontmatter {
     pub title: String,
     pub tags: Vec<String>,
+    pub summary: String,
 }
 
 /// A parsed blog post.
