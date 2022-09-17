@@ -1,4 +1,5 @@
 use crate::markdown::{parse, ParsedPost};
+use crate::stylesheets::compile_stylesheets;
 use color_eyre::eyre::{eyre, Result};
 use ignore::Walk;
 use rusqlite::Connection;
@@ -15,6 +16,9 @@ enum ToBuild {
 
 #[tracing::instrument(skip(tera))]
 pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
+    info!("Compile stylesheets");
+    compile_stylesheets()?;
+
     let paths = Walk::new("contents/")
         .filter_map(std::result::Result::ok)
         .map(ignore::DirEntry::into_path)

@@ -1,0 +1,7 @@
+@use 'colors';
+
+.post-content {
+    width: 100%;
+    display: flex;
+    background-color: colors.$base0;
+}

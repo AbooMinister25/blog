@@ -8,9 +8,10 @@ summary = "hello world"
 
 ## yay
 
-```rust
-fn main() {
-    println!("Hello World")
-}
+```py
+def main():
+    print("hi")
 ```
-d
+
+hi this is new content
+## this is a header

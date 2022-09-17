@@ -8,6 +8,7 @@
 
 mod build;
 mod markdown;
+mod stylesheets;
 
 use build::build;
 use color_eyre::eyre::Result;
