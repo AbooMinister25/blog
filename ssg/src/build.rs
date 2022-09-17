@@ -20,7 +20,7 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
         .map(ignore::DirEntry::into_path)
         .collect::<Vec<PathBuf>>();
 
-    info!("Found {} content files", paths.len());
+    info!("Found {} files in contents/", paths.len());
 
     let mut rendered = 0;
     let mut skipped = 0;
