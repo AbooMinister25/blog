@@ -22,6 +22,9 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
 
     info!("Found {} content files", paths.len());
 
+    let mut rendered = 0;
+    let mut skipped = 0;
+
     for path in paths {
         if path.is_dir() {
             continue;
@@ -52,18 +55,23 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
                         parsed_post.date,
                     ),
                 )?;
+
+                rendered += 1;
             }
             ToBuild::Exist => {
                 let parsed_post = parse_file(&path)?;
                 let title = parsed_post.frontmatter.title;
                 let file = fs::File::create(format!("public/{}.html", title))?;
                 render_template(&parsed_post.content, &title, tera, file)?;
+
+                rendered += 1;
             }
-            ToBuild::No => info!("No changes to content, skipping"),
+            ToBuild::No => skipped += 1,
         }
     }
 
-    info!("Rendered templates");
+    info!("Built {rendered} files");
+    info!("No changes made to {skipped} files, skipped");
 
     Ok(())
 }
