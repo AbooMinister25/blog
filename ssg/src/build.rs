@@ -92,7 +92,7 @@ fn render_template(markup: &str, title: &str, tera: &Tera, file: fs::File) -> Re
     context.insert("title", title);
     context.insert("markup", markup);
 
-    tera.render_to("page.html", &context, file)?;
+    tera.render_to("post.html", &context, file)?;
     Ok(())
 }
 
