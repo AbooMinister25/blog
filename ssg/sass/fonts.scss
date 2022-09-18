@@ -1,0 +1,12 @@
+@font-face {
+    font-family: "Crimson Pro";
+    src: url("/static/CrimsonPro-Regular.ttf");
+}
+
+@font-face {
+    font-family: "Fira Code";
+    src: url("/static/FiraCode-Regular.ttf");
+}
+
+$sans-serif: "Crimson Pro", sans-serif;
+$monospace: "Fira Code", monospace;
