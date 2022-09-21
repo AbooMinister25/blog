@@ -40,7 +40,13 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
                 let parsed_post = parse_file(&path)?;
                 let title = parsed_post.frontmatter.title;
                 let file = fs::File::create(format!("public/{}.html", title))?;
-                render_template(&parsed_post.content, &title, tera, file)?;
+                render_template(
+                    &parsed_post.content,
+                    &title,
+                    &parsed_post.frontmatter.tags,
+                    tera,
+                    file,
+                )?;
 
                 conn.execute(
                     "INSERT INTO posts
@@ -66,7 +72,13 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
                 let parsed_post = parse_file(&path)?;
                 let title = parsed_post.frontmatter.title;
                 let file = fs::File::create(format!("public/{}.html", title))?;
-                render_template(&parsed_post.content, &title, tera, file)?;
+                render_template(
+                    &parsed_post.content,
+                    &title,
+                    &parsed_post.frontmatter.tags,
+                    tera,
+                    file,
+                )?;
 
                 rendered += 1;
             }
@@ -87,9 +99,16 @@ fn parse_file(path: &PathBuf) -> Result<ParsedPost> {
     Ok(parsed_post)
 }
 
-fn render_template(markup: &str, title: &str, tera: &Tera, file: fs::File) -> Result<()> {
+fn render_template(
+    markup: &str,
+    title: &str,
+    tags: &Vec<String>,
+    tera: &Tera,
+    file: fs::File,
+) -> Result<()> {
     let mut context = Context::new();
     context.insert("title", title);
+    context.insert("tags", tags);
     context.insert("markup", markup);
 
     tera.render_to("post.html", &context, file)?;

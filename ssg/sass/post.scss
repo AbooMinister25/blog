@@ -17,6 +17,7 @@ body {
 
 .post-content h1 {
     font-size: 2rem;
+    margin-bottom: 0;
 
     @media (min-width: 600px) {
         font-size: 2.2rem;
@@ -40,6 +41,14 @@ body {
     &:visited {
         color: colors.$violet;
     }
+}
+
+.post-content .tags {
+    color: colors.$base03;
+    font-size: 0.8rem;
+    font-family: fonts.$monospace;
+    margin: 0;
+    padding: 0;
 }
 
 pre {
