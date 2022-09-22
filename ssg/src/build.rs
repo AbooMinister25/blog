@@ -54,8 +54,8 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
 
                 conn.execute(
                     "INSERT INTO posts
-                    (title, path, hash, summary, tags, published, published_at)
-                    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+                    (title, path, hash, tags)
+                    VALUES (?1, ?2, ?3, ?4)
                 ",
                     (
                         &title,
@@ -63,10 +63,7 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
                             .to_str()
                             .ok_or_else(|| eyre!("Error while converting path to string"))?,
                         &markdown_hash,
-                        &parsed_post.frontmatter.summary,
                         &serde_json::to_string(&parsed_post.frontmatter.tags)?,
-                        true,
-                        parsed_post.date,
                     ),
                 )?;
 
