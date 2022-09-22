@@ -16,7 +16,7 @@ pub struct Frontmatter {
 /// Contains the content parsed from a markdown document.
 #[derive(Debug)]
 pub struct ParsedPost {
-    pub date: NaiveDateTime,
+    pub date: DateTime<Utc>,
     pub content: String,
     pub frontmatter: Frontmatter,
 }
@@ -58,14 +58,9 @@ pub fn parse(content: &str) -> Result<ParsedPost> {
     let html = markdown_to_html_with_plugins(content, &options, &plugins);
 
     let today = Utc::now();
-    let date = NaiveDate::from_ymd(today.year(), today.month(), today.day()).and_hms(
-        today.hour(),
-        today.minute(),
-        today.second(),
-    );
 
     Ok(ParsedPost {
-        date,
+        date: today,
         content: html,
         frontmatter,
     })

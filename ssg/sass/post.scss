@@ -43,7 +43,7 @@ body {
     }
 }
 
-.post-content .tags {
+.post-content .details {
     color: colors.$base03;
     font-size: 0.8rem;
     font-family: fonts.$monospace;
@@ -74,4 +74,12 @@ pre {
     @media (min-width: 600px) {
         font-size: 0.9rem;
     }
+}
+
+code {
+    font-size: 1rem;
+}
+
+pre code {
+    font-size: inherit;
 }

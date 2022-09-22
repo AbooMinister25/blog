@@ -1,5 +1,6 @@
 use crate::markdown::{parse, ParsedPost};
 use crate::stylesheets::compile_stylesheets;
+use chrono::prelude::*;
 use color_eyre::eyre::{eyre, Result};
 use ignore::Walk;
 use rusqlite::Connection;
@@ -7,6 +8,8 @@ use std::fs;
 use std::path::PathBuf;
 use tera::{Context, Tera};
 use tracing::info;
+
+const DATE_FORMAT: &str = "%b %e, %Y";
 
 enum ToBuild {
     Nonexistent(String),
@@ -44,6 +47,7 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
                     &parsed_post.content,
                     &title,
                     &parsed_post.frontmatter.tags,
+                    parsed_post.date,
                     tera,
                     file,
                 )?;
@@ -76,6 +80,7 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
                     &parsed_post.content,
                     &title,
                     &parsed_post.frontmatter.tags,
+                    parsed_post.date,
                     tera,
                     file,
                 )?;
@@ -102,13 +107,15 @@ fn parse_file(path: &PathBuf) -> Result<ParsedPost> {
 fn render_template(
     markup: &str,
     title: &str,
-    tags: &Vec<String>,
+    tags: &[String],
+    date: DateTime<Utc>,
     tera: &Tera,
     file: fs::File,
 ) -> Result<()> {
     let mut context = Context::new();
     context.insert("title", title);
-    context.insert("tags", tags);
+    context.insert("tags", &tags.join(", "));
+    context.insert("date", &date.format(DATE_FORMAT).to_string());
     context.insert("markup", markup);
 
     tera.render_to("post.html", &context, file)?;
@@ -144,3 +151,7 @@ fn to_build(conn: &Connection, path: &PathBuf) -> Result<ToBuild> {
 
     Ok(build)
 }
+
+// fn remove_brackets(value: Value, _: &HashMap<String, Value>) -> Result<Value> {
+//     let s = try_get_value!("upper", "value", String, value);
+// }

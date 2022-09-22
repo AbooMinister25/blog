@@ -9,7 +9,7 @@
 {% block content %}
     <div class="post-content">
         <h1>{{ title }}</h1>
-        <p class="tags"> {{ tags }} </p>
+        <p class="details"> {{ date }} * {{ tags }} </p>
         {{ markup | safe }}
     </div>
 {% endblock content %}

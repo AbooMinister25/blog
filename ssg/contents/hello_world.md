@@ -4,17 +4,14 @@ tags = ["programming", "test"]
 summary = "hello world"
 ---
 
-This is a sample post of what my blog posts might eventually look like, and such I'll now go on to write nonsense prose in an attempt to construct a natural sounding blog post which will be better for my judgement of style as opposed to lorem-ipsum or whatever other latin placeholders there are.
+hi this is a test post. It consists of _both_ tests and `tests`. Can't believe it, right?
+I didn't believe it at first myself. Also - don't mention it to anyone, but theres also a
+THIRD test. Yes, you heard it. THIRD. test test AND FUCKING TEST. So much test
 
 ```rust
 fn main() {
     println!("hello world")
 }
-```
-
-```python
-def foo():
-    print("hi")
 ```
 
 [this is a link](https://pydis.org)
