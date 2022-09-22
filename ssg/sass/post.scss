@@ -55,22 +55,21 @@ pre {
     overflow: auto;
     font-size: 0.8rem;
     line-height: 1.25rem;
-    font-weight: 100;
     border-radius: 5px;
     border: 1px solid colors.$base1;
-    padding: 10px 10px 1px 10px;
+    padding-left: 0.5rem;
     margin: 1rem 0 3rem 0;
     font-family: fonts.$monospace;
 
-    &:before {
-        display: block;
-        width: calc(100%);
-        padding-top: 3px;
-        text-transform: capitalize;
-        font-size: 0.9rem;
-        border-radius: 5px;
-        content: attr(lang);
-    }
+    // &:before {
+    //     display: block;
+    //     width: calc(100%);
+    //     padding-top: 0.4rem;
+    //     position: relative;
+    //     text-transform: capitalize;
+    //     font-size: 0.9rem;
+    //     content: attr(lang);
+    // }
 
     @media (min-width: 600px) {
         font-size: 0.9rem;

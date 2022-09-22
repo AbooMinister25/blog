@@ -12,4 +12,9 @@ fn main() {
 }
 ```
 
+```python
+def foo():
+    print("hi")
+```
+
 [this is a link](https://pydis.org)
