@@ -24,6 +24,7 @@ pub fn build_posts(conn: &Connection, tera: &Tera) -> Result<()> {
         .iter()
         .map(|(path, to_build)| Ok((to_build, build_markdown(path, tera)?, path)))
         .map(|r| {
+            // If building the file wasn't an error, go ahead and insert it into the database.
             r.and_then(|(to_build, parsed_post, path)| {
                 if let ToBuild::Nonexistent(markdown_hash) = to_build {
                     conn.execute(
