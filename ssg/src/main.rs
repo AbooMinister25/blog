@@ -37,6 +37,14 @@ fn setup() -> Result<Connection> {
         )",
         (),
     )?;
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS styles (
+            id INTEGER PRIMARY KEY,
+            path VARCHAR NOT NULL,
+            hash TEXT NOT NULL
+        )",
+        (),
+    )?;
     info!("Established connection to database");
 
     Ok(conn)

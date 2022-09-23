@@ -17,10 +17,10 @@ enum ToBuild {
     No,
 }
 
-#[tracing::instrument(skip(tera))]
+#[tracing::instrument(skip(tera, conn))]
 pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
-    info!("Compile stylesheets");
-    compile_stylesheets()?;
+    info!("Compiling stylesheets");
+    compile_stylesheets(&conn)?;
 
     let paths = Walk::new("contents/")
         .filter_map(std::result::Result::ok)
@@ -142,13 +142,8 @@ fn to_build(conn: &Connection, path: &PathBuf) -> Result<ToBuild> {
         )?;
         ToBuild::Exist
     } else {
-        info!("Skipping file, already rendered");
         ToBuild::No
     };
 
     Ok(build)
 }
-
-// fn remove_brackets(value: Value, _: &HashMap<String, Value>) -> Result<Value> {
-//     let s = try_get_value!("upper", "value", String, value);
-// }
