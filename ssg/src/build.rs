@@ -3,7 +3,6 @@ use crate::stylesheets::compile_stylesheets;
 use chrono::prelude::*;
 use color_eyre::eyre::{eyre, Result};
 use ignore::Walk;
-use rayon::prelude::*;
 use rusqlite::Connection;
 use std::fs;
 use std::path::PathBuf;

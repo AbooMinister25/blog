@@ -13,6 +13,7 @@ mod stylesheets;
 use build::build;
 use color_eyre::eyre::Result;
 use rusqlite::Connection;
+use std::time::Instant;
 use tera::Tera;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
@@ -51,10 +52,15 @@ fn setup() -> Result<Connection> {
 }
 
 fn main() -> Result<()> {
+    let now = Instant::now();
+
     let conn = setup()?;
     let tera = Tera::new("templates/**/*.html")?;
 
     build(conn, &tera)?;
+
+    let elapsed = now.elapsed();
+    info!("Built in {:.2?} seconds", elapsed);
 
     Ok(())
 }
