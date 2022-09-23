@@ -40,25 +40,14 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
 
         match to_build {
             ToBuild::Nonexistent(markdown_hash) => {
-                let parsed_post = parse_file(&path)?;
-                let title = parsed_post.frontmatter.title;
-                let file = fs::File::create(format!("public/{}.html", title))?;
-                render_template(
-                    &parsed_post.content,
-                    &title,
-                    &parsed_post.frontmatter.tags,
-                    parsed_post.date,
-                    tera,
-                    file,
-                )?;
-
+                let parsed_post = build_markdown(&path, tera)?;
                 conn.execute(
                     "INSERT INTO posts
                     (title, path, hash, tags)
                     VALUES (?1, ?2, ?3, ?4)
                 ",
                     (
-                        &title,
+                        &parsed_post.frontmatter.title,
                         &path
                             .to_str()
                             .ok_or_else(|| eyre!("Error while converting path to string"))?,
@@ -70,18 +59,7 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
                 rendered += 1;
             }
             ToBuild::Exist => {
-                let parsed_post = parse_file(&path)?;
-                let title = parsed_post.frontmatter.title;
-                let file = fs::File::create(format!("public/{}.html", title))?;
-                render_template(
-                    &parsed_post.content,
-                    &title,
-                    &parsed_post.frontmatter.tags,
-                    parsed_post.date,
-                    tera,
-                    file,
-                )?;
-
+                build_markdown(&path, tera)?;
                 rendered += 1;
             }
             ToBuild::No => skipped += 1,
@@ -98,6 +76,22 @@ fn parse_file(path: &PathBuf) -> Result<ParsedPost> {
     let markdown = fs::read_to_string(path)?;
     let parsed_post = parse(&markdown)?;
 
+    Ok(parsed_post)
+}
+
+fn build_markdown(path: &PathBuf, tera: &Tera) -> Result<ParsedPost> {
+    let parsed_post = parse_file(path)?;
+    let frontmatter = &parsed_post.frontmatter;
+    let file = fs::File::create(format!("public/{}.html", frontmatter.title))?;
+
+    render_template(
+        &parsed_post.content,
+        &frontmatter.title,
+        &frontmatter.tags,
+        parsed_post.date,
+        tera,
+        file,
+    )?;
     Ok(parsed_post)
 }
 
