@@ -50,6 +50,8 @@ pub fn parse(content: &str) -> Result<ParsedPost> {
     let mut options = ComrakOptions::default();
     options.extension.front_matter_delimiter = Some("---".to_owned());
     options.extension.header_ids = Some("".to_string());
+    options.extension.tasklist = true;
+    options.extension.strikethrough = true;
     options.render.github_pre_lang = true;
 
     let mut plugins = ComrakPlugins::default();
