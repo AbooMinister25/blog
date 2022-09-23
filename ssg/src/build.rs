@@ -3,6 +3,7 @@ use crate::stylesheets::compile_stylesheets;
 use chrono::prelude::*;
 use color_eyre::eyre::{eyre, Result};
 use ignore::Walk;
+use rayon::prelude::*;
 use rusqlite::Connection;
 use std::fs;
 use std::path::PathBuf;
@@ -25,6 +26,7 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
     let paths = Walk::new("contents/")
         .filter_map(std::result::Result::ok)
         .map(ignore::DirEntry::into_path)
+        .filter(|path| !path.is_dir())
         .collect::<Vec<PathBuf>>();
 
     info!("Found {} files in contents/", paths.len());
@@ -33,9 +35,6 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
     let mut skipped = 0;
 
     for path in paths {
-        if path.is_dir() {
-            continue;
-        }
         let to_build = to_build(&conn, &path)?;
 
         match to_build {
