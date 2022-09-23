@@ -49,6 +49,7 @@ pub fn parse(content: &str) -> Result<ParsedPost> {
     let adapter = SyntectAdapter::new("Solarized (light)");
     let mut options = ComrakOptions::default();
     options.extension.front_matter_delimiter = Some("---".to_owned());
+    options.extension.header_ids = Some("".to_string());
     options.render.github_pre_lang = true;
 
     let mut plugins = ComrakPlugins::default();
