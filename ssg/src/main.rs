@@ -1,13 +1,10 @@
 #![warn(clippy::pedantic, clippy::nursery)]
-#![allow(clippy::must_use_candidate)]
-#![allow(clippy::unnecessary_wraps)]
-#![allow(clippy::missing_const_for_fn)]
-#![allow(clippy::return_self_not_must_use)]
-#![allow(clippy::module_name_repetitions)]
 #![allow(clippy::missing_panics_doc)]
+#![allow(clippy::module_name_repetitions)]
 
 mod build;
 mod markdown;
+mod post;
 mod stylesheets;
 
 use build::build;
