@@ -89,7 +89,7 @@ pub fn build(conn: Connection, tera: &Tera) -> Result<()> {
     }
 
     info!("Built {rendered} files");
-    info!("No changes made to {skipped} files, skipped");
+    info!("{skipped} files left unchanged, skipping");
 
     Ok(())
 }
