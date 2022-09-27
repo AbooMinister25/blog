@@ -66,9 +66,6 @@ pub fn compile_stylesheets(conn: &Connection) -> Result<()> {
             ToBuild::No => skipped += 1,
         }
 
-        info!("Built {rendered} stylesheets");
-        info!("{skipped} stylesheets left unchanged, skipping");
-
         // If for some wild reason the CSS paths don't contain any non-valid
         // UTF-8 characters, I deserve this panicking.
         let filename = path.file_stem().unwrap().to_str().unwrap();
@@ -81,6 +78,9 @@ pub fn compile_stylesheets(conn: &Connection) -> Result<()> {
         fs::File::create(format!("styles/{}.css", filename))?;
         fs::write(format!("styles/{}.css", filename), css)?;
     }
+
+    info!("Built {rendered} stylesheets");
+    info!("{skipped} stylesheets left unchanged, skipping");
 
     Ok(())
 }

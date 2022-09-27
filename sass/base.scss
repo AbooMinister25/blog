@@ -1,0 +1,12 @@
+@use "colors";
+@use "fonts";
+
+footer {
+    margin: 3rem auto auto auto;
+    border-top: 1px dashed colors.$base03;
+    text-align: center;
+    
+    @media (min-width: 801px) {
+        width: 750px;
+    }
+} 
