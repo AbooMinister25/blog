@@ -126,6 +126,7 @@ fn build_markdown(path: &PathBuf, tera: &Tera) -> Result<ParsedPost> {
         &frontmatter.title,
         &frontmatter.tags,
         parsed_post.date,
+        &parsed_post.toc,
         tera,
         file,
     )?;
@@ -144,6 +145,7 @@ fn render_template(
     title: &str,
     tags: &[String],
     date: DateTime<Utc>,
+    toc: &[String],
     tera: &Tera,
     file: fs::File,
 ) -> Result<()> {
@@ -152,6 +154,7 @@ fn render_template(
     context.insert("title", title);
     context.insert("tags", &tags.join(", "));
     context.insert("date", &date.format(DATE_FORMAT).to_string());
+    context.insert("toc", toc);
     context.insert("markup", markup);
 
     tera.render_to("post.html", &context, file)?;

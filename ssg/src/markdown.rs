@@ -1,7 +1,11 @@
 use chrono::prelude::*;
 use color_eyre::Result;
 use comrak::plugins::syntect::SyntectAdapter;
-use comrak::{markdown_to_html_with_plugins, ComrakOptions, ComrakPlugins};
+use comrak::{
+    format_html_with_plugins,
+    nodes::{AstNode, NodeCode, NodeValue},
+    parse_document, Arena, ComrakOptions, ComrakPlugins,
+};
 use serde::Deserialize;
 
 // Represents the frontmatter to a blog post.
@@ -19,6 +23,7 @@ pub struct ParsedPost {
     pub date: DateTime<Utc>,
     pub content: String,
     pub frontmatter: Frontmatter,
+    pub toc: Vec<String>,
 }
 
 /// Parse some markdown and return a `ParsedPost`
@@ -46,7 +51,10 @@ pub struct ParsedPost {
 /// header is found to be missing, or some error occurred during
 /// parsing.
 pub fn parse(content: &str) -> Result<ParsedPost> {
+    // Choose the syntax highlighting theme
     let adapter = SyntectAdapter::new("Solarized (light)");
+
+    // Set the options
     let mut options = ComrakOptions::default();
     options.extension.front_matter_delimiter = Some("---".to_owned());
     options.extension.header_ids = Some("".to_string());
@@ -54,18 +62,27 @@ pub fn parse(content: &str) -> Result<ParsedPost> {
     options.extension.strikethrough = true;
     options.render.github_pre_lang = true;
 
+    // Parse the table of contents
+    let arena = Arena::new();
+    let root = parse_document(&arena, content, &options);
+    let toc = parse_toc(root);
+
+    // Set the plugins
     let mut plugins = ComrakPlugins::default();
     plugins.render.codefence_syntax_highlighter = Some(&adapter);
 
+    // Parse the frontmatter and format the AST
     let frontmatter = parse_frontmatter(content)?;
-    let html = markdown_to_html_with_plugins(content, &options, &plugins);
+    let mut html = Vec::new();
+    format_html_with_plugins(root, &options, &mut html, &plugins)?;
 
     let today = Utc::now();
 
     Ok(ParsedPost {
         date: today,
-        content: html,
+        content: String::from_utf8(html).unwrap(), // Safe to unwrap, comrak guarantees valid UTF-8
         frontmatter,
+        toc,
     })
 }
 
@@ -89,4 +106,42 @@ fn parse_frontmatter(content: &str) -> Result<Frontmatter> {
 
     let frontmatter: Frontmatter = toml::from_str(&frontmatter_content)?;
     Ok(frontmatter)
+}
+
+fn parse_toc<'a>(root: &'a AstNode<'a>) -> Vec<String> {
+    let mut toc_headers = Vec::new();
+
+    for node in root.children() {
+        let header = match node.data.clone().into_inner().value {
+            NodeValue::Heading(c) => c,
+            _ => continue,
+        };
+
+        if header.level != 2 {
+            continue;
+        }
+
+        let mut text = Vec::new();
+        collect_text(node, &mut text);
+
+        // Safe to unwrap since input was good UTF-8 and comrak guarantees
+        // output will be good UTF-8
+        toc_headers.push(String::from_utf8(text).unwrap());
+    }
+
+    toc_headers
+}
+
+fn collect_text<'a>(node: &'a AstNode<'a>, output: &mut Vec<u8>) {
+    match node.data.borrow().value {
+        NodeValue::Text(ref literal) | NodeValue::Code(NodeCode { ref literal, .. }) => {
+            output.extend_from_slice(literal);
+        }
+        NodeValue::LineBreak | NodeValue::SoftBreak => output.push(b' '),
+        _ => {
+            for n in node.children() {
+                collect_text(n, output);
+            }
+        }
+    }
 }

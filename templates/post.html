@@ -10,6 +10,14 @@
     <div class="post-content">
         <h1>{{ title }}</h1>
         <p class="details"> {{ date }} * {{ tags }} </p>
+        <ul class="table-of-contents">
+            <h2 class="toc-header">Contents</h2>
+            {% for header in toc %}
+                <li class="toc-item">
+                    <a href={{ "#" ~ header }}>{{ header }}</a>
+                </li>
+            {% endfor %}
+        </ul>
         {{ markup | safe }}
     </div>
 {% endblock content %}

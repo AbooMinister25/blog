@@ -24,6 +24,46 @@ body {
     }
 }
 
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.table-of-contents {
+    margin-top: 1rem;
+    background-color: colors.$base3;
+    padding: 1rem;
+}
+
+.table-of-contents > .toc-item {
+    font-size: 1.2rem;
+    line-height: 1.8rem;
+    color: colors.$base03;
+
+    &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    @media (min-width: 600px) {
+        font-size: 1.3rem;
+        line-height: 2rem;
+    }
+
+    &:before {
+        content: "#";
+    }
+}
+
+.table-of-contents > .toc-item > a {
+    all: unset;
+
+    &:visited {
+        color: inherit;
+    }
+}
+
 .post-content p {
     color: colors.$base01;
     font-size: 1.2rem;
