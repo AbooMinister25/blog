@@ -24,13 +24,8 @@ body {
     }
 }
 
-ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
 .table-of-contents {
+    list-style: none;
     margin-top: 1rem;
     background-color: colors.$base3;
     padding: 1rem;
