@@ -118,3 +118,19 @@ code {
 pre code {
     font-size: inherit;
 }
+
+ul {
+    padding-left: 1.5rem;
+    list-style: square;
+}
+
+li {
+    font-size: 1.2rem;
+    line-height: 1.8rem;
+    color: colors.$base01;
+
+    @media (min-width: 600px) {
+        font-size: 1.3rem;
+        line-height: 2rem;
+    }
+}
