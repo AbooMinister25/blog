@@ -14,7 +14,7 @@
             <h2 class="toc-header">Contents</h2>
             {% for header in toc %}
                 <li class="toc-item">
-                    <a href={{ "#" ~ header }}>{{ header }}</a>
+                    <a href={{ '#' ~ header | lower | replace(from=' ', to='-') }}>{{ header }}</a>
                 </li>
             {% endfor %}
         </ul>
