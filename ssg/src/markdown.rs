@@ -61,6 +61,7 @@ pub fn parse(content: &str) -> Result<ParsedPost> {
     options.extension.tasklist = true;
     options.extension.strikethrough = true;
     options.render.github_pre_lang = true;
+    options.render.unsafe_ = true;
 
     // Parse the table of contents
     let arena = Arena::new();
