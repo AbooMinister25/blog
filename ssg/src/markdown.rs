@@ -1,4 +1,5 @@
 use chrono::prelude::*;
+use color_eyre::eyre::Context;
 use color_eyre::Result;
 use comrak::plugins::syntect::SyntectAdapter;
 use comrak::{
@@ -78,10 +79,9 @@ pub fn parse(content: &str) -> Result<ParsedPost> {
     format_html_with_plugins(root, &options, &mut html, &plugins)?;
 
     let today = Utc::now();
-
     Ok(ParsedPost {
         date: today,
-        content: String::from_utf8(html).unwrap(), // Safe to unwrap, comrak guarantees valid UTF-8
+        content: String::from_utf8(html).wrap_err("why is this invalid utf-8 you suck")?,
         frontmatter,
         toc,
     })
