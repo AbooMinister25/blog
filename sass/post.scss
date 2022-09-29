@@ -24,6 +24,14 @@ body {
     }
 }
 
+.post-content h2 {
+    font-size: 1.8rem;
+
+    @media (min-width: 600px) {
+        font-size: 2rem;
+    }
+}
+
 .table-of-contents {
     list-style: none;
     margin-top: 1rem;
@@ -60,7 +68,7 @@ body {
 }
 
 .post-content p {
-    color: colors.$base01;
+    color: colors.$base02;
     font-size: 1.2rem;
     line-height: 1.8rem;
 
@@ -74,7 +82,7 @@ body {
     color: colors.$blue;
 
     &:visited {
-        color: colors.$violet;
+        color: colors.$blue;
     }
 }
 
@@ -90,7 +98,7 @@ pre {
     overflow: auto;
     font-size: 0.8rem;
     line-height: 1.25rem;
-    border-radius: 5px;
+    // border-radius: 5px;
     border: 1px solid colors.$base1;
     padding-left: 0.5rem;
     margin: 1rem 0 3rem 0;
@@ -127,10 +135,17 @@ ul {
 li {
     font-size: 1.2rem;
     line-height: 1.8rem;
-    color: colors.$base01;
+    color: colors.$base02;
 
     @media (min-width: 600px) {
         font-size: 1.3rem;
         line-height: 2rem;
     }
+}
+
+.post-content .blog-note {
+    color: colors.$base01;
+    padding: 1rem;
+    border-top: 1px dashed;
+    border-bottom: 1px dashed;
 }

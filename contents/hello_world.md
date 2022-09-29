@@ -19,7 +19,13 @@ _italic_
 -   b
 -   c
 
-## bye
+## Header 1
+
+Yeah, this has some code. Deal with it.
+
+<div class="blog-note">
+    This code is written in rust, so its very safe and blazingly fast. For more info, see <a href="https://rust-lang.org">rust's website</a>
+</div>
 
 ```rust
 fn main() {
@@ -27,15 +33,15 @@ fn main() {
 }
 ```
 
-## bye3
+## Header 2
 
 a
 
-## byee
+## Header 3
 
 b
 
-## Hello World
+## Header 4
 
 c
 
