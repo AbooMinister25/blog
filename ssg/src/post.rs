@@ -17,12 +17,17 @@ enum ToBuild {
     No,
 }
 
-#[tracing::instrument(skip(tera, conn))]
-pub fn build_posts(conn: &Connection, tera: &Tera) -> Result<()> {
-    let posts_to_build = get_posts_to_build(conn)?;
+// #[tracing::instrument(skip(tera, conn))]
+pub fn build_posts(
+    conn: &Connection,
+    tera: &Tera,
+    output_dir: &str,
+    html_input_dir: &str,
+) -> Result<()> {
+    let posts_to_build = get_posts_to_build(conn, html_input_dir)?;
     posts_to_build
         .iter()
-        .map(|(path, to_build)| Ok((to_build, build_markdown(path, tera)?, path)))
+        .map(|(path, to_build)| Ok((to_build, build_markdown(path, tera, output_dir)?, path)))
         .map(|r| {
             // If building the file wasn't an error, go ahead and insert it into the database.
             r.and_then(|(to_build, parsed_post, path)| {
@@ -51,15 +56,15 @@ pub fn build_posts(conn: &Connection, tera: &Tera) -> Result<()> {
     Ok(())
 }
 
-fn get_posts_to_build(conn: &Connection) -> Result<Vec<(PathBuf, ToBuild)>> {
-    // Collect all paths in the contents/ folder, filter out directories.
-    let paths = Walk::new("contents/")
+fn get_posts_to_build(conn: &Connection, input_dir: &str) -> Result<Vec<(PathBuf, ToBuild)>> {
+    // Collect all paths in the input directory folder, filter out directories.
+    let paths = Walk::new(input_dir)
         .filter_map(std::result::Result::ok)
         .map(ignore::DirEntry::into_path)
         .filter(|path| !path.is_dir())
         .collect::<Vec<_>>();
 
-    info!("Found {} files in contents/", paths.len());
+    info!("Found {} files in {}", paths.len(), input_dir);
 
     let mut rendering = 0;
     let mut skipping = 0;
@@ -115,11 +120,11 @@ fn to_build(conn: &Connection, path: &PathBuf) -> Result<ToBuild> {
     Ok(build)
 }
 
-fn build_markdown(path: &PathBuf, tera: &Tera) -> Result<ParsedPost> {
+fn build_markdown(path: &PathBuf, tera: &Tera, output_dir: &str) -> Result<ParsedPost> {
     // Parse the file
     let parsed_post = parse_file(path)?;
     let frontmatter = &parsed_post.frontmatter;
-    let file = fs::File::create(format!("public/{}.html", frontmatter.title))?;
+    let file = fs::File::create(format!("{output_dir}/{}.html", frontmatter.title))?;
 
     render_template(
         &parsed_post.content,

@@ -11,11 +11,15 @@ enum ToBuild {
     No,
 }
 
-pub fn compile_stylesheets(conn: &Connection) -> Result<()> {
+pub fn compile_stylesheets(
+    conn: &Connection,
+    css_output_dir: &str,
+    scss_input_dir: &str,
+) -> Result<()> {
     let mut rendered = 0;
     let mut skipped = 0;
 
-    for result in Walk::new("sass/") {
+    for result in Walk::new(scss_input_dir) {
         let path = result?.into_path();
         if path.is_dir() {
             continue;
@@ -34,8 +38,8 @@ pub fn compile_stylesheets(conn: &Connection) -> Result<()> {
                     ..Default::default()
                 };
                 let css = compile_scss_path(&path, format)?;
-                fs::File::create(format!("styles/{}.css", filename))?;
-                fs::write(format!("styles/{}.css", filename), css)?;
+                fs::File::create(format!("{css_output_dir}/{filename}.css"))?;
+                fs::write(format!("{css_output_dir}/{filename}.css"), css)?;
 
                 conn.execute(
                     "INSERT INTO styles (path, hash) VALUES (?1, ?2) ",
@@ -59,24 +63,12 @@ pub fn compile_stylesheets(conn: &Connection) -> Result<()> {
                     ..Default::default()
                 };
                 let css = compile_scss_path(&path, format)?;
-                fs::write(format!("styles/{}.css", filename), css)?;
+                fs::write(format!("{css_output_dir}/{filename}.css"), css)?;
 
                 rendered += 1;
             }
             ToBuild::No => skipped += 1,
         }
-
-        // If for some wild reason the CSS paths don't contain any non-valid
-        // UTF-8 characters, I deserve this panicking.
-        let filename = path.file_stem().unwrap().to_str().unwrap();
-
-        let format = output::Format {
-            style: output::Style::Compressed,
-            ..Default::default()
-        };
-        let css = compile_scss_path(&path, format)?;
-        fs::File::create(format!("styles/{}.css", filename))?;
-        fs::write(format!("styles/{}.css", filename), css)?;
     }
 
     info!("Built {rendered} stylesheets");

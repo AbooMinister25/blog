@@ -25,4 +25,4 @@ toml = "0.5.9"
 comrak = "0.14.0"
 rsass = "0.25.2"
 lol_html = "0.3.1"
-clap = "3.2.22"
+clap = { version = "3.2.22", features = ["derive"] }
