@@ -1,5 +1,4 @@
-use crate::markdown::{parse, ParsedPost};
-use chrono::prelude::*;
+use crate::markdown::{parse, Frontmatter, ParsedPost};
 use color_eyre::eyre::{eyre, Result};
 use ignore::Walk;
 use rusqlite::Connection;
@@ -127,11 +126,14 @@ fn build_markdown(path: &PathBuf, tera: &Tera, output_dir: &str) -> Result<Parse
     let file = fs::File::create(format!("{output_dir}/{}.html", frontmatter.title))?;
 
     render_template(
-        &parsed_post.content,
-        &frontmatter.title,
-        &frontmatter.tags,
-        parsed_post.date,
-        &parsed_post.toc,
+        // &parsed_post.content,
+        // &frontmatter.title,
+        // &frontmatter.tags,
+        // parsed_post.date,
+        // &parsed_post.toc,
+        // &frontmatter.summary,
+        &parsed_post,
+        frontmatter,
         tera,
         file,
     )?;
@@ -146,21 +148,25 @@ fn parse_file(path: &PathBuf) -> Result<ParsedPost> {
 }
 
 fn render_template(
-    markup: &str,
-    title: &str,
-    tags: &[String],
-    date: DateTime<Utc>,
-    toc: &[String],
+    // markup: &str,
+    // title: &str,
+    // tags: &[String],
+    // date: DateTime<Utc>,
+    // toc: &[String],
+    // summary: &str,
+    parsed_post: &ParsedPost,
+    frontmatter: &Frontmatter,
     tera: &Tera,
     file: fs::File,
 ) -> Result<()> {
     let mut context = Context::new();
     // Insert context for the template
-    context.insert("title", title);
-    context.insert("tags", &tags.join(", "));
-    context.insert("date", &date.format(DATE_FORMAT).to_string());
-    context.insert("toc", toc);
-    context.insert("markup", markup);
+    context.insert("title", &frontmatter.title);
+    context.insert("tags", &frontmatter.tags.join(", "));
+    context.insert("date", &parsed_post.date.format(DATE_FORMAT).to_string());
+    context.insert("toc", &parsed_post.toc);
+    context.insert("markup", &parsed_post.content);
+    context.insert("summary", &frontmatter.summary);
 
     tera.render_to("post.html", &context, file)?;
     Ok(())
