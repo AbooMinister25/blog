@@ -1,12 +1,12 @@
 ---
-title = "Hello World"
+title = "test"
 tags = ["programming", "test"]
-summary = "hello world"
+summary = "test"
 ---
 
 [Heading IDs](#bye)
 
-![blog icon](/static/blah.svg)
+![blog icon](/static/blahs.svg)
 
 hi this is a test post. It consists of _both_ tests and `tests`. Can't believe it, right?
 I didn't believe it at first myself. Also - don't mention it to anyone, but theres also a
