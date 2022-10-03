@@ -59,7 +59,7 @@ body {
     list-style: square;
 }
 
-.post-content > li {
+.post-content > ul > li {
     font-size: 1.2rem;
     line-height: 1.8rem;
     color: latte.$text;
@@ -83,7 +83,6 @@ body {
     font-size: 0.8rem;
     line-height: 1.25rem;
     border-radius: 5px;
-    // border: 1px solid latte.$overlay0;
     padding-left: 0.5rem;
     margin: 1rem 0 3rem 0;
     font-family: fonts.$monospace;
