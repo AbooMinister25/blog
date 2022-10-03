@@ -14,7 +14,7 @@
         
     <div class="post-content">
         <h1>Hello World</h1>
-        <p class="details"> Oct  1, 2022 * programming, test </p>
+        <p class="details"> Oct  3, 2022 * programming, test </p>
         <ul class="table-of-contents">
             <h2 class="toc-header">Contents</h2>
             
@@ -52,10 +52,20 @@ I didn't believe it at first myself. Also - don't mention it to anyone, but ther
 <div class="blog-note">
     This code is written in rust, so its very safe and blazingly fast. For more info, see <a href="https://rust-lang.org">rust's website</a>
 </div>
-<pre style="background-color:#fdf6e3;" lang="rust"><code>
-<span style="color:#268bd2;">fn </span><span style="color:#b58900;">main</span><span style="color:#657b83;">() {
-</span><span style="color:#657b83;">    </span><span style="color:#859900;">println!</span><span style="color:#657b83;">(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">hello world</span><span style="color:#839496;">&quot;</span><span style="color:#657b83;">)
-</span><span style="color:#657b83;">}
+<pre style="background-color:#303446;" lang="rust"><code>
+<span style="font-style:italic;color:#e5c890;">fn </span><span style="font-style:italic;color:#8caaee;">main</span><span style="color:#949cbb;">() {
+</span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#737994;">// Generate lorem ipsum text with Title Case.
+</span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#e5c890;">let</span><span style="color:#c6d0f5;"> title </span><span style="font-weight:bold;color:#99d1db;">= </span><span style="font-style:italic;color:#f2d5cf;">lipsum</span><span style="font-weight:bold;color:#99d1db;">::</span><span style="color:#c6d0f5;">lipsum_title</span><span style="color:#949cbb;">()</span><span style="color:#81c8be;">;
+</span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#737994;">// Print underlined title and lorem ipsum text.
+</span><span style="color:#c6d0f5;">    println!</span><span style="color:#949cbb;">(</span><span style="color:#a6d189;">&quot;{}</span><span style="color:#f4b8e4;">\n</span><span style="color:#a6d189;">{}</span><span style="color:#f4b8e4;">\n</span><span style="color:#a6d189;">&quot;</span><span style="color:#81c8be;">,</span><span style="color:#c6d0f5;"> title</span><span style="color:#81c8be;">, </span><span style="font-style:italic;color:#e5c890;">str</span><span style="font-weight:bold;color:#99d1db;">::</span><span style="color:#c6d0f5;">repeat</span><span style="color:#949cbb;">(</span><span style="color:#a6d189;">&quot;=&quot;</span><span style="color:#81c8be;">,</span><span style="color:#c6d0f5;"> title.</span><span style="color:#99d1db;">len</span><span style="color:#949cbb;">()))</span><span style="color:#81c8be;">;
+</span><span style="color:#c6d0f5;">
+</span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#737994;">// First command line argument or &quot;&quot; if not supplied.
+</span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#e5c890;">let</span><span style="color:#c6d0f5;"> arg </span><span style="font-weight:bold;color:#99d1db;">= </span><span style="font-style:italic;color:#f2d5cf;">std</span><span style="font-weight:bold;color:#99d1db;">::</span><span style="font-style:italic;color:#f2d5cf;">env</span><span style="font-weight:bold;color:#99d1db;">::</span><span style="color:#c6d0f5;">args</span><span style="color:#949cbb;">()</span><span style="color:#c6d0f5;">.</span><span style="color:#99d1db;">nth</span><span style="color:#949cbb;">(</span><span style="color:#ef9f76;">1</span><span style="color:#949cbb;">)</span><span style="color:#c6d0f5;">.</span><span style="color:#99d1db;">unwrap_or_default</span><span style="color:#949cbb;">()</span><span style="color:#81c8be;">;
+</span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#737994;">// Number of words to generate.
+</span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#e5c890;">let</span><span style="color:#c6d0f5;"> n </span><span style="font-weight:bold;color:#99d1db;">=</span><span style="color:#c6d0f5;"> arg.</span><span style="color:#99d1db;">parse</span><span style="color:#949cbb;">()</span><span style="color:#c6d0f5;">.</span><span style="color:#99d1db;">unwrap_or</span><span style="color:#949cbb;">(</span><span style="color:#ef9f76;">25</span><span style="color:#949cbb;">)</span><span style="color:#81c8be;">;
+</span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#737994;">// Print n words of lorem ipsum text.
+</span><span style="color:#c6d0f5;">    println!</span><span style="color:#949cbb;">(</span><span style="color:#a6d189;">&quot;{}&quot;</span><span style="color:#81c8be;">, </span><span style="font-style:italic;color:#f2d5cf;">lipsum</span><span style="font-weight:bold;color:#99d1db;">::</span><span style="color:#c6d0f5;">lipsum</span><span style="color:#949cbb;">(</span><span style="color:#c6d0f5;">n</span><span style="color:#949cbb;">))</span><span style="color:#81c8be;">;
+</span><span style="color:#949cbb;">}
 </span>
 </code></pre>
 <h2><a href="#header-2" aria-hidden="true" class="anchor" id="header-2"></a>Header 2</h2>

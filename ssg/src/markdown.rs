@@ -1,13 +1,14 @@
 use chrono::prelude::*;
 use color_eyre::eyre::Context;
 use color_eyre::Result;
-use comrak::plugins::syntect::SyntectAdapter;
+use comrak::plugins::syntect::SyntectAdapterBuilder;
 use comrak::{
     format_html_with_plugins,
     nodes::{AstNode, NodeCode, NodeValue},
     parse_document, Arena, ComrakOptions, ComrakPlugins,
 };
 use serde::Deserialize;
+use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 
 // Represents the frontmatter to a blog post.
 #[derive(Deserialize, Debug)]
@@ -53,7 +54,15 @@ pub struct ParsedPost {
 /// parsing.
 pub fn parse(content: &str) -> Result<ParsedPost> {
     // Choose the syntax highlighting theme
-    let adapter = SyntectAdapter::new("Solarized (light)");
+    // let adapter = SyntectAdapter::new("Solarized (light)");
+    let ss = SyntaxSet::load_defaults_newlines();
+    let theme_set = ThemeSet::load_from_folder("themes/")?;
+
+    let adapter = SyntectAdapterBuilder::new()
+        .theme("Catpuccin-frappe")
+        .syntax_set(ss)
+        .theme_set(theme_set)
+        .build();
 
     // Set the options
     let mut options = ComrakOptions::default();
