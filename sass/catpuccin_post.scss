@@ -16,7 +16,7 @@ body {
     }
 }
 
-.post-content h1 {
+.post-content h1 { 
     font-size: 2rem;
     margin-bottom: 0;
     color: latte.$text;
@@ -54,12 +54,12 @@ body {
     }
 }
 
-.post-content ul {
+.post-content > ul {
     padding-left: 1.5rem;
     list-style: square;
 }
 
-.post-content li {
+.post-content > li {
     font-size: 1.2rem;
     line-height: 1.8rem;
     color: latte.$text;
@@ -82,7 +82,8 @@ body {
     overflow: auto;
     font-size: 0.8rem;
     line-height: 1.25rem;
-    border: 1px solid latte.$overlay0;
+    border-radius: 5px;
+    // border: 1px solid latte.$overlay0;
     padding-left: 0.5rem;
     margin: 1rem 0 3rem 0;
     font-family: fonts.$monospace;
@@ -118,6 +119,7 @@ body {
     font-size: 1.2rem;
     line-height: 1.8rem;
     color: latte.$subtext1;
+    list-style: none;
 
     &:hover {
         cursor: pointer;
