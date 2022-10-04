@@ -1,10 +1,12 @@
-@use "colors";
+@use "latte";
 @use "fonts";
 
 footer {
+    font-family: fonts.$sans-serif;
     margin: 3rem auto auto auto;
-    border-top: 1px dashed colors.$base03;
+    border-top: 1px dashed latte.$overlay1;
     text-align: center;
+    color: latte.$overlay1;
     
     @media (min-width: 801px) {
         width: 750px;
