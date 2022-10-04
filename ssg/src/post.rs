@@ -16,7 +16,6 @@ enum ToBuild {
     No,
 }
 
-// #[tracing::instrument(skip(tera, conn))]
 pub fn build_posts(
     conn: &Connection,
     tera: &Tera,

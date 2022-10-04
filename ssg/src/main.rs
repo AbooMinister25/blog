@@ -2,6 +2,7 @@
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
 
+mod assets;
 mod build;
 mod markdown;
 mod post;
@@ -65,7 +66,7 @@ fn setup() -> Result<Connection> {
         (),
     )?;
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS styles (
+        "CREATE TABLE IF NOT EXISTS assets (
             id INTEGER PRIMARY KEY,
             path VARCHAR NOT NULL,
             hash TEXT NOT NULL

@@ -1,3 +1,4 @@
+use crate::assets::process_assets;
 use crate::post::build_posts;
 use crate::stylesheets::compile_stylesheets;
 use color_eyre::eyre::Result;
@@ -23,6 +24,8 @@ pub fn build(
 ) -> Result<()> {
     info!("Compiling stylesheets");
     compile_stylesheets(&conn, &css_output_dir, &scss_input_dir)?;
+    info!("Minimizig assets");
+    process_assets(&conn)?;
     info!("Building posts");
     build_posts(&conn, tera, &output_dir, &html_input_dir)?;
 
