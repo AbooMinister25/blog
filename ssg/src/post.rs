@@ -126,12 +126,6 @@ fn build_markdown(path: &PathBuf, tera: &Tera, output_dir: &str) -> Result<Parse
     let file = fs::File::create(format!("{output_dir}/{}.html", frontmatter.title))?;
 
     render_template(
-        // &parsed_post.content,
-        // &frontmatter.title,
-        // &frontmatter.tags,
-        // parsed_post.date,
-        // &parsed_post.toc,
-        // &frontmatter.summary,
         &parsed_post,
         frontmatter,
         tera,
@@ -148,12 +142,6 @@ fn parse_file(path: &PathBuf) -> Result<ParsedPost> {
 }
 
 fn render_template(
-    // markup: &str,
-    // title: &str,
-    // tags: &[String],
-    // date: DateTime<Utc>,
-    // toc: &[String],
-    // summary: &str,
     parsed_post: &ParsedPost,
     frontmatter: &Frontmatter,
     tera: &Tera,

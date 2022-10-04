@@ -18,7 +18,7 @@ _italic_
 **_bolt_italic_** 
 
 -   yeah this is a thing
--   b 
+-   b
 -   c
 
 ## Header 1
