@@ -1,13 +1,60 @@
 @use "latte";
 @use "fonts";
 
+body {
+    margin: 0;
+    padding: 0;
+}
+
+nav {
+    display: flex;
+    background-color: latte.$crust;
+    height: 50px;
+}
+
+.nav-link {
+    padding: 0.9rem 1rem;
+    text-decoration: none;
+    color: latte.$text;
+
+    &:hover {
+        background-color: latte.$mantle;
+    }
+}
+
+.nav-search-container {
+    padding-top: 0.5rem;
+    margin-left: auto;
+    margin-right: 2rem;
+
+    @media (min-width: 801px) {
+        width: auto;
+        margin-right: 1rem;
+    }
+}
+
+.nav-search {
+    border-radius: 5px;
+    border: none;
+    padding: 0.5rem;
+    width: 100%;
+
+    &:focus {
+        outline: none;
+    }
+
+    @media (min-width: 801px) {
+        width: 15rem;
+    }
+}
+
 footer {
     font-family: fonts.$sans-serif;
     margin: 3rem auto auto auto;
     border-top: 1px dashed latte.$overlay1;
     text-align: center;
     color: latte.$overlay1;
-    
+
     @media (min-width: 801px) {
         width: 750px;
     }

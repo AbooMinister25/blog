@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="/styles/base.css" />
         {% block head %}
         <title>{% block title%}{%endblock title%}</title>
         {% endblock head %}
     </head>
     <body>
+        <nav>
+            <a class="nav-link" href="/home">Home</a>
+            <a class="nav-link" href="/articles">Articles</a>
+
+            <div class="nav-search-container">
+                <input type="text" class="nav-search" placeholder="Search" />
+            </div>
+        </nav>
         {% block content %} {% endblock content %}
     </body>
     <footer>

@@ -11,7 +11,7 @@ summary = "hello world"
 hi this is a test post. It consists of _both_ tests and `tests`. Can't believe it, right?
 I didn't believe it at first myself. Also - don't mention it to anyone, but theres also a
 
-_italic_
+_italic_  
 
 **bold**
 
@@ -20,8 +20,8 @@ _italic_
 -   yeah this is a thing
 -   b
 -   c
- 
-## Header 1 
+
+## Header 1
 
 Yeah, this has some code. Deal with it.
 

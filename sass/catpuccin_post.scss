@@ -2,12 +2,8 @@
 @use "latte";
 @use "fonts";
 
-body {
-    padding: 1rem;
-}
-
 .post-content {
-    width: 100%;
+    padding: 1rem;
     margin: auto;
     font-family: fonts.$sans-serif;
 
@@ -16,7 +12,7 @@ body {
     }
 }
 
-.post-content h1 { 
+.post-content h1 {
     font-size: 2rem;
     margin-bottom: 0;
     color: latte.$text;
