@@ -3,7 +3,8 @@ use crate::post::build_posts;
 use crate::stylesheets::compile_stylesheets;
 use color_eyre::eyre::Result;
 use rusqlite::Connection;
-use tera::Tera;
+use std::fs;
+use tera::{Context, Tera};
 use tracing::info;
 
 #[tracing::instrument(skip(
@@ -22,12 +23,22 @@ pub fn build(
     html_input_dir: String,
     scss_input_dir: String,
 ) -> Result<()> {
+    info!("Rendering Index");
+    render_index(tera, &output_dir)?;
     info!("Compiling stylesheets");
     compile_stylesheets(&conn, &css_output_dir, &scss_input_dir)?;
     info!("Minimizig assets");
     process_assets(&conn)?;
     info!("Building posts");
     build_posts(&conn, tera, &output_dir, &html_input_dir)?;
+
+    Ok(())
+}
+
+fn render_index(tera: &Tera, output_dir: &str) -> Result<()> {
+    let context = Context::new();
+    let file = fs::File::create(format!("{output_dir}/index.html"))?;
+    tera.render_to("index.html", &context, file)?;
 
     Ok(())
 }

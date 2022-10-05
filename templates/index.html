@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %} Home {% endblock title %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="/styles/catpuccin_index.css" />
+    <meta name="description" content="Rayyan Cyclegar's blog"/>
+{% endblock head %}
+
+{% block content %}
+    <div class="home-content">
+        <p class="bio">
+            Hi, I'm Rayyan Cyclegar, a high school student and programming
+            enthusiast. You can find me and my projects on 
+            <a href="https://github.com/AbooMinister25">Github</a>. Here,
+            I'll occasionally write about tech, and sometimes
+            about non-tech.
+            <br />
+            <br />
+            If you want to get in touch with me, you can do so through my email,
+            <a href="mailto:aboominister@gmail.com">aboominister@gmail.com</a>, or on Discord, through the user
+            <code>AbooMinister#8971</code>.
+        </p>
+    </div>
+{% endblock content %}
