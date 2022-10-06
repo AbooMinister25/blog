@@ -59,3 +59,7 @@ footer {
         width: 750px;
     }
 }
+
+::selection {
+    background-color: latte.$surface0;
+}
