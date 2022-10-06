@@ -32,8 +32,8 @@ pub fn build_posts(
                 if let ToBuild::Nonexistent(markdown_hash) = to_build {
                     conn.execute(
                         "INSERT INTO posts
-                        (title, path, hash, tags)
-                        VALUES (?1, ?2, ?3, ?4)
+                        (title, path, hash, rendered_content, tags)
+                        VALUES (?1, ?2, ?3, ?4, ?5)
                     ",
                         (
                             &parsed_post.frontmatter.title,
@@ -41,6 +41,7 @@ pub fn build_posts(
                                 .to_str()
                                 .ok_or_else(|| eyre!("Error while converting path to string"))?,
                             &markdown_hash,
+                            &parsed_post.content,
                             &serde_json::to_string(&parsed_post.frontmatter.tags)?,
                         ),
                     )?;
@@ -124,12 +125,7 @@ fn build_markdown(path: &PathBuf, tera: &Tera, output_dir: &str) -> Result<Parse
     let frontmatter = &parsed_post.frontmatter;
     let file = fs::File::create(format!("{output_dir}/{}.html", frontmatter.title))?;
 
-    render_template(
-        &parsed_post,
-        frontmatter,
-        tera,
-        file,
-    )?;
+    render_template(&parsed_post, frontmatter, tera, file)?;
     Ok(parsed_post)
 }
 

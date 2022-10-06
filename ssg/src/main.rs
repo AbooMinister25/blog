@@ -53,6 +53,7 @@ fn setup() -> Result<Connection> {
             title VARCHAR NOT NULL,
             path VARCHAR NOT NULL,
             hash TEXT NOT NULL,
+            rendered_content TEXT NOT NULL,
             tags TEXT NOT NULL
         )",
         (),
