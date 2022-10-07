@@ -29,22 +29,53 @@ pub fn build_posts(
         .map(|r| {
             // If building the file wasn't an error, go ahead and insert it into the database.
             r.and_then(|(to_build, parsed_post, path)| {
-                if let ToBuild::Nonexistent(markdown_hash) = to_build {
-                    conn.execute(
-                        "INSERT INTO posts
-                        (title, path, hash, rendered_content, tags)
-                        VALUES (?1, ?2, ?3, ?4, ?5)
-                    ",
-                        (
-                            &parsed_post.frontmatter.title,
-                            &path
-                                .to_str()
-                                .ok_or_else(|| eyre!("Error while converting path to string"))?,
-                            &markdown_hash,
-                            &parsed_post.content,
-                            &serde_json::to_string(&parsed_post.frontmatter.tags)?,
-                        ),
-                    )?;
+                match to_build {
+                    ToBuild::Nonexistent(markdown_hash) => {
+                        conn.execute(
+                            "INSERT INTO posts
+                            (title, path, hash, rendered_content, tags)
+                            VALUES (?1, ?2, ?3, ?4, ?5)
+                        ",
+                            (
+                                &parsed_post.frontmatter.title,
+                                &path.to_str().ok_or_else(|| {
+                                    eyre!("Error while converting path to string")
+                                })?,
+                                &markdown_hash,
+                                &parsed_post.content,
+                                &serde_json::to_string(&parsed_post.frontmatter.tags)?,
+                            ),
+                        )?;
+                    }
+                    ToBuild::Exist => {
+                        conn.execute(
+                            "
+                        UPDATE posts 
+                        SET title = (:title),
+                            rendered_content = (:content),
+                            tags = (:tags)
+                        WHERE path = (:path)
+                        ",
+                            &[
+                                (":title", &parsed_post.frontmatter.title),
+                                (":content", &parsed_post.content),
+                                (
+                                    ":tags",
+                                    &serde_json::to_string(&parsed_post.frontmatter.tags)?,
+                                ),
+                                (
+                                    ":path",
+                                    &path
+                                        .to_str()
+                                        .ok_or_else(|| {
+                                            eyre!("Error while converting path to string")
+                                        })?
+                                        .to_string(),
+                                ),
+                            ],
+                        )?;
+                    }
+                    ToBuild::No => unreachable!("Should never be ToBuild::No"),
                 }
 
                 Ok(())
