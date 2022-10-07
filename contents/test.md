@@ -12,7 +12,7 @@ hi this is a test post. It consists of _both_ tests and `tests`. Can't believe i
 I didn't believe it at first myself. Also - don't mention it to anyone, but theres also a
 
 _italic_
-
+  
 **bold**
 
 **_bolt_italic_** 

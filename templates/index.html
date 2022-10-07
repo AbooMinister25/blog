@@ -21,5 +21,13 @@
             <a href="mailto:aboominister@gmail.com">aboominister@gmail.com</a>, or on Discord, through the user
             <code>AbooMinister#8971</code>.
         </p>
+        <div class="posts">
+            {% for post in posts %}
+                <div class="post_card">
+                    <h1>{{ post.title }}</h1>
+                    <p> {{ post.summary | safe }} </p>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 {% endblock content %}
