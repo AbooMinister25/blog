@@ -33,7 +33,7 @@ pub fn build_posts(
                         conn.execute(
                             "INSERT INTO posts
                             (title, path, hash, rendered_content, timestamp, tags)
-                            VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+                            VALUES (?1, ?2, ?3, ?4, datetime(?5), ?6)
                         ",
                             (
                                 &parsed_post.frontmatter.title,
@@ -53,7 +53,7 @@ pub fn build_posts(
                         UPDATE posts 
                         SET title = (:title),
                             rendered_content = (:content),
-                            timestamp = (:timestamp)
+                            timestamp = datetime((:timestamp))
                             tags = (:tags)
                         WHERE path = (:path)
                         ",

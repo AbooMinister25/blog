@@ -56,7 +56,7 @@ fn setup() -> Result<Connection> {
             path VARCHAR NOT NULL,
             hash TEXT NOT NULL,
             rendered_content TEXT NOT NULL,
-            timestamp TIMESTAMP NOT NULL,
+            timestamp TEXT NOT NULL,
             tags TEXT NOT NULL
         )",
         (),

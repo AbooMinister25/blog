@@ -1,6 +1,8 @@
 use crate::assets::process_assets;
 use crate::post::build_posts;
 use crate::stylesheets::compile_stylesheets;
+use crate::DATE_FORMAT;
+use chrono::NaiveDateTime;
 use color_eyre::eyre::Result;
 use lol_html::{element, html_content::TextType, rewrite_str, text, RewriteStrSettings};
 use rusqlite::Connection;
@@ -16,6 +18,7 @@ struct Entry {
     pub title: String,
     pub content: String,
     pub summary: String,
+    pub timestamp: String,
     pub tags: Vec<String>,
 }
 
@@ -64,14 +67,18 @@ fn create_directories(output_dir: &str, css_output_dir: &str) -> Result<()> {
 
 fn render_index(conn: &Connection, tera: &Tera, output_dir: &str) -> Result<()> {
     // Fetch posts from database
-    let mut stmt = conn.prepare("SELECT title, rendered_content, tags FROM posts LIMIT 10")?;
+    let mut stmt =
+        conn.prepare("SELECT title, rendered_content, timestamp, tags FROM posts LIMIT 10")?;
     let posts_iter = stmt.query_map([], |row| {
-        let tags_str: String = row.get(2)?;
+        let tags_str: String = row.get(3)?;
         let summary_str: String = row.get(1)?;
+        let date: NaiveDateTime = row.get(2)?;
+
         Ok(Entry {
             title: row.get(0)?,
             content: row.get(1)?,
             summary: get_summary(&summary_str).expect("Error while writing HTML"),
+            timestamp: date.format(DATE_FORMAT).to_string(),
             tags: serde_json::from_str(&tags_str)
                 .map_err(|_| rusqlite::types::FromSqlError::InvalidType)?,
         })
