@@ -1,13 +1,12 @@
 use crate::markdown::{parse, Frontmatter, ParsedPost};
+use crate::DATE_FORMAT;
 use color_eyre::eyre::{eyre, Result};
 use ignore::Walk;
-use rusqlite::Connection;
+use rusqlite::{named_params, Connection};
 use std::fs;
 use std::path::PathBuf;
 use tera::{Context, Tera};
 use tracing::info;
-
-const DATE_FORMAT: &str = "%b %e, %Y";
 
 // Whether a post should be built
 enum ToBuild {
@@ -33,8 +32,8 @@ pub fn build_posts(
                     ToBuild::Nonexistent(markdown_hash) => {
                         conn.execute(
                             "INSERT INTO posts
-                            (title, path, hash, rendered_content, tags)
-                            VALUES (?1, ?2, ?3, ?4, ?5)
+                            (title, path, hash, rendered_content, timestamp, tags)
+                            VALUES (?1, ?2, ?3, ?4, ?5, ?6)
                         ",
                             (
                                 &parsed_post.frontmatter.title,
@@ -43,6 +42,7 @@ pub fn build_posts(
                                 })?,
                                 &markdown_hash,
                                 &parsed_post.content,
+                                &parsed_post.date,
                                 &serde_json::to_string(&parsed_post.frontmatter.tags)?,
                             ),
                         )?;
@@ -53,26 +53,17 @@ pub fn build_posts(
                         UPDATE posts 
                         SET title = (:title),
                             rendered_content = (:content),
+                            timestamp = (:timestamp)
                             tags = (:tags)
                         WHERE path = (:path)
                         ",
-                            &[
-                                (":title", &parsed_post.frontmatter.title),
-                                (":content", &parsed_post.content),
-                                (
-                                    ":tags",
-                                    &serde_json::to_string(&parsed_post.frontmatter.tags)?,
-                                ),
-                                (
-                                    ":path",
-                                    &path
-                                        .to_str()
-                                        .ok_or_else(|| {
-                                            eyre!("Error while converting path to string")
-                                        })?
-                                        .to_string(),
-                                ),
-                            ],
+                        named_params! {
+                            ":title": &parsed_post.frontmatter.title,
+                            ":content": &parsed_post.content,
+                            ":timestamp": &parsed_post.date,
+                            ":tags": &serde_json::to_string(&parsed_post.frontmatter.tags)?,
+                            ":path": &path.to_str().ok_or_else(|| eyre!("Error while converting path to string"))?
+                        }
                         )?;
                     }
                     ToBuild::No => unreachable!("Should never be ToBuild::No"),

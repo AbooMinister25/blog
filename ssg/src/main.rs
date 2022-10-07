@@ -17,6 +17,8 @@ use tera::Tera;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
+const DATE_FORMAT: &str = "%b %e, %Y";
+
 #[derive(Parser)]
 #[clap(version, about)]
 struct Args {
@@ -54,6 +56,7 @@ fn setup() -> Result<Connection> {
             path VARCHAR NOT NULL,
             hash TEXT NOT NULL,
             rendered_content TEXT NOT NULL,
+            timestamp TIMESTAMP NOT NULL,
             tags TEXT NOT NULL
         )",
         (),
