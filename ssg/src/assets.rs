@@ -15,9 +15,13 @@ pub fn process_assets(conn: &Connection) -> Result<()> {
     let mut processed = 0;
     let mut skipped = 0;
 
-    for result in Walk::new("assets/*.svg") {
+    for result in Walk::new("assets/") {
         let path = result?.into_path();
         if path.is_dir() {
+            continue;
+        }
+
+        if path.extension().expect("if this fails, its my fault") != ".svg" {
             continue;
         }
 
