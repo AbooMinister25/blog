@@ -21,7 +21,7 @@ pub fn process_assets(conn: &Connection) -> Result<()> {
             continue;
         }
 
-        if path.extension().expect("if this fails, its my fault") != ".svg" {
+        if path.extension().expect("if this fails, its my fault") != "svg" {
             continue;
         }
 
