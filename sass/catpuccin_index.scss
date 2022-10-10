@@ -34,3 +34,23 @@
     font-family: fonts.$monospace;
     font-size: 1rem;
 }
+
+.home-content .details {
+    color: latte.$overlay1;
+    font-size: 0.8rem;
+    font-family: fonts.$monospace;
+    margin: 0;
+    padding: 0;
+}
+
+.post-card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: latte.$crust;
+}
+
+.post-card .summary {
+    color: latte.$text;
+    font-size: 1.2rem;
+    line-height: 1.5rem;
+}

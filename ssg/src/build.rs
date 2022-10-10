@@ -105,7 +105,7 @@ fn get_summary(content: &str) -> Result<String> {
 
     let element_content_handlers = vec![
         element!("*", |el| {
-            if *character_count.borrow() > 100 {
+            if *character_count.borrow() > 150 {
                 skip = true;
             }
 

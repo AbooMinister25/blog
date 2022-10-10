@@ -10,14 +10,14 @@ I didn't believe it at first myself. Also - don't mention it to anyone, but ther
 
 `println!("Hello World")`
 
-_italic_  
-
+_italic_   
+ 
 **bold**
 
 **_bolt_italic_** 
 
 -   yeah this is a thing
--   b
+-   b 
 -   c
 
 ## Header 1

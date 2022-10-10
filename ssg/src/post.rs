@@ -53,7 +53,7 @@ pub fn build_posts(
                         UPDATE posts 
                         SET title = (:title),
                             rendered_content = (:content),
-                            timestamp = datetime((:timestamp))
+                            timestamp = datetime(:timestamp),
                             tags = (:tags)
                         WHERE path = (:path)
                         ",
