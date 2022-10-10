@@ -20,6 +20,27 @@ struct Entry {
     pub summary: String,
     pub timestamp: String,
     pub tags: Vec<String>,
+    pub link: String,
+}
+
+impl Entry {
+    pub fn new(
+        title: String,
+        content: String,
+        summary: String,
+        timestamp: String,
+        tags: Vec<String>,
+    ) -> Self {
+        let link = escape_url(&format!("/public/{title}.html"));
+        Self {
+            title,
+            content,
+            summary,
+            timestamp,
+            tags,
+            link,
+        }
+    }
 }
 
 #[tracing::instrument(skip(
@@ -74,14 +95,23 @@ fn render_index(conn: &Connection, tera: &Tera, output_dir: &str) -> Result<()> 
         let summary_str: String = row.get(1)?;
         let date: NaiveDateTime = row.get(2)?;
 
-        Ok(Entry {
-            title: row.get(0)?,
-            content: row.get(1)?,
-            summary: get_summary(&summary_str).expect("Error while writing HTML"),
-            timestamp: date.format(DATE_FORMAT).to_string(),
-            tags: serde_json::from_str(&tags_str)
+        Ok(Entry::new(
+            row.get(0)?,
+            row.get(1)?,
+            get_summary(&summary_str).expect("Error while rewriting HTML"),
+            date.format(DATE_FORMAT).to_string(),
+            serde_json::from_str(&tags_str)
                 .map_err(|_| rusqlite::types::FromSqlError::InvalidType)?,
-        })
+        ))
+
+        // Ok(Entry {
+        //     title: row.get(0)?,
+        //     content: row.get(1)?,
+        //     summary: get_summary(&summary_str).expect("Error while writing HTML"),
+        //     timestamp: date.format(DATE_FORMAT).to_string(),
+        //     tags: serde_json::from_str(&tags_str)
+        //         .map_err(|_| rusqlite::types::FromSqlError::InvalidType)?,
+        // })
     })?;
 
     let mut posts = vec![];
@@ -136,4 +166,20 @@ fn get_summary(content: &str) -> Result<String> {
     )?;
 
     Ok(truncated)
+}
+
+fn escape_url(url: &str) -> String {
+    // yes this is probably a terrible way to do this
+    // but whatever
+    url.replace(' ', "%20")
+        .replace('<', "%3C")
+        .replace('>', "%3E")
+        .replace('#', "$23")
+        .replace('+', "%2B")
+        .replace('{', "%7B")
+        .replace('}', "%7D")
+        .replace('?', "%3F")
+        .replace('@', "%40")
+        .replace('=', "%3D")
+        .replace('&', "%26")
 }

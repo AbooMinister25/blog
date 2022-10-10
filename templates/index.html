@@ -24,7 +24,7 @@
         <div class="posts">
             {% for post in posts %}
                 <div class="post-card">
-                    <h1>{{ post.title }}</h1>
+                    <h1><a href={{ post.link }} class="header">{{ post.title }}</a></h1>
                     <p class="details"> {{ post.timestamp }} * {{ post.tags | join(sep=", ") }} </p>
                     <div class="summary"> {{ post.summary | safe }} </div>
                 </div>
