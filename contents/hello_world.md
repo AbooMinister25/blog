@@ -18,7 +18,7 @@ _italic_
 
 -   yeah this is a thing
 -   b 
--   c
+-   c 
 
 ## Header 1
 
