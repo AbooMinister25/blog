@@ -1,6 +1,6 @@
 ---
 title = "A New Site"
-tags = ["programming"]
+tags = ["programming", "rust"]
 summary = "I give an overview of my site and how I built it." 
 ---
 

@@ -4,6 +4,9 @@
 body {
     margin: 0;
     padding: 0;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
 }
 
 nav {
@@ -40,7 +43,7 @@ nav {
 
 footer {
     font-family: fonts.$sans-serif;
-    margin: 3rem auto auto auto;
+    margin: 2rem auto auto auto;
     border-top: 1px dashed latte.$overlay1;
     text-align: center;
     color: latte.$overlay1;

@@ -103,21 +103,13 @@ fn render_index(conn: &Connection, tera: &Tera, output_dir: &str) -> Result<()> 
             serde_json::from_str(&tags_str)
                 .map_err(|_| rusqlite::types::FromSqlError::InvalidType)?,
         ))
-
-        // Ok(Entry {
-        //     title: row.get(0)?,
-        //     content: row.get(1)?,
-        //     summary: get_summary(&summary_str).expect("Error while writing HTML"),
-        //     timestamp: date.format(DATE_FORMAT).to_string(),
-        //     tags: serde_json::from_str(&tags_str)
-        //         .map_err(|_| rusqlite::types::FromSqlError::InvalidType)?,
-        // })
     })?;
 
     let mut posts = vec![];
     for post in posts_iter {
         posts.push(post?);
     }
+    posts.reverse(); // Reverse posts so that latest ones appear first
 
     let mut context = Context::new();
     context.insert("posts", &posts);
