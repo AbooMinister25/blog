@@ -10,7 +10,7 @@ I've gone and written a website for myself. In Rust! All with my very own static
 Now, back to the blog. I've often found that writing is a nice way for me to get my thoughts out there. Whether it be to share knowledge, talk about something cool, or to simply rant into the void that is the internet. It took me a good few weeks to hack this thing together, so I'll take the pleasure of walking you all through it!
 
 ## The Gist of it
-So there are tons of preexisting solutions I could've used. Static site generators such as Zola and Hugo are more than capable for my needs. But if I had gone with those, this process wouldn't have been nearly as fun. The gist of my static site generator is it takes three input folders, one for my stylesheets (SASS) one for the markdown content, and one for my assets. My stylesheets and markdown would then be compiled, my assets (SVGs) would be minimized, and everything would be rendered using templates, all with support for incremental building!
+So there are tons of preexisting solutions I could've used. Static site generators such as Zola and Hugo are more than capable for my needs. But if I had gone with those, this process wouldn't have been nearly as fun. The gist of the process is that it takes all my markdown, stored in a `contents/` folder, all my stylesheets (SASS) in a `sass/` folder, and my assets inside an `assets/` folder. It then compiles what needs to be compiled, minifies assets, renders everything using templates, and chucks the generated HTML and stylesheets inside the `public/` and `styles/` folder respectfully. All with support for incremental building!
 
 ![hi](/assets/markdown_flowchart.excalidraw.svg)
 
