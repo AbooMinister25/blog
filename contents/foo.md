@@ -5,5 +5,3 @@ summary = "foo"
 ---
 
 blash  
-
-![hi](/assets/foobar.excalidraw.svg)

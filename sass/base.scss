@@ -12,25 +12,35 @@ body {
 nav {
     display: flex;
     margin: auto;
-    padding: 1rem;
+    width: 100%;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid latte.$rosewater;
 
     @media (min-width: 801px) {
         width: 750px;
+        padding: 1rem;
     }
 }
 
 .nav-link {
-    margin-right: 2rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
     text-decoration: none;
     color: latte.$text;
 
     &:hover {
         text-decoration: underline 2px latte.$rosewater;
     }
+
+    @media (min-width: 801px) {
+        margin-left: 0;
+        margin-right: 2rem;
+    }
 }
 
 .nav-link-right {
+    margin-right: 1rem;
     margin-bottom: 0;
     text-decoration: none;
     color: latte.$text;
@@ -38,6 +48,10 @@ nav {
 
     &:hover {
         text-decoration: underline 2px latte.$rosewater;
+    }
+
+    @media (min-width: 801px) {
+        margin-right: 0;
     }
 }
 
@@ -47,6 +61,7 @@ footer {
     border-top: 1px dashed latte.$overlay1;
     text-align: center;
     color: latte.$overlay1;
+    width: 100%;
 
     @media (min-width: 801px) {
         width: 750px;
