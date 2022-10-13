@@ -21,7 +21,7 @@
         
     <div class="post-content">
         <h1>A New Site</h1>
-        <p class="details"> Oct 12, 2022 * programming, rust </p>
+        <p class="details"> Oct 13, 2022 * programming, rust </p>
         <ul class="table-of-contents">
             <h2 class="toc-header">Contents</h2>
             
@@ -41,16 +41,26 @@
         <p>I've gone and written a website for myself. In Rust! All with my very own static site generator with a few neat features. Before we get into that, however, I'd like to take this chance to introduce myself. I'm Rayyan Cyclegar, a high schooler and programming enthusiast. I even have a <a href="https://github.com/AbooMinister25">GitHub</a> profile, complete with my projects and contributions.</p>
 <p>Now, back to the blog. I've often found that writing is a nice way for me to get my thoughts out there. Whether it be to share knowledge, talk about something cool, or to simply rant into the void that is the internet. It took me a good few weeks to hack this thing together, so I'll take the pleasure of walking you all through it!</p>
 <h2><a href="#the-gist-of-it" aria-hidden="true" class="anchor" id="the-gist-of-it"></a>The Gist of it</h2>
-<p>So there are tons of preexisting solutions I could've used. Static site generators such as Zola and Hugo are more than capable for my needs. But if I had gone with those, this process wouldn't have been nearly as fun. The gist of the process is that it takes all my markdown, stored in a <code>contents/</code> folder, all my stylesheets (SASS) in a <code>sass/</code> folder, and my assets inside an <code>assets/</code> folder. It then compiles what needs to be compiled, minifies assets, renders everything using templates, and chucks the generated HTML and stylesheets inside the <code>public/</code> and <code>styles/</code> folder respectfully. All with support for incremental building!</p>
+<p>So there are tons of preexisting solutions I could've used. Static site generators such as Zola and Hugo are more than capable for my needs. But if I had gone with those, this process wouldn't have been nearly as fun. The gist of the process is that it takes all my markdown, stored in a <code>contents/</code> folder, all my stylesheets (SASS) in a <code>sass/</code> folder, and my assets inside an <code>assets/</code> folder. It then compiles what needs to be compiled, minifies assets, renders everything using templates, and chucks the generated HTML and stylesheets into their respective <code>public/</code> and <code>styles/</code>. All with support for incremental building!</p>
 <p><img src="/assets/markdown_flowchart.excalidraw.svg" alt="hi" /></p>
 <h2><a href="#the-markdown-side-of-things" aria-hidden="true" class="anchor" id="the-markdown-side-of-things"></a>The Markdown Side of Things</h2>
-<p>The core of a static site generator is <em>markdown</em>. A markup language used for writing formatted text. Now, I did mention I wrote this in Rust, and as far as I know, Rust has two notable crates for parsing markdown:</p>
+<p>The core of a static site generator is <em>markdown</em>. A markup language used for writing formatted text. Now, I did mention I wrote this in Rust, which has two notable crates for parsing markdown:</p>
 <ul>
 <li>pulldown-cmark</li>
 <li>comrak</li>
 </ul>
-<p>Originally, I started with <a href="https://github.com/kivikakk/comrak">comrak</a>, and it was pretty nice. It had complete support for CommonMark, all five GitHub Flavored Markdown (Shortened to GFM) specific extensions, and a plugin for <a href="https://github.com/trishume/syntect">syntect</a>, a crate for syntax highlighting. What it didn't have, however, was support for providing your own highlighting themes to syntect.</p>
-<p>TODO: Talk about switching to pulldown-cmark</p>
+<p>I decided to go with <a href="https://github.com/kivikakk/comrak">comrak</a>. From a glance, it seems easy enough to use, and has complete support for CommonMark and all five of GitHub Flavored Markdown (Shortened to GFM) specific extensions. Built in support for <a href="https://github.com/trishume/syntect">syntect</a>, the crate I used for syntax highlighting, also helped.</p>
+<p>My entire process for handling markdown consists of walking the content directory, reading in all the files one by one, hashed the files, which I'll go more into later, and rendered everything using templates. I also wrote any data I wanted to persist into an SQLite database.</p>
+<p>Why SQLite? Well, my database needs for this aren't particularly extravagant, and I didn't want to go through the trouble of setting up diesel and migrations. I'm not going to be writing to it all the time, either.</p>
+<p>Ah right, templates. I had a few options for this:</p>
+<ul>
+<li>A rust port of handlebars</li>
+<li>Tera</li>
+<li>Liquid</li>
+<li>Maud</li>
+<li>Among others…</li>
+</ul>
+<p>I eventually settled on <a href="https://tera.netlify.app/">Tera</a>, for no particular reason other than it seemed straightforward enough to set up, and had everything I really cared about.</p>
 <p>A good static site generator will typically parse some form of <em>frontmatter</em> from your markdown files. Frontmatter is some additional information about each page of Markdown at the top of your file, it can look something like this.</p>
 <pre lang="markdown" style="background-color:#303446;"><code>
 <span style="color:#c6d0f5;">---
@@ -61,17 +71,8 @@
 </span>
 </code></pre>
 <p>I used rust's <a href="https://docs.rs/toml/latest/toml/">toml</a> crate for parsing the frontmatter.</p>
-<p>Once the posts were parsed and formatted as HTML, they would then be rendered using templates. I had a few options for this.</p>
-<ul>
-<li>A rust port of handlebars</li>
-<li>Tera</li>
-<li>Liquid</li>
-<li>Maud</li>
-<li>Among others…</li>
-</ul>
-<p>I eventually settled on <a href="https://tera.netlify.app/">Tera</a>, for no particular reason other than it seemed straightforward enough to set up, and had everything I really cared about.</p>
 <h2><a href="#stylesheets" aria-hidden="true" class="anchor" id="stylesheets"></a>Stylesheets</h2>
-<p>For styling my blog, I went with <a href="https://sass-lang.com/">SASS</a>.</p>
+<p>For styling everything, I went with <a href="https://sass-lang.com/">SASS</a>, since it's what all the cool kids are using.</p>
 
     </div>
 
