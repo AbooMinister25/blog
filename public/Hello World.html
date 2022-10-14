@@ -3,12 +3,13 @@
     <head>
         
     
-        
-        
     <title> Hello World </title>
     <meta name="og:title" property="og:title" content=Hello World />
+    <meta name="twitter:title" content=Hello World />
     <link rel="stylesheet" href="/styles/catpuccin_post.css" />
     <meta name="description" content="hello world"/>
+    <meta name="og:description" property="og:description" content=hello world />
+    <meta name="twitter:description" content=hello world />
 
         <link rel="stylesheet" href="/styles/base.css" />
         <link
@@ -35,8 +36,8 @@
     </head>
     <body>
         <nav>
-            <a class="nav-link" href="/home">Home</a>
-            <a class="nav-link" href="/articles">Articles</a>
+            <a class="nav-link" href="/">Home</a>
+            <a class="nav-link" href="/posts">Articles</a>
 
             <a class="nav-link-right" href="/search">Search</a>
         </nav>
@@ -81,7 +82,7 @@ I didn't believe it at first myself. Also - don't mention it to anyone, but ther
 <div class="blog-note">
     This code is written in rust, so its very safe and blazingly fast. For more info, see <a href="https://rust-lang.org">rust's website</a>
 </div>
-<pre lang="rust" style="background-color:#303446;"><code>
+<pre style="background-color:#303446;" lang="rust"><code>
 <span style="font-style:italic;color:#e5c890;">fn </span><span style="font-style:italic;color:#8caaee;">main</span><span style="color:#949cbb;">() {
 </span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#737994;">// Generate lorem ipsum text with Title Case.
 </span><span style="color:#c6d0f5;">    </span><span style="font-style:italic;color:#e5c890;">let</span><span style="color:#c6d0f5;"> title </span><span style="font-weight:bold;color:#99d1db;">= </span><span style="font-style:italic;color:#f2d5cf;">lipsum</span><span style="font-weight:bold;color:#99d1db;">::</span><span style="color:#c6d0f5;">lipsum_title</span><span style="color:#949cbb;">()</span><span style="color:#81c8be;">;
