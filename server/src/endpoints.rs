@@ -1,8 +1,5 @@
-use rocket::{fs::NamedFile, response::content::RawHtml};
-use std::include_str;
+use rocket::fs::NamedFile;
 use std::path::Path;
-
-static INDEX_CONTENT: &str = include_str!("../../public/index.html");
 
 #[get("/")]
 pub async fn index() -> Option<NamedFile> {

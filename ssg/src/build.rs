@@ -20,7 +20,6 @@ struct Entry {
     pub summary: String,
     pub timestamp: String,
     pub tags: Vec<String>,
-    pub link: String,
 }
 
 impl Entry {
@@ -31,14 +30,12 @@ impl Entry {
         timestamp: String,
         tags: Vec<String>,
     ) -> Self {
-        let link = escape_url(&format!("/public/{title}.html"));
         Self {
             title,
             content,
             summary,
             timestamp,
             tags,
-            link,
         }
     }
 }
@@ -158,20 +155,4 @@ fn get_summary(content: &str) -> Result<String> {
     )?;
 
     Ok(truncated)
-}
-
-fn escape_url(url: &str) -> String {
-    // yes this is probably a terrible way to do this
-    // but whatever
-    url.replace(' ', "%20")
-        .replace('<', "%3C")
-        .replace('>', "%3E")
-        .replace('#', "$23")
-        .replace('+', "%2B")
-        .replace('{', "%7B")
-        .replace('}', "%7D")
-        .replace('?', "%3F")
-        .replace('@', "%40")
-        .replace('=', "%3D")
-        .replace('&', "%26")
 }
