@@ -6,6 +6,7 @@ mod assets;
 mod build;
 mod markdown;
 mod post;
+mod search;
 mod stylesheets;
 
 use build::build;

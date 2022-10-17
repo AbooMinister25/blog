@@ -7,7 +7,7 @@ summary = "I give an overview of my site and how I built it."
 
 I've gone and written a website for myself. In Rust! All with my very own static site generator with a few neat features. Before we get into that, however, I'd like to take this chance to introduce myself. I'm Rayyan Cyclegar, a high schooler and programming enthusiast. I even have a [GitHub](https://github.com/AbooMinister25) profile, complete with my projects and contributions.
 
-Now, back to the blog. I've often found that writing is a nice way for me to get my thoughts out there. Whether it be to share knowledge, talk about something cool, or to simply rant into the void that is the internet. It took me a good few weeks to hack this thing together, so I'll take the pleasure of walking you all through it!
+Now, back to the blog. I've often found that writing is a nice way for me to get my thoughts out there. Whether it be to share knowledge, talk about something cool, or to simply rant into the void that is the internet. It took me a good few weeks to hack this thing together, so I'll take the pleasure of walking you all through it.
 
 ## The Gist of it
 So there are tons of preexisting solutions I could've used. Static site generators such as Zola and Hugo are more than capable for my needs. But if I had gone with those, this process wouldn't have been nearly as fun. The gist of the process is that it takes all my markdown, stored in a `contents/` folder, all my stylesheets (SASS) in a `sass/` folder, and my assets inside an `assets/` folder. It then compiles what needs to be compiled, minifies assets, renders everything using templates, and chucks the generated HTML and stylesheets into their respective `public/` and `styles/`. All with support for incremental building!
@@ -47,4 +47,4 @@ summary = "I give an overview of my site and how I built it."
 I used rust's [toml](https://docs.rs/toml/latest/toml/) crate for parsing the frontmatter.
 
 ## Stylesheets
-For styling everything, I went with [SASS](https://sass-lang.com/), since it's what all the cool kids are using.
+For styling everything, I went with [SASS](https://sass-lang.com/), since everyone and their mom uses it. My stylesheets aren't too extravagant.

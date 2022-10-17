@@ -1,0 +1,4 @@
+template_dir = "./templates/"
+
+[default.databases]
+blog_db = { url = "./blog.db" }

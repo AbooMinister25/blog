@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {{ super() }}
+    <title> Posts </title>
+    <meta name="og:title" property="og:title" content="Posts" />
+    <meta name="twitter:title" content="Posts" />
+    <link rel="stylesheet" href="styles/catpuccin_index.css" />
+    <meta name="description" content="Rayyan Cyclegar's Blog"/>
+    <meta name="og:description" property="og:description" content="Rayyan Cyclegar's Blog" />
+    <meta name="twitter:description" content="Rayyan Cyclegar's Blog" />
+{% endblock head %}
+
+{% block content %}
+    <div class="home-content">
+        <h1 class="posts-header">All Posts</h1>
+        <div class="posts">
+            <h1 class="posts-header">Latest Posts</h1>
+            {% for post in posts %}
+                <div class="post-card">
+                    <h1><a href={{ "/posts/" ~ post.title | urlencode }} class="header">{{ post.title }}</a></h1>
+                    <p class="details"> {{ post.timestamp }} * {{ post.tags | join(sep=", ") }} </p>
+                    <div class="summary"> {{ post.summary | safe }} </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}

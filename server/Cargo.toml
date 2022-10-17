@@ -7,3 +7,14 @@ edition = "2021"
 
 [dependencies]
 rocket = "0.5.0-rc.2"
+rusqlite = { version = "0.28.0", features = ["bundled", "chrono"] }
+r2d2 = "0.8.10"
+r2d2_sqlite = "0.21.0"
+
+[dependencies.rocket_dyn_templates]
+version = "0.1.0-rc.2"
+features = ["tera"]
+
+# [dependencies.rocket_sync_db_pools]
+# version = "0.1.0-rc.2"
+# features = ["sqlite_pool"]
