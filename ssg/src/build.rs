@@ -112,7 +112,7 @@ fn render_index(conn: &Connection, tera: &Tera, output_dir: &str) -> Result<()> 
     context.insert("posts", &posts);
 
     let file = fs::File::create(format!("{output_dir}/index.html"))?;
-    tera.render_to("index.html", &context, file)?;
+    tera.render_to("index.html.tera", &context, file)?;
 
     Ok(())
 }

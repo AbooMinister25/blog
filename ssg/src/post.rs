@@ -173,6 +173,6 @@ fn render_template(
     context.insert("markup", &parsed_post.content);
     context.insert("summary", &frontmatter.summary);
 
-    tera.render_to("post.html", &context, file)?;
+    tera.render_to("post.html.tera", &context, file)?;
     Ok(())
 }

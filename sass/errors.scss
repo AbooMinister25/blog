@@ -1,0 +1,21 @@
+@use "latte";
+@use "fonts";
+
+body {
+    font-family: fonts.$sans-serif;
+    margin: auto;
+    text-align: center;
+    color: latte.$text;
+}
+
+.error h1 {
+    font-size: 3rem;
+}
+
+.error a {
+    color: latte.$rosewater;
+
+    &:visited {
+        color: latte.$rosewater;
+    }
+}

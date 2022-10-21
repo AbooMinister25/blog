@@ -87,7 +87,7 @@ fn main() -> Result<()> {
     let now = Instant::now();
 
     let conn = setup()?;
-    let tera = Tera::new("templates/**/*.html")?;
+    let tera = Tera::new("templates/**/*.tera")?;
 
     let args = Args::parse();
 

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html.tera" %}
 
 {% block head %}
     {{ super() }}
@@ -14,7 +14,7 @@
 {% block content %}
     <div class="home-content">
         <h1 class="posts-header">All Posts</h1>
-        <div class="posts">
+        {# <div class="posts">
             <h1 class="posts-header">Latest Posts</h1>
             {% for post in posts %}
                 <div class="post-card">
@@ -23,6 +23,6 @@
                     <div class="summary"> {{ post.summary | safe }} </div>
                 </div>
             {% endfor %}
-        </div>
+        </div> #}
     </div>
 {% endblock content %}

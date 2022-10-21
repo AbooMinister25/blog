@@ -44,7 +44,7 @@
         
     <div class="post-content">
         <h1>A New Site</h1>
-        <p class="details"> Oct 15, 2022 * programming, rust </p>
+        <p class="details"> Oct 21, 2022 * programming, rust </p>
         <ul class="table-of-contents">
             <h2 class="toc-header">Contents</h2>
             
@@ -62,7 +62,7 @@
             
         </ul>
         <p>I've gone and written a website for myself. In Rust! All with my very own static site generator with a few neat features. Before we get into that, however, I'd like to take this chance to introduce myself. I'm Rayyan Cyclegar, a high schooler and programming enthusiast. I even have a <a href="https://github.com/AbooMinister25">GitHub</a> profile, complete with my projects and contributions.</p>
-<p>Now, back to the blog. I've often found that writing is a nice way for me to get my thoughts out there. Whether it be to share knowledge, talk about something cool, or to simply rant into the void that is the internet. It took me a good few weeks to hack this thing together, so I'll take the pleasure of walking you all through it!</p>
+<p>Now, back to the blog. I've often found that writing is a nice way for me to get my thoughts out there. Whether it be to share knowledge, talk about something cool, or to simply rant into the void that is the internet. It took me a good few weeks to hack this thing together, so I'll take the pleasure of walking you all through it.</p>
 <h2><a href="#the-gist-of-it" aria-hidden="true" class="anchor" id="the-gist-of-it"></a>The Gist of it</h2>
 <p>So there are tons of preexisting solutions I could've used. Static site generators such as Zola and Hugo are more than capable for my needs. But if I had gone with those, this process wouldn't have been nearly as fun. The gist of the process is that it takes all my markdown, stored in a <code>contents/</code> folder, all my stylesheets (SASS) in a <code>sass/</code> folder, and my assets inside an <code>assets/</code> folder. It then compiles what needs to be compiled, minifies assets, renders everything using templates, and chucks the generated HTML and stylesheets into their respective <code>public/</code> and <code>styles/</code>. All with support for incremental building!</p>
 <p><img src="/assets/markdown_flowchart.excalidraw.svg" alt="hi" /></p>
@@ -95,7 +95,7 @@
 </code></pre>
 <p>I used rust's <a href="https://docs.rs/toml/latest/toml/">toml</a> crate for parsing the frontmatter.</p>
 <h2><a href="#stylesheets" aria-hidden="true" class="anchor" id="stylesheets"></a>Stylesheets</h2>
-<p>For styling everything, I went with <a href="https://sass-lang.com/">SASS</a>, since it's what all the cool kids are using.</p>
+<p>For styling everything, I went with <a href="https://sass-lang.com/">SASS</a>, since everyone and their mom uses it. My stylesheets aren't too extravagant.</p>
 
     </div>
 
