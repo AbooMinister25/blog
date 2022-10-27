@@ -4,6 +4,7 @@ extern crate rocket;
 mod connection;
 mod endpoints;
 mod templates;
+mod post;
 
 use crate::connection::init_pool;
 use crate::endpoints::{get_post, get_posts, index};
@@ -18,8 +19,9 @@ fn internal_server_error() -> RawHtml<String> {
         <title>Rayyan Cyclegar</title>
         <link rel="stylesheet" href="/styles/errors.css" />
     </head>
-    <div class="error error-404">
+    <div class="error error-500">
         <h1>Internal Server Error</h1>
+        <p>Something went wrong. Try again later, or go back <a href="/">Home</a></p>
     </div>
     "#
         .to_string(),
@@ -54,5 +56,6 @@ fn rocket() -> _ {
         .mount("/", routes![index, get_post, get_posts])
         .mount("/styles", FileServer::from("./styles"))
         .mount("/static", FileServer::from("./static"))
+        .mount("/assets", FileServer::from("./assets"))
         .register("/", catchers![internal_server_error, not_found])
 }

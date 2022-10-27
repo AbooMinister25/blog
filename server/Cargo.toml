@@ -11,4 +11,9 @@ rusqlite = { version = "0.28.0", features = ["bundled", "chrono"] }
 r2d2 = "0.8.10"
 r2d2_sqlite = "0.21.0"
 tera = "1"
+lol_html = "0.3.1"
+serde_json = "1.0.87"
+chrono = "0.4.22"
+color-eyre = "0.6.2"
+serde = { version = "1.0.147", features = ["derive"] }
 
