@@ -22,7 +22,9 @@
                     <div class="summary"> {{ post.summary | safe }} </div>
                 </div>
             {% endfor %}
-            <a href="/posts/next" class="button">More</a>
+            <div class="button-container">
+                <a href="/posts/next" class="button">More</a>
+            </div>
         </div>
     </div>
 {% endblock content %}

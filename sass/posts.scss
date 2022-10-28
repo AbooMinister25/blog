@@ -12,7 +12,7 @@
     }
 }
 
-a {
+.posts-content a {
     color: latte.$rosewater;
 
     &:visited {
@@ -55,20 +55,23 @@ code {
 }
 
 .post-card .summary {
-    color: latte.$text; 
+    color: latte.$text;
     font-size: 1.2rem;
     line-height: 1.5rem;
 }
 
-a.button {
+.button-container {
+    margin: auto;
+    text-align: center;
+}
+
+.posts-content a.button {
     display: inline-block;
     background-color: latte.$surface1;
-    padding: 1rem;
-    margin: 1rem;
+    padding: 1rem 2rem;
     text-decoration: none;
     text-align: center;
     color: latte.$text;
-    margin: auto;
 
     &:hover {
         color: latte.$text;
