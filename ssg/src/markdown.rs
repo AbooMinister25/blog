@@ -1,5 +1,5 @@
 use chrono::prelude::*;
-use color_eyre::eyre::Context;
+// use color_eyre::eyre::Context;
 use color_eyre::Result;
 use comrak::plugins::syntect::SyntectAdapterBuilder;
 use comrak::{
@@ -28,72 +28,52 @@ pub struct ParsedPost {
     pub toc: Vec<String>,
 }
 
-/// Parse some markdown and return a `ParsedPost`
-///
-/// # Examples
-///
-/// ```
-/// use blog::util::markdown::parse;
-///
-/// let markdown_content = "
-/// title: test
-///
-/// ## Hello, World
-/// ### Yay
-/// ";
-///
-/// let parsed_markdown = parse(markdown_content).expect("Error while parsing");
-///
-/// assert_eq!(&parsed_markdown.title, "test");
-/// assert_eq!(&parsed_markdown.content, "<h1>Hello, World</h1>\n<h2>Yay</h2>\n");
-/// ```
-///
-/// # Errors
-/// This function can return an error if a required
-/// header is found to be missing, or some error occurred during
-/// parsing.
-pub fn parse(content: &str) -> Result<ParsedPost> {
-    // Choose the syntax highlighting theme
-    // let adapter = SyntectAdapter::new("Solarized (light)");
-    let ss = SyntaxSet::load_defaults_newlines();
-    let theme_set = ThemeSet::load_from_folder("themes/")?;
+impl ParsedPost {
+    /// Parse a post from some markdown
+    pub fn from(content: &str) -> Result<Self> {
+        // Load the theme set
+        let ss = SyntaxSet::load_defaults_newlines();
+        let theme_set = ThemeSet::load_from_folder("themes/")?;
 
-    let adapter = SyntectAdapterBuilder::new()
-        .theme("Catpuccin-frappe")
-        .syntax_set(ss)
-        .theme_set(theme_set)
-        .build();
+        // Create an adapter and choose the syntax highlighting theme
+        let adapter = SyntectAdapterBuilder::new()
+            .theme("Catpuccin-frappe")
+            .syntax_set(ss)
+            .theme_set(theme_set)
+            .build();
 
-    // Set the options
-    let mut options = ComrakOptions::default();
-    options.extension.front_matter_delimiter = Some("---".to_owned());
-    options.extension.header_ids = Some("".to_string());
-    options.extension.tasklist = true;
-    options.extension.strikethrough = true;
-    options.render.github_pre_lang = true;
-    options.render.unsafe_ = true;
+        // Set the options
+        let mut options = ComrakOptions::default();
+        options.extension.front_matter_delimiter = Some("---".to_owned());
+        options.extension.header_ids = Some("".to_string());
+        options.extension.tasklist = true;
+        options.extension.strikethrough = true;
+        options.render.github_pre_lang = true;
+        options.render.unsafe_ = true;
 
-    // Parse the table of contents
-    let arena = Arena::new();
-    let root = parse_document(&arena, content, &options);
-    let toc = parse_toc(root);
+        // Parse table of contents
+        let arena = Arena::new();
+        let root = parse_document(&arena, content, &options);
+        let toc = parse_toc(root);
 
-    // Set the plugins
-    let mut plugins = ComrakPlugins::default();
-    plugins.render.codefence_syntax_highlighter = Some(&adapter);
+        // Set the plugins
+        let mut plugins = ComrakPlugins::default();
+        plugins.render.codefence_syntax_highlighter = Some(&adapter);
 
-    // Parse the frontmatter and format the AST
-    let frontmatter = parse_frontmatter(content)?;
-    let mut html = Vec::new();
-    format_html_with_plugins(root, &options, &mut html, &plugins)?;
+        // Parse frontmatter
+        let frontmatter = parse_frontmatter(content)?;
 
-    let today = Utc::now();
-    Ok(ParsedPost {
-        date: today,
-        content: String::from_utf8(html).wrap_err("why is this invalid utf-8 you suck")?,
-        frontmatter,
-        toc,
-    })
+        // Format AST to HTML
+        let mut html = Vec::new();
+        format_html_with_plugins(root, &options, &mut html, &plugins)?;
+
+        Ok(Self {
+            date: Utc::now(),
+            content: String::from_utf8(html)?,
+            frontmatter,
+            toc,
+        })
+    }
 }
 
 fn parse_frontmatter(content: &str) -> Result<Frontmatter> {

@@ -1,4 +1,4 @@
-use crate::markdown::{parse, Frontmatter, ParsedPost};
+use crate::markdown::{Frontmatter, ParsedPost};
 use crate::DATE_FORMAT;
 use color_eyre::eyre::{eyre, Result};
 use ignore::Walk;
@@ -153,7 +153,8 @@ fn build_markdown(path: &PathBuf, tera: &Tera, output_dir: &str) -> Result<Parse
 
 fn parse_file(path: &PathBuf) -> Result<ParsedPost> {
     let markdown = fs::read_to_string(path)?;
-    let parsed_post = parse(&markdown)?;
+    let parsed_post = ParsedPost::from(&markdown)?;
+    // let parsed_post = parse(&markdown)?;
 
     Ok(parsed_post)
 }
