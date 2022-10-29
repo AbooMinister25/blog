@@ -79,6 +79,7 @@ pub fn compile_stylesheets(
 
 fn to_build(conn: &Connection, path: &PathBuf) -> Result<ToBuild> {
     let raw_css = fs::read_to_string(path)?;
+    // Hash css
     let css_hash = format!("{:016x}", seahash::hash(raw_css.as_bytes()));
     let mut stmt = conn.prepare("SELECT hash FROM styles WHERE path = :path")?;
     let path_str = path

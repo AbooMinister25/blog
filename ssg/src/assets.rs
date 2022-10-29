@@ -5,6 +5,7 @@ use std::process::{Command, Stdio};
 use std::{fs, path::PathBuf};
 use tracing::info;
 
+#[derive(Debug)]
 enum ToProcess {
     Nonexistent(String),
     Exist(String),
@@ -21,6 +22,7 @@ pub fn process_assets(conn: &Connection) -> Result<()> {
             continue;
         }
 
+        // Only minimize SVG files
         if path.extension().expect("if this fails, its my fault") != "svg" {
             continue;
         }

@@ -2368,7 +2368,6 @@ dependencies = [
  "comrak",
  "ignore",
  "lazy_static",
- "lol_html",
  "rsass",
  "rusqlite",
  "seahash",
