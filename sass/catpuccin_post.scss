@@ -4,11 +4,11 @@
 
 .post-content {
     padding: 1rem;
-    margin: auto;
     flex-grow: 1;
     font-family: fonts.$sans-serif;
 
     @media (min-width: 801px) {
+        margin: auto;
         width: 750px;
     }
 }

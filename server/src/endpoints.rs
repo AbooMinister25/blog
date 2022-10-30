@@ -6,7 +6,7 @@ use tera::{Context, Tera};
 
 #[get("/")]
 pub async fn index(tera: &State<Tera>, conn: DbConn) -> RawHtml<String> {
-    let posts = posts_from_database(&conn);
+    let posts = posts_from_database(&conn, 0);
 
     let mut context = Context::new();
     context.insert("posts", &posts);
@@ -20,7 +20,9 @@ pub async fn index(tera: &State<Tera>, conn: DbConn) -> RawHtml<String> {
 
 #[get("/posts?<page>")]
 pub async fn get_posts(tera: &State<Tera>, conn: DbConn, page: Option<i32>) -> RawHtml<String> {
-    let posts = posts_from_database(&conn);
+    let offset = if let Some(n) = page { (n - 1) * 10 } else { 0 };
+
+    let posts = posts_from_database(&conn, offset);
 
     let mut context = Context::default();
     context.insert("posts", &posts);

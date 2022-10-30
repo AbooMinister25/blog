@@ -1,21 +1,6 @@
 @use "latte";
 @use "fonts";
 
-.home-content {
-    padding: 1rem;
-    margin: auto;
-    font-family: fonts.$sans-serif;
-    color: latte.$text;
-
-    @media (min-width: 801px) {
-        width: 750px;
-    }
-}
-
-.home-content .posts-header {
-    font-size: 2.5rem;
-}
-
 .bio {
     font-size: 1.2rem;
     line-height: 1.8rem;
@@ -24,52 +9,4 @@
         font-size: 1.3rem;
         line-height: 2rem;
     }
-}
-
-.home-content a {
-    color: latte.$rosewater;
-
-    &:visited {
-        color: latte.$rosewater;
-    }
-}
-
-.home-content code {
-    font-family: fonts.$monospace;
-    font-size: 1rem;
-}
-
-.home-content .details {
-    color: latte.$overlay1;
-    font-size: 0.8rem;
-    font-family: fonts.$monospace;
-    margin: 0;
-    padding: 0;
-}
-
-.post-card {
-    padding: 1rem;
-    margin-bottom: 1rem;
-    background-color: latte.$base;
-}
-
-.post-card .header {
-    color: latte.$text;
-    text-decoration: none;
-    margin: 0;
-    padding: 0;
-
-    &:visited {
-        color: inherit;
-    }
-}
-
-.post-card h1 {
-    margin-top: 0.5rem;
-}
-
-.post-card .summary {
-    color: latte.$text;
-    font-size: 1.2rem;
-    line-height: 1.5rem;
 }

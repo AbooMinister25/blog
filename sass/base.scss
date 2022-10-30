@@ -11,7 +11,7 @@ body {
 
 nav {
     display: flex;
-    margin: auto;
+    margin: 0.5rem auto auto auto;
     width: 100%;
     padding-top: 1rem;
     padding-bottom: 1rem;
@@ -57,7 +57,7 @@ nav {
 
 footer {
     font-family: fonts.$sans-serif;
-    margin: 2rem auto auto auto;
+    margin: 2rem auto 1rem auto;
     border-top: 1px dashed latte.$overlay1;
     text-align: center;
     color: latte.$overlay1;

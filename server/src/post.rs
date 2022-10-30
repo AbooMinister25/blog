@@ -35,11 +35,11 @@ impl Post {
 }
 
 // Fetch the latest ten posts from the database
-pub fn posts_from_database(conn: &DbConn) -> Vec<Post> {
+pub fn posts_from_database(conn: &DbConn, offset: i32) -> Vec<Post> {
     // Fetch posts from database
     let mut stmt = conn
         .prepare(
-            "SELECT title, rendered_content, timestamp, tags FROM posts ORDER BY id DESC LIMIT 10",
+            &format!("SELECT title, rendered_content, timestamp, tags FROM posts ORDER BY id DESC LIMIT 10 OFFSET {offset}"),
         )
         .expect("Error when fetching posts from database");
 
