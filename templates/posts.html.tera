@@ -24,7 +24,15 @@
                 </div>
             {% endfor %}
             <div class="button-container">
-                <a href="/posts/next" class="button">More</a>
+                {% set next_page = page + 1 %}
+                {% set previous_page = page - 1 %}
+                {% if page != 1 %}
+                    <a href={{"/posts?page=" ~ previous_page }} class="button">Previous</a>
+                {% endif %}
+                <a href={{"/posts?page=" ~ page }} class="button">{{ page }}</a>
+                {% if posts | length == 10 %}
+                <a href={{"/posts?page=" ~ next_page }} class="button">Next</a>
+                {% endif %}
             </div>
         </div>
     </div>

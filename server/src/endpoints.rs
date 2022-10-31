@@ -21,11 +21,12 @@ pub async fn index(tera: &State<Tera>, conn: DbConn) -> RawHtml<String> {
 #[get("/posts?<page>")]
 pub async fn get_posts(tera: &State<Tera>, conn: DbConn, page: Option<i32>) -> RawHtml<String> {
     let offset = if let Some(n) = page { (n - 1) * 10 } else { 0 };
-
     let posts = posts_from_database(&conn, offset);
 
     let mut context = Context::default();
     context.insert("posts", &posts);
+    context.insert("page", &page.unwrap_or(1));
+
     let rendered = tera
         .render("posts.html.tera", &context)
         .expect("Error while rendering template");

@@ -39,13 +39,13 @@ pub fn posts_from_database(conn: &DbConn, offset: i32) -> Vec<Post> {
     // Fetch posts from database
     let mut stmt = conn
         .prepare(
-            &format!("SELECT title, rendered_content, timestamp, tags FROM posts ORDER BY id DESC LIMIT 10 OFFSET {offset}"),
+            "SELECT title, rendered_content, timestamp, tags FROM posts ORDER BY id DESC LIMIT 10 OFFSET (?)",
         )
         .expect("Error when fetching posts from database");
 
     // Load into an iterator of `Post`s
     let posts_iter = stmt
-        .query_map([], |row| {
+        .query_map([offset], |row| {
             let tags_str: String = row.get(3)?;
             let summary_str: String = row.get(1)?;
             let date: NaiveDateTime = row.get(2)?;
