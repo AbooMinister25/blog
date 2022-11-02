@@ -1,5 +1,4 @@
 use chrono::prelude::*;
-// use color_eyre::eyre::Context;
 use color_eyre::Result;
 use comrak::plugins::syntect::SyntectAdapterBuilder;
 use comrak::{

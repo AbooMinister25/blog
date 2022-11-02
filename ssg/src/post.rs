@@ -4,7 +4,7 @@ use color_eyre::eyre::{eyre, Result};
 use ignore::Walk;
 use rusqlite::{named_params, Connection};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tera::{Context, Tera};
 use tracing::info;
 
@@ -30,10 +30,11 @@ pub fn build_posts(
             r.and_then(|(to_build, parsed_post, path)| {
                 match to_build {
                     ToBuild::Nonexistent(markdown_hash) => {
+                        insert_tags(conn, &parsed_post.frontmatter.tags)?;
                         conn.execute(
                             "INSERT INTO posts
-                            (title, path, hash, rendered_content, timestamp, tags)
-                            VALUES (?1, ?2, ?3, ?4, datetime(?5), ?6)
+                            (title, path, hash, rendered_content, timestamp)
+                            VALUES (?1, ?2, ?3, ?4, datetime(?5))
                         ",
                             (
                                 &parsed_post.frontmatter.title,
@@ -43,28 +44,33 @@ pub fn build_posts(
                                 &markdown_hash,
                                 &parsed_post.content,
                                 &parsed_post.date,
-                                &serde_json::to_string(&parsed_post.frontmatter.tags)?,
+                                // &serde_json::to_string(&parsed_post.frontmatter.tags)?,
                             ),
                         )?;
+
+                        insert_tagmaps(conn, path, &parsed_post.frontmatter.tags)?;
                     }
                     ToBuild::Exist => {
+                        insert_tags(conn, &parsed_post.frontmatter.tags)?;
                         conn.execute(
                             "
                         UPDATE posts 
                         SET title = (:title),
                             rendered_content = (:content),
-                            timestamp = datetime(:timestamp),
-                            tags = (:tags)
+                            timestamp = datetime(:timestamp)
+                            
                         WHERE path = (:path)
                         ",
                         named_params! {
                             ":title": &parsed_post.frontmatter.title,
                             ":content": &parsed_post.content,
                             ":timestamp": &parsed_post.date,
-                            ":tags": &serde_json::to_string(&parsed_post.frontmatter.tags)?,
+                            // ":tags": &serde_json::to_string(&parsed_post.frontmatter.tags)?,
                             ":path": &path.to_str().ok_or_else(|| eyre!("Error while converting path to string"))?
                         }
                         )?;
+
+                        insert_tagmaps(conn, path, &parsed_post.frontmatter.tags)?;
                     }
                     ToBuild::No => unreachable!("Should never be ToBuild::No"),
                 }
@@ -154,9 +160,55 @@ fn build_markdown(path: &PathBuf, tera: &Tera, output_dir: &str) -> Result<Parse
 fn parse_file(path: &PathBuf) -> Result<ParsedPost> {
     let markdown = fs::read_to_string(path)?;
     let parsed_post = ParsedPost::from(&markdown)?;
-    // let parsed_post = parse(&markdown)?;
 
     Ok(parsed_post)
+}
+
+fn insert_tags(conn: &Connection, tags: &[String]) -> Result<()> {
+    let mut stmt = conn.prepare("SELECT name FROM tags WHERE name = ?")?;
+    for tag in tags {
+        if !stmt.exists([&tag])? {
+            // If tag didn't exist, create it.
+            conn.execute("INSERT INTO tags (name) VALUES (?)", [&tag])?;
+        }
+    }
+
+    Ok(())
+}
+
+fn insert_tagmaps(conn: &Connection, path: &Path, tags: &[String]) -> Result<()> {
+    let path_str = path
+        .to_str()
+        .ok_or_else(|| eyre!("Error while converting path to string"))?;
+
+    let mut exists_stmt = conn.prepare(
+        "SELECT post_id, tag_id from tags_posts WHERE (post_id = (?1) AND tag_id = (?2))",
+    )?;
+    let mut stmt = conn.prepare("SELECT tag_id FROM tags WHERE name = ?")?;
+    let mut p_stmt = conn.prepare("SELECT post_id FROM posts WHERE path = ?")?;
+
+    let mut rows = p_stmt.query([path_str])?;
+    let post_id: i32 = if let Some(row) = rows.next()? {
+        Ok(row.get(0)?)
+    } else {
+        Err(eyre!("Error while querying post"))
+    }?;
+
+    for tag in tags {
+        let mut rows = stmt.query([&tag])?;
+        if let Some(row) = rows.next()? {
+            let tag_id: i32 = row.get(0)?;
+
+            if !exists_stmt.exists((post_id, tag_id))? {
+                conn.execute(
+                    "INSERT INTO tags_posts (post_id, tag_id) VALUES (?1, ?2)",
+                    (post_id, tag_id),
+                )?;
+            }
+        }
+    }
+
+    Ok(())
 }
 
 fn render_template(

@@ -1,7 +1,7 @@
 ---
 title = "foo"
-tags = ["programming", "test"]
+tags = ["programming", "test", "misc", "baz", "ban"]
 summary = "foo"
 ---
 
-blash  
+blash   

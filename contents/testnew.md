@@ -1,6 +1,6 @@
 ---
 title = "bar"
-tags = ["programming", "test"]
+tags = ["programming", "test", "ban"]
 summary = "foo"
 ---
 
