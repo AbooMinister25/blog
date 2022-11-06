@@ -1,6 +1,6 @@
 ---
 title = "test"
-tags = ["programming", "test"]
+tags = ["programming", "test", "anotherrandomtag"]
 summary = "test"
 ---
 

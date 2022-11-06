@@ -39,24 +39,49 @@ pub fn posts_from_database(conn: &DbConn, offset: i32) -> Vec<Post> {
     // Fetch posts from database
     let mut stmt = conn
         .prepare(
-            "SELECT title, rendered_content, timestamp, tags FROM posts ORDER BY id DESC LIMIT 10 OFFSET (?)",
+            "SELECT post_id, title, rendered_content, timestamp FROM posts ORDER BY post_id DESC LIMIT 10 OFFSET (?)",
         )
         .expect("Error when fetching posts from database");
+    let mut tags_stmt = conn
+        .prepare(
+            "
+        SELECT tags.name 
+        FROM posts 
+        INNER JOIN 
+            tags_posts ON tags_posts.post_id = posts.post_id 
+        INNER JOIN 
+            tags ON tags_posts.tag_id = tags.tag_id 
+        WHERE posts.post_id = (?)",
+        )
+        .expect("Error when querying database");
 
     // Load into an iterator of `Post`s
     let posts_iter = stmt
         .query_map([offset], |row| {
-            let tags_str: String = row.get(3)?;
-            let summary_str: String = row.get(1)?;
-            let date: NaiveDateTime = row.get(2)?;
+            let id: i32 = row.get(0)?;
+            // let tags_str: String = row.get(4)?;
+            let summary_str: String = row.get(2)?;
+            let date: NaiveDateTime = row.get(3)?;
+
+            // Fetch tags for the post
+            let tags_iter = tags_stmt
+                .query_map([id], |tags_row| {
+                    let tag_name: String = tags_row.get(0)?;
+                    Ok(tag_name)
+                })
+                .expect("Error while fetching posts from database");
+
+            let mut tags = vec![];
+            for tag in tags_iter {
+                tags.push(tag.expect("Error while collecting tags"))
+            }
 
             Ok(Post::new(
-                row.get(0)?,
                 row.get(1)?,
+                row.get(2)?,
                 get_summary(&summary_str).expect("Error while rewriting HTML"),
                 date.format(DATE_FORMAT).to_string(),
-                serde_json::from_str(&tags_str)
-                    .map_err(|_| rusqlite::types::FromSqlError::InvalidType)?,
+                tags,
             ))
         })
         .expect("Error while fetching posts from database");
