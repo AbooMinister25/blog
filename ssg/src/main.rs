@@ -79,14 +79,6 @@ fn setup() -> Result<Connection> {
         (),
     )?;
     conn.execute(
-        "CREATE TABLE IF NOT EXISTS styles (
-            id INTEGER PRIMARY KEY,
-            path VARCHAR NOT NULL,
-            hash TEXT NOT NULL
-        )",
-        (),
-    )?;
-    conn.execute(
         "CREATE TABLE IF NOT EXISTS assets (
             id INTEGER PRIMARY KEY,
             path VARCHAR NOT NULL,

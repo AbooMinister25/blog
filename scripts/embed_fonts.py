@@ -46,7 +46,7 @@ def main() -> None:
 
         element.text = "\n".join(embedded_fonts)
 
-    tree.write(filename + ".foo.svg")
+    tree.write(filename)
 
 
 if __name__ == "__main__":

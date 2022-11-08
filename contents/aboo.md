@@ -6,4 +6,4 @@ summary = "foo"
 
 blash  
 
-![hi](/static/test(1).svg.foo.svg)
+![hi](/static/assets/neat.svg)

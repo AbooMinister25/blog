@@ -35,6 +35,7 @@ pub fn process_assets(conn: &Connection) -> Result<()> {
 
         match to_build {
             ToProcess::Nonexistent(raw_asset) => {
+                embed_fonts(path_str)?;
                 invoke_svgo(path_str)?;
                 let asset_hash = format!("{:016x}", seahash::hash(raw_asset.as_bytes()));
                 // Write asset into database
@@ -46,6 +47,7 @@ pub fn process_assets(conn: &Connection) -> Result<()> {
                 processed += 1;
             }
             ToProcess::Exist(raw_asset) => {
+                embed_fonts(path_str)?;
                 invoke_svgo(path_str)?;
                 let asset_hash = format!("{:016x}", seahash::hash(raw_asset.as_bytes()));
                 // Update hash in database
@@ -105,6 +107,20 @@ fn invoke_svgo(path_str: &str) -> Result<()> {
         .spawn()?;
 
     // Wait for the process to end, since we hash the minified data
+    cmd.wait()?;
+
+    Ok(())
+}
+
+fn embed_fonts(path_str: &str) -> Result<()> {
+    // Invoke scripts/embed_fonts.py to embed fonts in SVG
+    let mut cmd = Command::new("python3")
+        .arg("./scripts/embed_fonts.py")
+        .arg(path_str)
+        .stdout(Stdio::null())
+        .spawn()?;
+
+    // Wait for the process to end, since we hash the data
     cmd.wait()?;
 
     Ok(())
