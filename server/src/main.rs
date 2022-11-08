@@ -56,6 +56,5 @@ fn rocket() -> _ {
         .mount("/", routes![index, get_post, get_posts])
         .mount("/styles", FileServer::from("./styles"))
         .mount("/static", FileServer::from("./static"))
-        .mount("/assets", FileServer::from("./assets"))
         .register("/", catchers![internal_server_error, not_found])
 }
