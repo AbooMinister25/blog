@@ -3,3 +3,5 @@
 .obsidian
 .trash
 *.excalidraw.md
+public/
+styles/

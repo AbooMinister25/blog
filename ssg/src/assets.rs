@@ -17,7 +17,7 @@ pub fn process_assets(conn: &Connection) -> Result<()> {
     let mut processed = 0;
     let mut skipped = 0;
 
-    for result in Walk::new("assets/") {
+    for result in Walk::new("static/assets/") {
         let path = result?.into_path();
         if path.is_dir() {
             continue;
