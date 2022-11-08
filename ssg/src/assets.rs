@@ -12,6 +12,7 @@ enum ToProcess {
     No,
 }
 
+#[tracing::instrument]
 pub fn process_assets(conn: &Connection) -> Result<()> {
     let mut processed = 0;
     let mut skipped = 0;

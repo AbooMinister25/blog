@@ -8,14 +8,7 @@ use std::path::Path;
 use tera::Tera;
 use tracing::info;
 
-#[tracing::instrument(skip(
-    tera,
-    conn,
-    output_dir,
-    css_output_dir,
-    html_input_dir,
-    scss_input_dir
-))]
+#[tracing::instrument(skip(tera))]
 pub fn build(
     conn: Connection,
     tera: &Tera,
@@ -27,7 +20,7 @@ pub fn build(
     info!("Creating directories");
     create_directories(&output_dir, &css_output_dir)?;
     info!("Compiling stylesheets");
-    compile_stylesheets(&conn, &css_output_dir, &scss_input_dir)?;
+    compile_stylesheets(&css_output_dir, &scss_input_dir)?;
     info!("Minimizing assets");
     process_assets(&conn)?;
     info!("Building posts");
