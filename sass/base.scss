@@ -11,7 +11,7 @@ body {
 
 nav {
     display: flex;
-    margin: 0.5rem auto auto auto;
+    margin: 0.2rem auto auto auto;
     width: 100%;
     padding-top: 1rem;
     padding-bottom: 1rem;
@@ -21,6 +21,24 @@ nav {
         width: 750px;
         padding: 1rem;
     }
+}
+
+footer {
+    font-family: fonts.$sans-serif;
+    margin: 2rem auto 0.8rem auto;
+    border-top: 1px dashed latte.$overlay1;
+    text-align: center;
+    color: latte.$overlay1;
+    width: 100%;
+
+    @media (min-width: 801px) {
+        width: 750px;
+    }
+}
+
+img {
+    display: block;
+    max-width: 100%;
 }
 
 .nav-link {
@@ -41,7 +59,6 @@ nav {
 
 .nav-link-right {
     margin-right: 1rem;
-    margin-bottom: 0;
     text-decoration: none;
     color: latte.$text;
     margin-left: auto;
@@ -52,19 +69,6 @@ nav {
 
     @media (min-width: 801px) {
         margin-right: 0;
-    }
-}
-
-footer {
-    font-family: fonts.$sans-serif;
-    margin: 2rem auto 1rem auto;
-    border-top: 1px dashed latte.$overlay1;
-    text-align: center;
-    color: latte.$overlay1;
-    width: 100%;
-
-    @media (min-width: 801px) {
-        width: 750px;
     }
 }
 
