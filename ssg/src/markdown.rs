@@ -14,7 +14,9 @@ use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 pub struct Frontmatter {
     pub title: String,
     pub tags: Vec<String>,
+    // TODO: Remove this, its unnecessary
     pub summary: String,
+    pub series: Option<String>,
 }
 
 /// A parsed blog post.

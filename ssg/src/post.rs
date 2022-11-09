@@ -45,11 +45,11 @@ pub fn build_posts(
                                 &markdown_hash,
                                 &parsed_post.content,
                                 &parsed_post.date,
-                                // &serde_json::to_string(&parsed_post.frontmatter.tags)?,
                             ),
                         )?;
 
                         insert_tagmaps(conn, path, &parsed_post.frontmatter.tags)?;
+                        insert_series(conn, parsed_post.frontmatter.series, path.to_str().ok_or_else(|| eyre!("Error while converting path to string"))?)?;
                     }
                     ToBuild::Exist => {
                         insert_tags(conn, &parsed_post.frontmatter.tags)?;
@@ -59,19 +59,18 @@ pub fn build_posts(
                         SET title = (:title),
                             rendered_content = (:content),
                             timestamp = datetime(:timestamp)
-                            
                         WHERE path = (:path)
                         ",
                         named_params! {
                             ":title": &parsed_post.frontmatter.title,
                             ":content": &parsed_post.content,
                             ":timestamp": &parsed_post.date,
-                            // ":tags": &serde_json::to_string(&parsed_post.frontmatter.tags)?,
                             ":path": &path.to_str().ok_or_else(|| eyre!("Error while converting path to string"))?
                         }
                         )?;
 
                         insert_tagmaps(conn, path, &parsed_post.frontmatter.tags)?;
+                        insert_series(conn, parsed_post.frontmatter.series, path.to_str().ok_or_else(|| eyre!("Error while converting path to string"))?)?;
                     }
                     ToBuild::No => unreachable!("Should never be ToBuild::No"),
                 }
@@ -207,6 +206,37 @@ fn insert_tagmaps(conn: &Connection, path: &Path, tags: &[String]) -> Result<()>
                 )?;
             }
         }
+    }
+
+    Ok(())
+}
+
+fn insert_series(conn: &Connection, series_title: Option<String>, path_str: &str) -> Result<()> {
+    if let Some(title) = series_title {
+        let mut stmt = conn.prepare("SELECT series_id FROM series WHERE name = ?")?;
+        if !stmt.exists([&title])? {
+            // If the series didn't exist, create it
+            conn.execute("INSERT INTO series (name) VALUES (?)", [&title])?;
+        }
+
+        let mut rows = stmt.query([&title])?;
+        let series_id: i32 = if let Some(row) = rows.next()? {
+            Ok(row.get(0)?)
+        } else {
+            Err(eyre!("Error while querying post"))
+        }?;
+
+        conn.execute(
+            "
+            UPDATE POSTS
+            SET series_id = (:series_id)
+            WHERE path = (:path)
+            ",
+            named_params! {
+                ":series_id": series_id,
+                ":path": path_str
+            },
+        )?;
     }
 
     Ok(())

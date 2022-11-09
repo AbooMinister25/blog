@@ -57,7 +57,9 @@ fn setup() -> Result<Connection> {
             path VARCHAR NOT NULL,
             hash TEXT NOT NULL,
             rendered_content TEXT NOT NULL,
-            timestamp TEXT NOT NULL
+            timestamp TEXT NOT NULL,
+            series_id INTEGER,
+            FOREIGN KEY (series_id) REFERENCES series(series_id)
         )",
         (),
     )?;
@@ -75,6 +77,13 @@ fn setup() -> Result<Connection> {
             PRIMARY KEY (post_id, tag_id),
             FOREIGN KEY (post_id) REFERENCES posts(post_id),
             FOREIGN KEY (tag_id) REFERENCES tags(tag_id)
+        )",
+        (),
+    )?;
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS series (
+            series_id INTEGER PRIMARY KEY,
+            name VARCHAR NOT NULL
         )",
         (),
     )?;
