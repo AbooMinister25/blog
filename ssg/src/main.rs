@@ -2,6 +2,7 @@
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
 
+mod entry;
 mod sql;
 
 use crate::sql::setup_sql;
