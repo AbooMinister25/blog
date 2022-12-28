@@ -2,11 +2,12 @@ use chrono::{DateTime, Utc};
 use color_eyre::Result;
 use comrak::plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder};
 use comrak::{
-    format_html_with_plugins, markdown_to_html_with_plugins,
+    format_html_with_plugins,
     nodes::{AstNode, NodeCode, NodeValue},
     parse_document, Arena, ComrakOptions, ComrakPlugins,
 };
 use serde::Deserialize;
+use std::{fs, path::Path};
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 
 // Represents the frontmatter to a parsed document
@@ -27,6 +28,12 @@ pub struct Document {
 }
 
 impl Document {
+    #[tracing::instrument]
+    pub fn from_file(path: &Path) -> Result<Self> {
+        let contents = fs::read_to_string(path)?;
+        Self::from(&contents)
+    }
+
     #[tracing::instrument]
     pub fn from(content: &str) -> Result<Self> {
         // Set up syntax highlighter and render options

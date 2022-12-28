@@ -2,7 +2,10 @@
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
 
+mod build;
 mod entry;
+mod markdown;
+mod post;
 mod sql;
 
 use crate::sql::setup_sql;
@@ -11,6 +14,8 @@ use color_eyre::eyre::Result;
 use tera::Tera;
 use tracing::{info, subscriber, Level};
 use tracing_subscriber::FmtSubscriber;
+
+pub const DATE_FORMAT: &str = "%b %e, %Y";
 
 #[derive(Parser)]
 #[clap(version, about)]
@@ -34,6 +39,8 @@ struct Args {
 
 #[tracing::instrument]
 fn main() -> Result<()> {
+    // Install panic and error report handlers
+    color_eyre::install();
     // Set up tracing subscribers
     let fmt_subscriber = FmtSubscriber::builder()
         .with_max_level(Level::TRACE) // TODO: Make this DEBUG and use another subscriber for verbose traces.
