@@ -104,7 +104,7 @@ impl Entry for Post {
 #[tracing::instrument]
 fn render_post(path: &Path, tera: &Tera, document: Document) -> Result<()> {
     // Create the file
-    let file = fs::File::create(format!("public/{}.html", document.frontmatter.title))?;
+    let file = fs::File::create(format!("dist/public/{}.html", document.frontmatter.title))?;
 
     let mut context = Context::new();
     // Insert context for the template

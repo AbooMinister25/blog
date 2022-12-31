@@ -7,6 +7,7 @@ mod entry;
 mod markdown;
 mod post;
 mod sql;
+mod stylesheet;
 
 use crate::sql::setup_sql;
 use clap::Parser;
@@ -40,7 +41,7 @@ struct Args {
 #[tracing::instrument]
 fn main() -> Result<()> {
     // Install panic and error report handlers
-    color_eyre::install();
+    color_eyre::install()?;
     // Set up tracing subscribers
     let fmt_subscriber = FmtSubscriber::builder()
         .with_max_level(Level::TRACE) // TODO: Make this DEBUG and use another subscriber for verbose traces.
