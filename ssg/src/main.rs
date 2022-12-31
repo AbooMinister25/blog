@@ -22,21 +22,12 @@ pub const DATE_FORMAT: &str = "%b %e, %Y";
 #[derive(Parser)]
 #[clap(version, about)]
 struct Args {
-    // The directory to output HTML files into
-    #[clap(short = 'O', long, default_value_t = String::from("public"))]
-    output_dir: String,
-    // The directory to output generated CSS into
-    #[clap(short = 'C', long, default_value_t = String::from("styles"))]
-    css_output_dir: String,
-    /// The directory to look for markdown files in
-    #[clap(short = 'I', long, default_value_t = String::from("contents"))]
-    html_input_dir: String,
-    /// The directory to look for SCSS files in
-    #[clap(short = 'S', long, default_value_t = String::from("sass"))]
-    scss_input_dir: String,
     /// Whether to reload on file changes
     #[clap(long, action)]
     watch: bool,
+    /// Whether to run a clean build
+    #[clap(long, action)]
+    clean: bool,
 }
 
 #[tracing::instrument]
@@ -60,6 +51,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     build(&conn, &tera)?;
+    info!("Build posts");
 
     Ok(())
 }

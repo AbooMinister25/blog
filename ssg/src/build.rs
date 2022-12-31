@@ -5,6 +5,7 @@ use color_eyre::{eyre::ContextCompat, Result};
 use ignore::{DirEntry, Walk};
 use rusqlite::Connection;
 use std::fs;
+use tracing::info;
 use tera::Tera;
 
 // Walk over all site entries and build them.
@@ -12,6 +13,7 @@ use tera::Tera;
 pub fn build(conn: &Connection, tera: &Tera) -> Result<()> {
     // Create directories
     create_directories()?;
+    info!("Created directories");
 
     // Collect all entries
     let entries = Walk::new("site/")
@@ -20,12 +22,14 @@ pub fn build(conn: &Connection, tera: &Tera) -> Result<()> {
         .filter(|path| !path.is_dir())
         .map(|p| to_entry(&p))
         .collect::<Result<Vec<_>>>()?;
+    info!("Discovered entries");
 
     // Build all entries
     entries
         .iter()
         .map(|e| e.build(conn, tera))
         .collect::<Result<Vec<_>>>()?;
+    info!("Build entries");
 
     Ok(())
 }
