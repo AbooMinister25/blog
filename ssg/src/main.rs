@@ -13,6 +13,7 @@ use crate::build::build;
 use crate::sql::setup_sql;
 use clap::Parser;
 use color_eyre::eyre::Result;
+use std::time::Instant;
 use tera::Tera;
 use tracing::{info, subscriber, Level};
 use tracing_subscriber::FmtSubscriber;
@@ -32,6 +33,8 @@ struct Args {
 
 #[tracing::instrument]
 fn main() -> Result<()> {
+    let now = Instant::now();
+
     // Install panic and error report handlers
     color_eyre::install()?;
     // Set up tracing subscribers
@@ -51,7 +54,10 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     build(&conn, &tera)?;
-    info!("Build posts");
+    info!("Built site");
+
+    let elapsed = now.elapsed();
+    info!("Built in {:.2?} seconds", elapsed);
 
     Ok(())
 }
