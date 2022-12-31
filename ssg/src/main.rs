@@ -9,6 +9,7 @@ mod post;
 mod sql;
 mod stylesheet;
 
+use crate::build::build;
 use crate::sql::setup_sql;
 use clap::Parser;
 use color_eyre::eyre::Result;
@@ -57,6 +58,8 @@ fn main() -> Result<()> {
 
     // Parse command line arguments
     let args = Args::parse();
+
+    build(&conn, &tera)?;
 
     Ok(())
 }

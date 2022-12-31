@@ -1,0 +1,77 @@
+@use "latte";
+@use "fonts";
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+nav {
+    display: flex;
+    margin: 0.2rem auto auto auto;
+    width: 100%;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid latte.$rosewater;
+
+    @media (min-width: 801px) {
+        width: 750px;
+        padding: 1rem;
+    }
+}
+
+footer {
+    font-family: fonts.$sans-serif;
+    margin: 2rem auto 0.8rem auto;
+    border-top: 1px dashed latte.$overlay1;
+    text-align: center;
+    color: latte.$overlay1;
+    width: 100%;
+
+    @media (min-width: 801px) {
+        width: 750px;
+    }
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+.nav-link {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    text-decoration: none;
+    color: latte.$text;
+
+    &:hover {
+        text-decoration: underline 2px latte.$rosewater;
+    }
+
+    @media (min-width: 801px) {
+        margin-left: 0;
+        margin-right: 2rem;
+    }
+}
+
+.nav-link-right {
+    margin-right: 1rem;
+    text-decoration: none;
+    color: latte.$text;
+    margin-left: auto;
+
+    &:hover {
+        text-decoration: underline 2px latte.$rosewater;
+    }
+
+    @media (min-width: 801px) {
+        margin-right: 0;
+    }
+}
+
+::selection {
+    background-color: latte.$surface0;
+}

@@ -6,9 +6,9 @@
     <meta name="og:title" property="og:title" content={{ title }} />
     <meta name="twitter:title" content={{ title }} />
     <link rel="stylesheet" href="/styles/post.css" />
-    <meta name="description" content="{{ summary }}"/>
-    <meta name="og:description" property="og:description" content={{ summary }} />
-    <meta name="twitter:description" content={{ summary }} />
+    {# <meta name="description" content="{{ summary }}"/> #}
+    {# <meta name="og:description" property="og:description" content={{ summary }} /> #}
+    {# <meta name="twitter:description" content={{ summary }} /> #}
 {% endblock head %}
 
 {% block content %}

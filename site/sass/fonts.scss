@@ -1,0 +1,35 @@
+@font-face {
+    font-family: "Crimson Pro";
+    src: url("/static/fonts/CrimsonPro-Regular.woff2");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Crimson Pro";
+    src: url("/static/fonts/CrimsonPro-Italic.woff2");
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Crimson Pro";
+    src: url("/static/fonts/CrimsonPro-Bold.woff2");
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Crimson Pro";
+    src: url("/static/fonts/CrimsonPro-BoldItalic.woff2");
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Fira Code";
+    src: url("/static/fonts/FiraCode-Regular.ttf");
+}
+
+$sans-serif: "Crimson Pro", sans-serif;
+$monospace: "Fira Code", monospace;

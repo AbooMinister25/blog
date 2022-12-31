@@ -30,7 +30,7 @@ impl Entry for Stylesheet {
     fn build(&self, conn: &Connection, _: &Tera) -> Result<()> {
         let filename = self
             .path
-            .file_name()
+            .file_stem()
             .context("Invalid filename")?
             .to_str()
             .context("Filename not valid unicode")?;

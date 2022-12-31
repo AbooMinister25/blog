@@ -4,11 +4,15 @@ use crate::{entry::Entry, post::Post, stylesheet::Stylesheet};
 use color_eyre::{eyre::ContextCompat, Result};
 use ignore::{DirEntry, Walk};
 use rusqlite::Connection;
+use std::fs;
 use tera::Tera;
 
 // Walk over all site entries and build them.
 #[tracing::instrument]
 pub fn build(conn: &Connection, tera: &Tera) -> Result<()> {
+    // Create directories
+    create_directories()?;
+
     // Collect all entries
     let entries = Walk::new("site/")
         .filter_map(Result::ok)
@@ -44,4 +48,13 @@ fn to_entry(path: &Path) -> Result<Box<dyn Entry>> {
     } else {
         todo!()
     }
+}
+
+#[tracing::instrument]
+fn create_directories() -> Result<()> {
+    fs::create_dir_all("dist")?;
+    fs::create_dir_all("dist/styles")?;
+    fs::create_dir_all("dist/public")?;
+
+    Ok(())
 }

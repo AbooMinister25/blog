@@ -69,12 +69,13 @@ fn setup_comrak() -> Result<(ComrakOptions, SyntectAdapter<'static>)> {
     // Load the theme set
     let ss = SyntaxSet::load_defaults_newlines();
     let theme_set = ThemeSet::load_from_folder("themes/")?;
+    // println!("{:?}", theme_set.themes["Catpuccin-frappe"]);
 
     // Create an adapter and choose the syntax highlighting theme
     let adapter = SyntectAdapterBuilder::new()
-        .theme("Captuccin-frappe")
         .syntax_set(ss)
         .theme_set(theme_set)
+        .theme("Catpuccin-frappe")
         .build();
 
     // Set the options

@@ -77,6 +77,7 @@ impl Entry for Post {
                     &parsed_document.frontmatter.tags,
                     MapFor::Post,
                 )?;
+                render_post(&self.path, tera, parsed_document)?;
             }
             BuildStatus::Changed => {
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
@@ -93,6 +94,7 @@ impl Entry for Post {
                     &parsed_document.frontmatter.tags,
                     MapFor::Post,
                 )?;
+                render_post(&self.path, tera, parsed_document)?;
             }
             BuildStatus::Unchanged => (), // Don't do anything if the file was unchanged
         }
