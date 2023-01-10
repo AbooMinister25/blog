@@ -12,8 +12,10 @@ mod utils;
 
 use crate::build::build;
 use crate::sql::setup_sql;
+use crate::utils::ensure_removed;
 use clap::Parser;
 use color_eyre::eyre::Result;
+use std::path::Path;
 use std::time::Instant;
 use tera::Tera;
 use tracing::metadata::LevelFilter;
@@ -41,6 +43,14 @@ fn main() -> Result<()> {
     // Install panic and error report handlers
     color_eyre::install()?;
 
+    // Parse command line arguments
+    let args = Args::parse();
+
+    // Clean build
+    if args.clean {
+        ensure_removed(Path::new("blog.db"))?;
+    }
+
     // Set up tracing subscribers
     let file_appender = tracing_appender::rolling::hourly("log/", "ssg.log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
@@ -49,6 +59,7 @@ fn main() -> Result<()> {
         .with(
             fmt::Layer::default()
                 .with_writer(non_blocking)
+                .with_ansi(false)
                 .with_filter(LevelFilter::TRACE),
         )
         .with(fmt::layer().compact().with_filter(LevelFilter::INFO));
@@ -61,9 +72,6 @@ fn main() -> Result<()> {
 
     let tera = Tera::new("templates/**/*.tera")?;
     info!("Loaded templates");
-
-    // Parse command line arguments
-    let args = Args::parse();
 
     build(&conn, &tera)?;
     info!("Built site");

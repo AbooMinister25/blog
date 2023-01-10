@@ -9,3 +9,12 @@ pub fn ensure_directory(path: &Path) -> Result<()> {
 
     Ok(())
 }
+
+// If the given file exists, delete it.
+pub fn ensure_removed(path: &Path) -> Result<()> {
+    if path.exists() {
+        fs::remove_file(path)?;
+    }
+
+    Ok(())
+}
