@@ -1,10 +1,9 @@
 use std::path::Path;
 
-use crate::{entry::Entry, post::Post, stylesheet::Stylesheet, utils::ensure_directory};
+use crate::{entry::Entry, post::Post, stylesheet::Stylesheet};
 use color_eyre::{eyre::ContextCompat, Result};
 use ignore::{DirEntry, Walk};
 use rusqlite::Connection;
-use std::fs;
 use tera::Tera;
 use tracing::info;
 

@@ -24,3 +24,4 @@ syntect = { version = "5.0", default-features = false, features = [
 ignore = "0.4.18"
 rsass = "0.26.0"
 tracing-appender = "0.2.2"
+lol_html = "0.3.2"

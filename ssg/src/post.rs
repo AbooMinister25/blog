@@ -1,7 +1,7 @@
 use crate::entry::{BuildStatus, Entry};
 use crate::markdown::Document;
 use crate::sql::{insert_post, insert_tagmaps, insert_tags, update_post, MapFor};
-use crate::utils::ensure_directory;
+use crate::utils::{ensure_directory, get_summary};
 use crate::DATE_FORMAT;
 use color_eyre::eyre::{ContextCompat, Result};
 use rusqlite::Connection;
@@ -81,7 +81,9 @@ impl Entry for Post {
                     &parsed_document.frontmatter.tags,
                     MapFor::Post,
                 )?;
-                render_post(&self.path, tera, parsed_document)?;
+
+                let summary = get_summary(&parsed_document.content)?;
+                render_post(&self.path, tera, &summary, parsed_document)?;
                 debug!("Built post");
             }
             BuildStatus::Changed => {
@@ -99,7 +101,9 @@ impl Entry for Post {
                     &parsed_document.frontmatter.tags,
                     MapFor::Post,
                 )?;
-                render_post(&self.path, tera, parsed_document)?;
+
+                let summary = get_summary(&parsed_document.content)?;
+                render_post(&self.path, tera, &summary, parsed_document)?;
                 debug!("Built post");
             }
             BuildStatus::Unchanged => (), // Don't do anything if the file was unchanged
@@ -110,7 +114,7 @@ impl Entry for Post {
 }
 
 #[tracing::instrument]
-fn render_post(path: &Path, tera: &Tera, document: Document) -> Result<()> {
+fn render_post(path: &Path, tera: &Tera, summary: &str, document: Document) -> Result<()> {
     // Create the file
     let file = fs::File::create(format!("dist/public/{}.html", document.frontmatter.title))?;
 
@@ -121,6 +125,7 @@ fn render_post(path: &Path, tera: &Tera, document: Document) -> Result<()> {
     context.insert("date", &document.date.format(DATE_FORMAT).to_string());
     context.insert("toc", &document.toc);
     context.insert("markup", &document.content);
+    context.insert("summary", summary);
 
     // Render the template
     tera.render_to("post.html.tera", &context, file)?;
