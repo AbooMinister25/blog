@@ -39,7 +39,7 @@ fn main() {
     // Number of words to generate.
     let n = arg.parse().unwrap_or(25);
     // Print n words of lorem ipsum text.
-    println!("{}", lipsum::lipsum(n));
+    println!("{}", lipsum::lipsum(n));  
 }
 ```
 

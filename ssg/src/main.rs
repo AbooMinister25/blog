@@ -15,8 +15,10 @@ use clap::Parser;
 use color_eyre::eyre::Result;
 use std::time::Instant;
 use tera::Tera;
+use tracing::metadata::LevelFilter;
 use tracing::{info, subscriber, Level};
-use tracing_subscriber::FmtSubscriber;
+use tracing_subscriber::prelude::*;
+use tracing_subscriber::{fmt, FmtSubscriber};
 
 pub const DATE_FORMAT: &str = "%b %e, %Y";
 
@@ -37,11 +39,20 @@ fn main() -> Result<()> {
 
     // Install panic and error report handlers
     color_eyre::install()?;
+
     // Set up tracing subscribers
-    let fmt_subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::TRACE) // TODO: Make this DEBUG and use another subscriber for verbose traces.
-        .finish();
-    subscriber::set_global_default(fmt_subscriber)?;
+    let file_appender = tracing_appender::rolling::hourly("log/", "ssg.log");
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+
+    let subscriber = tracing_subscriber::registry()
+        .with(
+            fmt::Layer::default()
+                .with_writer(non_blocking)
+                .with_filter(LevelFilter::TRACE),
+        )
+        .with(fmt::layer().compact().with_filter(LevelFilter::INFO));
+
+    subscriber::set_global_default(subscriber)?;
     info!("Set up subscribers");
 
     let conn = setup_sql()?;

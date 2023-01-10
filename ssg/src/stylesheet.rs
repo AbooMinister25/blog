@@ -6,6 +6,7 @@ use rsass::{compile_scss_path, output};
 use rusqlite::Connection;
 use std::fs;
 use tera::Tera;
+use tracing::debug;
 
 // A stylesheet
 #[derive(Debug)]
@@ -44,6 +45,8 @@ impl Entry for Stylesheet {
         let css = compile_scss_path(&self.path, format)?;
         fs::File::create(format!("dist/styles/{filename}.css"))?;
         fs::write(format!("dist/styles/{filename}.css"), css)?;
+
+        debug!("Built stylesheet");
 
         Ok(())
     }

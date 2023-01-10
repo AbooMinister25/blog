@@ -7,6 +7,7 @@ use rusqlite::Connection;
 use std::path::Path;
 use std::{fs, path::PathBuf};
 use tera::{Context, Tera};
+use tracing::debug;
 
 // A blog post, represented by a markdown file in the `contents/` directory.
 #[derive(Debug)]
@@ -56,7 +57,7 @@ impl Entry for Post {
         Ok(format!("{:016x}", seahash::hash(raw_markdown.as_bytes())))
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(tera))]
     fn build(&self, conn: &Connection, tera: &Tera) -> Result<()> {
         let status = self.build_status(conn)?;
         let parsed_document = Document::from_file(&self.path)?;
@@ -78,6 +79,7 @@ impl Entry for Post {
                     MapFor::Post,
                 )?;
                 render_post(&self.path, tera, parsed_document)?;
+                debug!("Built post");
             }
             BuildStatus::Changed => {
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
@@ -95,6 +97,7 @@ impl Entry for Post {
                     MapFor::Post,
                 )?;
                 render_post(&self.path, tera, parsed_document)?;
+                debug!("Built post");
             }
             BuildStatus::Unchanged => (), // Don't do anything if the file was unchanged
         }
