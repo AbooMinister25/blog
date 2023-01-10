@@ -19,9 +19,9 @@ use std::path::Path;
 use std::time::Instant;
 use tera::Tera;
 use tracing::metadata::LevelFilter;
-use tracing::{info, subscriber, Level};
+use tracing::{info, subscriber};
 use tracing_subscriber::prelude::*;
-use tracing_subscriber::{fmt, FmtSubscriber};
+use tracing_subscriber::{fmt};
 
 pub const DATE_FORMAT: &str = "%b %e, %Y";
 
