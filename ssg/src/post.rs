@@ -1,6 +1,7 @@
 use crate::entry::{BuildStatus, Entry};
 use crate::markdown::Document;
 use crate::sql::{insert_post, insert_tagmaps, insert_tags, update_post, MapFor};
+use crate::utils::ensure_directory;
 use crate::DATE_FORMAT;
 use color_eyre::eyre::{ContextCompat, Result};
 use rusqlite::Connection;
@@ -59,6 +60,8 @@ impl Entry for Post {
 
     #[tracing::instrument(skip(tera))]
     fn build(&self, conn: &Connection, tera: &Tera) -> Result<()> {
+        ensure_directory(Path::new("dist/public"))?;
+
         let status = self.build_status(conn)?;
         let parsed_document = Document::from_file(&self.path)?;
         match status {

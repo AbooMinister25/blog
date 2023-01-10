@@ -8,6 +8,7 @@ mod markdown;
 mod post;
 mod sql;
 mod stylesheet;
+mod utils;
 
 use crate::build::build;
 use crate::sql::setup_sql;

@@ -1,6 +1,9 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use crate::entry::{BuildStatus, Entry};
+use crate::{
+    entry::{BuildStatus, Entry},
+    utils::ensure_directory,
+};
 use color_eyre::eyre::{ContextCompat, Result};
 use rsass::{compile_scss_path, output};
 use rusqlite::Connection;
@@ -29,6 +32,8 @@ impl Entry for Stylesheet {
 
     #[tracing::instrument]
     fn build(&self, conn: &Connection, _: &Tera) -> Result<()> {
+        ensure_directory(Path::new("dist/styles"))?;
+
         let filename = self
             .path
             .file_stem()
