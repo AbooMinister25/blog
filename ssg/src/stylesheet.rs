@@ -19,6 +19,11 @@ pub struct Stylesheet {
 
 impl Entry for Stylesheet {
     #[tracing::instrument]
+    fn from_file(path: PathBuf) -> Self {
+        Self { path }
+    }
+
+    #[tracing::instrument]
     fn build_status(&self, _: &Connection) -> Result<BuildStatus> {
         // No incremental building for stylesheets
         Ok(BuildStatus::New(String::new()))
@@ -32,7 +37,7 @@ impl Entry for Stylesheet {
 
     #[tracing::instrument]
     fn build(&self, conn: &Connection, _: &Tera) -> Result<()> {
-        ensure_directory(Path::new("dist/styles"))?;
+        ensure_directory(Path::new("public/styles"))?;
 
         let filename = self
             .path
@@ -48,8 +53,8 @@ impl Entry for Stylesheet {
 
         // Compile and write the CSS to disk
         let css = compile_scss_path(&self.path, format)?;
-        fs::File::create(format!("dist/styles/{filename}.css"))?;
-        fs::write(format!("dist/styles/{filename}.css"), css)?;
+        fs::File::create(format!("public/styles/{filename}.css"))?;
+        fs::write(format!("public/styles/{filename}.css"), css)?;
 
         debug!("Built stylesheet");
 
