@@ -39,7 +39,6 @@ pub fn setup_sql() -> Result<Connection> {
             series_id INTEGER PRIMARY KEY,
             name VARCHAR NOT NULL,
             path VARCHAR NOT NULL,
-            hash TEXT NOT NULL,
             description VARCHAR NOT NULL,
             timestamp TEXT NOT NULL
         )
@@ -170,51 +169,22 @@ pub fn insert_series(
     conn: &Connection,
     name: &str,
     path: &Path,
-    hash: &str,
     description: &str,
     date: DateTime<Utc>,
 ) -> Result<()> {
     conn.execute(
-        "INSERT INTO series 
-                (name, path, hash, description, timestamp)
-                VALUES (?1, ?2, ?3, ?4, datetime(?5))
+        "INSERT INTO series IF NOT EXISTS
+                (name, path, description, timestamp)
+                VALUES (?1, ?2, ?3, datetime(?4))
                 ",
         (
             &name,
             &path
                 .to_str()
                 .context("Error while converting path to string")?,
-            &hash,
             &description,
             &date,
         ),
-    )?;
-
-    Ok(())
-}
-
-// Update an existing series in the database
-#[tracing::instrument]
-pub fn update_series(
-    conn: &Connection,
-    name: &str,
-    description: &str,
-    date: DateTime<Utc>,
-    path: &Path,
-) -> Result<()> {
-    conn.execute(
-        "UPDATE POSTS
-    SET name = (:name),
-        description = (:description),
-        timestamp = datetime(:timestamp)
-    WHERE path = (:path)
-    ",
-        named_params! {
-            ":name": name,
-            ":description": &description,
-            ":timestamp": &date,
-            ":path": &path.to_str().context("Error while converting path to string")?,
-        },
     )?;
 
     Ok(())

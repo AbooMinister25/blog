@@ -66,11 +66,15 @@ impl Entry for Post {
     #[tracing::instrument(skip(tera))]
     fn build(&self, conn: &Connection, tera: &Tera) -> Result<()> {
         ensure_directory(Path::new("public/posts"))?;
+        debug!(
+            "Building post at {}",
+            self.path.to_str().context("Path should be valid unicode")?
+        );
 
         let status = self.build_status(conn)?;
-        let parsed_document = Document::from_file(&self.path)?;
         match status {
             BuildStatus::New(markdown_hash) => {
+                let parsed_document = Document::from_file(&self.path)?;
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
                 insert_post(
                     conn,
@@ -92,6 +96,7 @@ impl Entry for Post {
                 debug!("Built post");
             }
             BuildStatus::Changed => {
+                let parsed_document = Document::from_file(&self.path)?;
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
                 update_post(
                     conn,

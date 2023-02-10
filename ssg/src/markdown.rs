@@ -31,11 +31,11 @@ impl Document {
     #[tracing::instrument]
     pub fn from_file(path: &Path) -> Result<Self> {
         let contents = fs::read_to_string(path)?;
-        Self::from(&contents)
+        Self::from_string(&contents)
     }
 
     #[tracing::instrument]
-    pub fn from(content: &str) -> Result<Self> {
+    pub fn from_string(content: &str) -> Result<Self> {
         // Set up syntax highlighter and render options
         let (options, adapter) = setup_comrak()?;
 

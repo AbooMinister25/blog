@@ -1,6 +1,7 @@
 ---
-title = "Hello World"
+title = "baz"
 tags = ["programming", "test"]
+series = "Hello World Series"
 ---
 
 test post

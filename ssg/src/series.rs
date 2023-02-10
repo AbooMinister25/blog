@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use crate::entry::{BuildStatus, Entry};
 use crate::markdown::Document;
-use crate::sql::{insert_series, insert_tagmaps, insert_tags, update_series, MapFor};
+use crate::sql::{insert_series, insert_tagmaps, insert_tags, MapFor};
 use crate::utils::{ensure_directory, get_summary};
 use crate::DATE_FORMAT;
 use color_eyre::eyre::{ContextCompat, Result};
@@ -59,7 +59,7 @@ impl Entry for Series {
 
     #[tracing::instrument]
     fn hash(&self) -> Result<String> {
-        let raw_markdown = fs::read_to_string(&self.path.join("index.md"))?;
+        let raw_markdown = fs::read_to_string(&self.path)?;
         // Hash markdown, format as string
         Ok(format!("{:016x}", seahash::hash(raw_markdown.as_bytes())))
     }
@@ -67,54 +67,27 @@ impl Entry for Series {
     #[tracing::instrument]
     fn build(&self, conn: &Connection, tera: &Tera) -> Result<()> {
         ensure_directory(Path::new("public/series"))?;
-
-        let status = self.build_status(conn)?;
         let parsed_document = Document::from_file(&self.path)?;
 
-        match status {
-            BuildStatus::New(markdown_hash) => {
-                insert_tags(conn, &parsed_document.frontmatter.tags)?;
-                insert_series(
-                    conn,
-                    &parsed_document.frontmatter.title,
-                    &self.path,
-                    &markdown_hash,
-                    &parsed_document.content,
-                    parsed_document.date,
-                )?;
-                insert_tagmaps(
-                    conn,
-                    &self.path,
-                    &parsed_document.frontmatter.tags,
-                    MapFor::Series,
-                )?;
+        insert_tags(conn, &parsed_document.frontmatter.tags)?;
+        insert_series(
+            conn,
+            &parsed_document.frontmatter.title,
+            &self.path,
+            &parsed_document.content,
+            parsed_document.date,
+        )?;
+        insert_tagmaps(
+            conn,
+            &self.path,
+            &parsed_document.frontmatter.tags,
+            MapFor::Series,
+        )?;
 
-                let summary = get_summary(&parsed_document.content)?;
-                render_series(tera, &summary, parsed_document)?;
-                debug!("Built series");
-            }
-            BuildStatus::Changed => {
-                insert_tags(conn, &parsed_document.frontmatter.tags)?;
-                update_series(
-                    conn,
-                    &parsed_document.frontmatter.title,
-                    &parsed_document.content,
-                    parsed_document.date,
-                    &self.path,
-                )?;
-                insert_tagmaps(
-                    conn,
-                    &self.path,
-                    &parsed_document.frontmatter.tags,
-                    MapFor::Series,
-                )?;
+        let summary = get_summary(&parsed_document.content)?;
+        render_series(tera, &summary, parsed_document)?;
+        debug!("Built series");
 
-                let summary = get_summary(&parsed_document.content)?;
-                render_series(tera, &summary, parsed_document)?;
-                debug!("Built series");
-            }
-            BuildStatus::Unchanged => (), // Don't do anything if the file was unchanged
-        }
         Ok(())
     }
 }

@@ -6,9 +6,9 @@ mod build;
 mod entry;
 mod markdown;
 mod post;
+mod series;
 mod sql;
 mod stylesheet;
-mod series;
 mod utils;
 
 use crate::build::build;
@@ -21,8 +21,8 @@ use std::time::Instant;
 use tera::Tera;
 use tracing::metadata::LevelFilter;
 use tracing::{info, subscriber};
+use tracing_subscriber::fmt;
 use tracing_subscriber::prelude::*;
-use tracing_subscriber::{fmt};
 
 pub const DATE_FORMAT: &str = "%b %e, %Y";
 
