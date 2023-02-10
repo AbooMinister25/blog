@@ -173,7 +173,7 @@ pub fn insert_series(
     date: DateTime<Utc>,
 ) -> Result<()> {
     conn.execute(
-        "INSERT INTO series IF NOT EXISTS
+        "INSERT INTO series
                 (name, path, description, timestamp)
                 VALUES (?1, ?2, ?3, datetime(?4))
                 ",
