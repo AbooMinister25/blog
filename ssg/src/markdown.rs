@@ -81,7 +81,7 @@ fn setup_comrak() -> Result<(ComrakOptions, SyntectAdapter<'static>)> {
     // Set the options
     let mut options = ComrakOptions::default();
     options.extension.front_matter_delimiter = Some("---".to_owned());
-    options.extension.header_ids = Some("".to_string());
+    options.extension.header_ids = Some(String::new());
     options.extension.tasklist = true;
     options.extension.strikethrough = true;
     options.render.github_pre_lang = true;
