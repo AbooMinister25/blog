@@ -67,6 +67,11 @@ impl Entry for Series {
     #[tracing::instrument]
     fn build(&self, conn: &Connection, tera: &Tera) -> Result<()> {
         ensure_directory(Path::new("public/series"))?;
+        debug!(
+            "Building series at {}",
+            self.path.to_str().context("Path should be valid unicode")?
+        );
+
         let parsed_document = Document::from_file(&self.path)?;
 
         insert_tags(conn, &parsed_document.frontmatter.tags)?;

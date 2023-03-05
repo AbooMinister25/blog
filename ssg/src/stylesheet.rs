@@ -38,6 +38,10 @@ impl Entry for Stylesheet {
     #[tracing::instrument]
     fn build(&self, conn: &Connection, _: &Tera) -> Result<()> {
         ensure_directory(Path::new("public/styles"))?;
+        debug!(
+            "Building stylesheet at {}",
+            self.path.to_str().context("Path should be valid unicode")?
+        );
 
         let filename = self
             .path

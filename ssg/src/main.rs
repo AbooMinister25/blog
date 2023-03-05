@@ -4,6 +4,7 @@
 
 mod build;
 mod entry;
+mod index;
 mod markdown;
 mod post;
 mod series;
