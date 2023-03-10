@@ -1,0 +1,14 @@
+[package]
+name = "sass"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+color-eyre = "0.6.2"
+entry = { path = "../entry" }
+rsass = "0.27.0"
+rusqlite = "0.28.0"
+tera = "1.18.0"
+tracing = "0.1.37"

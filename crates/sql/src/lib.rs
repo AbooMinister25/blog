@@ -1,8 +1,11 @@
-use std::path::Path;
+#![warn(clippy::pedantic, clippy::nursery)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::module_name_repetitions)]
 
 use chrono::{DateTime, Utc};
 use color_eyre::eyre::{eyre, ContextCompat, Result};
 use rusqlite::{named_params, Connection};
+use std::path::Path;
 
 // Represents what entity the function `insert_tagmaps` should insert the tag-entity maps for.
 #[derive(Debug)]

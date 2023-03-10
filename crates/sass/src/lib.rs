@@ -1,13 +1,14 @@
-use std::path::{Path, PathBuf};
+#![warn(clippy::pedantic, clippy::nursery)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::module_name_repetitions)]
 
-use crate::{
-    entry::{BuildStatus, Entry},
-    utils::ensure_directory,
-};
 use color_eyre::eyre::{ContextCompat, Result};
+use entry::filesystem::ensure_directory;
+use entry::{BuildStatus, Entry};
 use rsass::{compile_scss_path, output};
 use rusqlite::Connection;
 use std::fs;
+use std::path::{Path, PathBuf};
 use tera::Tera;
 use tracing::debug;
 

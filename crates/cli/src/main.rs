@@ -2,38 +2,25 @@
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
 
-mod build;
-mod entry;
-mod index;
-mod markdown;
-mod post;
-mod series;
-mod sql;
-mod stylesheet;
-mod utils;
-
-use crate::build::build;
-use crate::sql::setup_sql;
-use crate::utils::ensure_removed;
 use clap::Parser;
-use color_eyre::eyre::Result;
+use color_eyre::Result;
+use entry::filesystem::ensure_removed;
+use site::build;
+use sql::setup_sql;
 use std::path::Path;
 use std::time::Instant;
 use tera::Tera;
-use tracing::metadata::LevelFilter;
-use tracing::{info, subscriber};
+use tracing::{info, metadata::LevelFilter, subscriber};
 use tracing_subscriber::fmt;
 use tracing_subscriber::prelude::*;
 
-pub const DATE_FORMAT: &str = "%b %e, %Y";
-
 #[derive(Parser)]
-#[clap(version, about)]
 struct Args {
-    /// Whether to reload on file changes
+    /// Reload on file changes
     #[clap(long, action)]
     watch: bool,
-    /// Whether to run a clean build
+
+    // Whether to run a clean build
     #[clap(long, action)]
     clean: bool,
 }

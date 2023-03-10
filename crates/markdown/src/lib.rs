@@ -1,16 +1,21 @@
+#![warn(clippy::pedantic, clippy::nursery)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::module_name_repetitions)]
+
 use chrono::{DateTime, Utc};
 use color_eyre::Result;
-use comrak::plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder};
 use comrak::{
     format_html_with_plugins,
     nodes::{AstNode, NodeCode, NodeValue},
-    parse_document, Arena, ComrakOptions, ComrakPlugins,
+    parse_document,
+    plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder},
+    Arena, ComrakOptions, ComrakPlugins,
 };
 use serde::Deserialize;
 use std::{fs, path::Path};
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 
-// Represents the frontmatter to a parsed document
+// The frontmatter for a parsed document
 #[derive(Debug, Deserialize)]
 pub struct Frontmatter {
     pub title: String,
@@ -18,7 +23,7 @@ pub struct Frontmatter {
     pub series: Option<String>,
 }
 
-// Represents a parsed markdown document
+// Represent a parsed markdown document
 #[derive(Debug)]
 pub struct Document {
     pub date: DateTime<Utc>,
@@ -69,7 +74,6 @@ fn setup_comrak() -> Result<(ComrakOptions, SyntectAdapter<'static>)> {
     // Load the theme set
     let ss = SyntaxSet::load_defaults_newlines();
     let theme_set = ThemeSet::load_from_folder("themes/")?;
-    // println!("{:?}", theme_set.themes["Catpuccin-frappe"]);
 
     // Create an adapter and choose the syntax highlighting theme
     let adapter = SyntectAdapterBuilder::new()
@@ -80,7 +84,7 @@ fn setup_comrak() -> Result<(ComrakOptions, SyntectAdapter<'static>)> {
 
     // Set the options
     let mut options = ComrakOptions::default();
-    options.extension.front_matter_delimiter = Some("---".to_owned());
+    options.extension.front_matter_delimiter = Some("---".to_string());
     options.extension.header_ids = Some(String::new());
     options.extension.tasklist = true;
     options.extension.strikethrough = true;

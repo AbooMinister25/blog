@@ -1,7 +1,17 @@
+#![warn(clippy::pedantic, clippy::nursery)]
+#![allow(clippy::missing_panics_doc)]
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::missing_errors_doc)]
+
+pub mod filesystem;
+pub mod summary;
+
 use color_eyre::eyre::Result;
 use rusqlite::Connection;
 use std::path::PathBuf;
 use tera::Tera;
+
+pub const DATE_FORMAT: &str = "%b %e, %Y";
 
 /// Whether an entry has been newly added, if it existed but was changed, or if existed and remained unchanged.
 pub enum BuildStatus {

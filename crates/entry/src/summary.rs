@@ -1,24 +1,7 @@
-use color_eyre::eyre::Result;
+use std::cell::RefCell;
+
+use color_eyre::Result;
 use lol_html::{element, html_content::TextType, rewrite_str, text, RewriteStrSettings};
-use std::{cell::RefCell, fs, path::Path};
-
-// If the given directory doesn't exist, creates it.
-pub fn ensure_directory(path: &Path) -> Result<()> {
-    if !path.exists() {
-        fs::create_dir_all(path)?;
-    }
-
-    Ok(())
-}
-
-// If the given file exists, delete it.
-pub fn ensure_removed(path: &Path) -> Result<()> {
-    if path.exists() {
-        fs::remove_file(path)?;
-    }
-
-    Ok(())
-}
 
 // Truncate the first part of a post's content for it's summary.
 pub fn get_summary(content: &str) -> Result<String> {
