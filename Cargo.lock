@@ -135,12 +135,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "572f695136211188308f16ad2ca5c851a712c464060ae6974944458eb83880ba"
 
 [[package]]
-name = "bytecount"
-version = "0.6.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c676a478f63e9fa2dd5368a42f28bba0d6c560b775f38583c8bbaa7fcd67c9c"
-
-[[package]]
 name = "byteorder"
 version = "1.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -290,26 +284,6 @@ dependencies = [
  "owo-colors",
  "tracing-core",
  "tracing-error",
-]
-
-[[package]]
-name = "comrak"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c11e55664fcff7f4d37cc2adf3a1996913692f037312f4ab0909047fdd2bf962"
-dependencies = [
- "clap",
- "entities",
- "memchr",
- "once_cell",
- "pest",
- "pest_derive",
- "regex",
- "shell-words",
- "syntect",
- "typed-arena",
- "unicode_categories",
- "xdg",
 ]
 
 [[package]]
@@ -1158,10 +1132,10 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "color-eyre",
- "comrak 0.16.0",
+ "comrak",
  "serde",
  "syntect",
- "toml 0.7.2",
+ "toml",
  "tracing",
 ]
 
@@ -1234,17 +1208,6 @@ checksum = "a8903e5a29a317527874d0402f867152a3d21c908bb0b933e416c65e301d4c36"
 dependencies = [
  "memchr",
  "minimal-lexical",
-]
-
-[[package]]
-name = "nom_locate"
-version = "4.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37794436ca3029a3089e0b95d42da1f0b565ad271e4d3bb4bad0c7bb70b10605"
-dependencies = [
- "bytecount",
- "memchr",
- "nom",
 ]
 
 [[package]]
@@ -1751,24 +1714,6 @@ checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
 
 [[package]]
 name = "rsass"
-version = "0.26.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "665387d3be91521de331a04cc7118c8c129ffe43c5f4e8a61e78990850046b5a"
-dependencies = [
- "arc-swap",
- "fastrand",
- "lazy_static",
- "nom",
- "nom_locate",
- "num-bigint",
- "num-integer",
- "num-rational",
- "num-traits",
- "tracing",
-]
-
-[[package]]
-name = "rsass"
 version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a43695dd28122f6c684273de89796a56a98e02e9694b8ab57b160fdc6e6d69af"
@@ -1855,7 +1800,7 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "entry",
- "rsass 0.27.0",
+ "rsass",
  "rusqlite",
  "tera",
  "tracing",
@@ -2062,29 +2007,6 @@ dependencies = [
  "color-eyre",
  "rusqlite",
  "tracing",
-]
-
-[[package]]
-name = "ssg"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "clap",
- "color-eyre",
- "comrak 0.15.0",
- "ignore",
- "lazy_static",
- "lol_html",
- "rsass 0.26.0",
- "rusqlite",
- "seahash",
- "serde",
- "syntect",
- "tera",
- "toml 0.5.10",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
 ]
 
 [[package]]
@@ -2307,15 +2229,6 @@ dependencies = [
  "pin-project-lite",
  "tokio",
  "tracing",
-]
-
-[[package]]
-name = "toml"
-version = "0.5.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1333c76748e868a4d9d1017b5ab53171dfd095f70c712fdb4653a406547f598f"
-dependencies = [
- "serde",
 ]
 
 [[package]]
