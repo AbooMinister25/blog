@@ -8,6 +8,7 @@ use entry::Entry;
 use ignore::{DirEntry, Walk};
 use rusqlite::Connection;
 use sass::Stylesheet;
+use static_assets::StaticAsset;
 use std::path::Path;
 use tera::Tera;
 use tracing::info;
@@ -18,10 +19,12 @@ pub fn build(conn: &Connection, tera: &Tera) -> Result<()> {
     let current_dir = Path::new(".");
     let content_dir = current_dir.join("contents");
     let sass_dir = current_dir.join("sass");
+    let static_dir = current_dir.join("static");
 
     // Build the entries
     build_entries::<Post>(conn, tera, &content_dir)?;
     build_entries::<Stylesheet>(conn, tera, &sass_dir)?;
+    build_entries::<StaticAsset>(conn, tera, &static_dir)?;
     build_series(conn, tera)?;
 
     info!("Built entries");

@@ -5,7 +5,7 @@ use entry::DATE_FORMAT;
 use entry::{BuildStatus, Entry};
 use markdown::Document;
 use rusqlite::Connection;
-use sql::{insert_series, insert_tagmaps, insert_tags, MapFor};
+use sql::{insert_series, insert_tagmaps, insert_tags, update_series, MapFor};
 use std::fs;
 use std::path::{Path, PathBuf};
 use tera::{Context, Tera};
@@ -72,26 +72,55 @@ impl Entry for Series {
             self.path.to_str().context("Path should be valid unicode")?
         );
 
-        let parsed_document = Document::from_file(&self.path)?;
+        let status = self.build_status(conn)?;
+        match status {
+            BuildStatus::New(hash) => {
+                let parsed_document = Document::from_file(&self.path)?;
 
-        insert_tags(conn, &parsed_document.frontmatter.tags)?;
-        insert_series(
-            conn,
-            &parsed_document.frontmatter.title,
-            &self.path,
-            &parsed_document.content,
-            parsed_document.date,
-        )?;
-        insert_tagmaps(
-            conn,
-            &self.path,
-            &parsed_document.frontmatter.tags,
-            MapFor::Series,
-        )?;
+                insert_tags(conn, &parsed_document.frontmatter.tags)?;
+                insert_series(
+                    conn,
+                    &parsed_document.frontmatter.title,
+                    &self.path,
+                    &hash,
+                    &parsed_document.content,
+                    parsed_document.date,
+                )?;
+                insert_tagmaps(
+                    conn,
+                    &self.path,
+                    &parsed_document.frontmatter.tags,
+                    MapFor::Series,
+                )?;
 
-        let summary = get_summary(&parsed_document.content)?;
-        render_series(tera, &summary, parsed_document)?;
-        debug!("Built series");
+                let summary = get_summary(&parsed_document.content)?;
+                render_series(tera, &summary, parsed_document)?;
+                debug!("Built series");
+            }
+            BuildStatus::Changed => {
+                let parsed_document = Document::from_file(&self.path)?;
+
+                insert_tags(conn, &parsed_document.frontmatter.tags)?;
+                update_series(
+                    conn,
+                    &parsed_document.frontmatter.title,
+                    &parsed_document.content,
+                    parsed_document.date,
+                    &self.path,
+                )?;
+                insert_tagmaps(
+                    conn,
+                    &self.path,
+                    &parsed_document.frontmatter.tags,
+                    MapFor::Series,
+                )?;
+
+                let summary = get_summary(&parsed_document.content)?;
+                render_series(tera, &summary, parsed_document)?;
+                debug!("Built series");
+            }
+            BuildStatus::Unchanged => (), // Don't do anything if the file was unchanged
+        }
 
         Ok(())
     }

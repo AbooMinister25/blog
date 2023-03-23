@@ -38,6 +38,7 @@ fn main() -> Result<()> {
     // Clean build
     if args.clean {
         ensure_removed(Path::new("blog.db"))?;
+        ensure_removed("public/")?;
     }
 
     // Set up tracing subscribers
