@@ -87,7 +87,6 @@ impl Entry for StaticAsset {
 
     #[tracing::instrument]
     fn hash(&self) -> Result<String> {
-        // let raw_asset = fs::read_to_string(&self.path)?;
         let raw_asset = fs::read(&self.path)?;
         // Hash asset, format as string
         Ok(format!("{:016x}", seahash::hash(&raw_asset)))
