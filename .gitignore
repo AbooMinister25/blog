@@ -2,3 +2,5 @@
 *.db
 public/
 log
+flamegraph.svg
+perf.data
