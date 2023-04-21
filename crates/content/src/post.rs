@@ -43,11 +43,11 @@ impl Entry for Post {
         let build = if hashes.is_empty() {
             BuildStatus::New(markdown_hash)
         } else if hashes[0] != markdown_hash {
-            conn.execute(
-                "UPDATE posts SET hash = (:hash) WHERE path = (:path)",
-                &[(":hash", &markdown_hash), (":path", &path_str.to_string())],
-            )?;
-            BuildStatus::Changed
+            // conn.execute(
+            //     "UPDATE posts SET hash = (:hash) WHERE path = (:path)",
+            //     &[(":hash", &markdown_hash), (":path", &path_str.to_string())],
+            // )?;
+            BuildStatus::Changed(markdown_hash)
         } else {
             BuildStatus::Unchanged
         };
@@ -63,16 +63,16 @@ impl Entry for Post {
     }
 
     #[tracing::instrument(skip(tera))]
-    fn build(&self, conn: &Connection, tera: &Tera) -> Result<()> {
+    fn build(&self, conn: &Connection, tera: &Tera, status: BuildStatus) -> Result<()> {
         ensure_directory("public/posts")?;
-        debug!(
-            "Building post at {}",
-            self.path.to_str().context("Path should be valid unicode")?
-        );
 
-        let status = self.build_status(conn)?;
         match status {
             BuildStatus::New(markdown_hash) => {
+                debug!(
+                    "Building post at {}",
+                    self.path.to_str().context("Path should be valid unicode")?
+                );
+
                 let parsed_document = Document::from_file(&self.path)?;
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
                 insert_post(
@@ -94,7 +94,27 @@ impl Entry for Post {
                 render_post(tera, &summary, parsed_document)?;
                 debug!("Built post");
             }
-            BuildStatus::Changed => {
+            BuildStatus::Changed(markdown_hash) => {
+                debug!(
+                    "Building post at {}",
+                    self.path.to_str().context("Path should be valid unicode")?
+                );
+
+                conn.execute(
+                    "UPDATE posts SET hash = (:hash) WHERE path = (:path)",
+                    &[
+                        (":hash", &markdown_hash),
+                        (
+                            ":path",
+                            &self
+                                .path
+                                .to_str()
+                                .context("Path should be valid unicode")?
+                                .to_string(),
+                        ),
+                    ],
+                )?;
+                
                 let parsed_document = Document::from_file(&self.path)?;
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
                 update_post(

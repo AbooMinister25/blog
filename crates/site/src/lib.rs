@@ -1,77 +1,79 @@
 #![warn(clippy::pedantic, clippy::nursery)]
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
+#![allow(clippy::missing_const_for_fn)]
+#![allow(clippy::must_use_candidate)]
 
 use color_eyre::Result;
 use content::{post::Post, series::Series};
+use entry::BuildStatus;
 use entry::Entry;
 use ignore::{DirEntry, Walk};
 use rusqlite::Connection;
 use sass::Stylesheet;
 use static_assets::StaticAsset;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tera::Tera;
-use tracing::info;
+use tracing::debug;
 
-// Walk over all site entries and build them.
-#[tracing::instrument(skip(tera))]
-pub fn build(conn: &Connection, tera: &Tera) -> Result<()> {
-    let current_dir = Path::new(".");
-    let content_dir = current_dir.join("contents");
-    let sass_dir = current_dir.join("sass");
-    let static_dir = current_dir.join("static");
-
-    // Build the entries
-    build_entries::<Post>(conn, tera, &content_dir)?;
-    build_entries::<Stylesheet>(conn, tera, &sass_dir)?;
-    build_entries::<StaticAsset>(conn, tera, &static_dir)?;
-    build_series(conn, tera)?;
-
-    info!("Built entries");
-
-    Ok(())
+#[derive(Debug)]
+pub struct Site {
+    path: PathBuf,
+    tera: Tera,
+    conn: Connection,
 }
 
-#[tracing::instrument]
-fn build_entries<T: Entry>(conn: &Connection, tera: &Tera, path: &Path) -> Result<()> {
-    // Discover entries
-    let entries = Walk::new(path)
-        .filter_map(Result::ok)
-        .map(DirEntry::into_path)
-        .filter(|p| {
-            !p.is_dir()
-                && p.file_name()
-                    .expect("File name should never terminate in ..")
-                    != "index.md"
-        })
-        .map(T::from_file);
+impl Site {
+    pub fn new(path: PathBuf, tera: Tera, conn: Connection) -> Self {
+        Self { path, tera, conn }
+    }
 
-    // Build entries
-    entries
-        .map(|e| e.build(conn, tera))
-        .collect::<Result<Vec<_>>>()?;
+    #[tracing::instrument]
+    pub fn build(&self) -> Result<()> {
+        let content_dir = self.path.join("contents");
+        let sass_dir = self.path.join("sass");
+        let static_dir = self.path.join("static");
 
-    Ok(())
-}
+        self.process_entry::<Post>(&content_dir)?;
+        self.process_entry::<Series>(&content_dir)?;
+        self.process_entry::<Stylesheet>(&sass_dir)?;
+        self.process_entry::<StaticAsset>(&static_dir)?;
 
-#[tracing::instrument]
-fn build_series(conn: &Connection, tera: &Tera) -> Result<()> {
-    // Discover entries
-    let series = Walk::new("contents/")
-        .filter_map(Result::ok)
-        .map(DirEntry::into_path)
-        .filter(|p| {
-            !p.is_dir()
-                && p.file_name()
-                    .expect("File name should never terminate in ..")
-                    == "index.md"
-        })
-        .map(Series::from_file);
+        Ok(())
+    }
 
-    // Build entries
-    series
-        .map(|e| e.build(conn, tera))
-        .collect::<Result<Vec<_>>>()?;
+    #[tracing::instrument]
+    fn discover_entries<T: Entry>(&self, path: &Path) -> Vec<T> {
+        // Discover entries
+        debug!("Discovering entries at {:?}", path);
+        Walk::new(path)
+            .filter_map(Result::ok)
+            .map(DirEntry::into_path)
+            .filter(|p| {
+                !p.is_dir()
+                    && p.file_name()
+                        .expect("File name should never terminate in ..")
+                        != "index.md"
+            })
+            .map(T::from_file)
+            .collect()
+    }
 
-    Ok(())
+    #[tracing::instrument]
+    fn process_entry<T: Entry>(&self, directory: &Path) -> Result<()> {
+        debug!("Processing entries at {:?}", directory);
+        let entries = self.discover_entries::<T>(directory);
+        let build_statuses = entries
+            .iter()
+            .map(|p| p.build_status(&self.conn))
+            .collect::<Result<Vec<BuildStatus>>>()?;
+
+        build_statuses
+            .into_iter()
+            .zip(entries)
+            .map(|(status, post)| post.build(&self.conn, &self.tera, status))
+            .collect::<Result<Vec<()>>>()?;
+
+        Ok(())
+    }
 }

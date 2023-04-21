@@ -14,9 +14,10 @@ use tera::Tera;
 pub const DATE_FORMAT: &str = "%b %e, %Y";
 
 /// Whether an entry has been newly added, if it existed but was changed, or if existed and remained unchanged.
+#[derive(Debug)]
 pub enum BuildStatus {
     New(String),
-    Changed,
+    Changed(String),
     Unchanged,
 }
 
@@ -27,5 +28,5 @@ pub trait Entry {
     fn from_file(path: PathBuf) -> Self;
     fn build_status(&self, conn: &Connection) -> Result<BuildStatus>;
     fn hash(&self) -> Result<String>;
-    fn build(&self, conn: &Connection, tera: &Tera) -> Result<()>;
+    fn build(&self, conn: &Connection, tera: &Tera, status: BuildStatus) -> Result<()>;
 }

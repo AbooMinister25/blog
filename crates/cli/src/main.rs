@@ -5,7 +5,7 @@
 use clap::Parser;
 use color_eyre::Result;
 use entry::filesystem::ensure_removed;
-use site::build;
+use site::Site;
 use sql::setup_sql;
 use std::path::Path;
 use std::time::Instant;
@@ -63,7 +63,8 @@ fn main() -> Result<()> {
     let tera = Tera::new("templates/**/*.tera")?;
     info!("Loaded templates");
 
-    build(&conn, &tera)?;
+    let site = Site::new(Path::new(".").to_owned(), tera, conn);
+    site.build()?;
     info!("Built site");
 
     let elapsed = now.elapsed();

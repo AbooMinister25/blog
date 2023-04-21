@@ -37,7 +37,7 @@ impl Entry for Stylesheet {
     }
 
     #[tracing::instrument]
-    fn build(&self, conn: &Connection, _: &Tera) -> Result<()> {
+    fn build(&self, conn: &Connection, _: &Tera, _: BuildStatus) -> Result<()> {
         ensure_directory(Path::new("public/styles"))?;
         debug!(
             "Building stylesheet at {}",

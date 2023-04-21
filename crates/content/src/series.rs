@@ -45,11 +45,7 @@ impl Entry for Series {
         let build = if hashes.is_empty() {
             BuildStatus::New(markdown_hash)
         } else if hashes[0] != markdown_hash {
-            conn.execute(
-                "UPDATE series SET hash = (:hash) WHERE path = (:path)",
-                &[(":hash", &markdown_hash), (":path", &path_str.to_string())],
-            )?;
-            BuildStatus::Changed
+            BuildStatus::Changed(markdown_hash)
         } else {
             BuildStatus::Unchanged
         };
@@ -65,16 +61,16 @@ impl Entry for Series {
     }
 
     #[tracing::instrument]
-    fn build(&self, conn: &Connection, tera: &Tera) -> Result<()> {
+    fn build(&self, conn: &Connection, tera: &Tera, status: BuildStatus) -> Result<()> {
         ensure_directory(Path::new("public/series"))?;
-        debug!(
-            "Building series at {}",
-            self.path.to_str().context("Path should be valid unicode")?
-        );
 
-        let status = self.build_status(conn)?;
         match status {
-            BuildStatus::New(hash) => {
+            BuildStatus::New(markdown_hash) => {
+                debug!(
+                    "Building series at {}",
+                    self.path.to_str().context("Path should be valid unicode")?
+                );
+
                 let parsed_document = Document::from_file(&self.path)?;
 
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
@@ -82,7 +78,7 @@ impl Entry for Series {
                     conn,
                     &parsed_document.frontmatter.title,
                     &self.path,
-                    &hash,
+                    &markdown_hash,
                     &parsed_document.content,
                     parsed_document.date,
                 )?;
@@ -97,9 +93,27 @@ impl Entry for Series {
                 render_series(tera, &summary, parsed_document)?;
                 debug!("Built series");
             }
-            BuildStatus::Changed => {
-                let parsed_document = Document::from_file(&self.path)?;
+            BuildStatus::Changed(markdown_hash) => {
+                debug!(
+                    "Building series at {}",
+                    self.path.to_str().context("Path should be valid unicode")?
+                );
+                conn.execute(
+                    "UPDATE series SET hash = (:hash) WHERE path = (:path)",
+                    &[
+                        (":hash", &markdown_hash),
+                        (
+                            ":path",
+                            &self
+                                .path
+                                .to_str()
+                                .context("Path should be valid unicode")?
+                                .to_string(),
+                        ),
+                    ],
+                )?;
 
+                let parsed_document = Document::from_file(&self.path)?;
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
                 update_series(
                     conn,

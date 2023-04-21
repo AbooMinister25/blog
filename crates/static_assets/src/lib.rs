@@ -32,6 +32,11 @@ impl StaticAsset {
     }
 
     fn copy_asset(&self) -> Result<()> {
+        debug!(
+            "Copying asset at {}",
+            self.path.to_str().context("Path should be valid unicode")?
+        );
+
         let path = Path::new("public/static").join(self.directory()?).join(
             self.path
                 .file_name()
@@ -73,11 +78,7 @@ impl Entry for StaticAsset {
         let build = if hashes.is_empty() {
             BuildStatus::New(asset_hash)
         } else if hashes[0] != asset_hash {
-            conn.execute(
-                "UPDATE static_assets SET hash = (:hash) WHERE path = (:path)",
-                &[(":hash", &asset_hash), (":path", &path_str.to_string())],
-            )?;
-            BuildStatus::Changed
+            BuildStatus::Changed(asset_hash)
         } else {
             BuildStatus::Unchanged
         };
@@ -93,12 +94,8 @@ impl Entry for StaticAsset {
     }
 
     #[tracing::instrument]
-    fn build(&self, conn: &Connection, _: &Tera) -> Result<()> {
+    fn build(&self, conn: &Connection, _: &Tera, status: BuildStatus) -> Result<()> {
         ensure_directory(Path::new("public/static").join(self.directory()?))?;
-        debug!(
-            "Copying asset at {}",
-            self.path.to_str().context("Path should be valid unicode")?
-        );
 
         let status = self.build_status(conn)?;
         match status {
@@ -106,7 +103,23 @@ impl Entry for StaticAsset {
                 insert_asset(conn, &self.path, &asset_hash)?;
                 self.copy_asset()?;
             }
-            BuildStatus::Changed => self.copy_asset()?,
+            BuildStatus::Changed(asset_hash) => {
+                conn.execute(
+                    "UPDATE static_assets SET hash = (:hash) WHERE path = (:path)",
+                    &[
+                        (":hash", &asset_hash),
+                        (
+                            ":path",
+                            &self
+                                .path
+                                .to_str()
+                                .context("Path should be valid unicode")?
+                                .to_string(),
+                        ),
+                    ],
+                )?;
+                self.copy_asset()?
+            }
             _ => (), // Don't do anything if the file was unchanged
         }
 
