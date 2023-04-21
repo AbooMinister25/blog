@@ -43,10 +43,6 @@ impl Entry for Post {
         let build = if hashes.is_empty() {
             BuildStatus::New(markdown_hash)
         } else if hashes[0] != markdown_hash {
-            // conn.execute(
-            //     "UPDATE posts SET hash = (:hash) WHERE path = (:path)",
-            //     &[(":hash", &markdown_hash), (":path", &path_str.to_string())],
-            // )?;
             BuildStatus::Changed(markdown_hash)
         } else {
             BuildStatus::Unchanged
@@ -114,7 +110,7 @@ impl Entry for Post {
                         ),
                     ],
                 )?;
-                
+
                 let parsed_document = Document::from_file(&self.path)?;
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
                 update_post(
