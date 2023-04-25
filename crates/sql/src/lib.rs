@@ -23,6 +23,20 @@ pub fn setup_sql() -> Result<Connection> {
     conn.execute("PRAGMA foreign_keys = 1", ())?;
     conn.execute(
         "
+        CREATE TABLE IF NOT EXISTS content (
+            content_id INTEGER PRIMARY KEY,
+            title VARCHAR NOT NULL,
+            path VARCHAR NOT NULL,
+            hash TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            series_id INTEGER,
+            FOREIGN KEY (series_id) REFERENCES series(series_id)
+        )
+    ",
+        (),
+    )?;
+    conn.execute(
+        "
         CREATE TABLE IF NOT EXISTS posts (
             post_id INTEGER PRIMARY KEY,
             title VARCHAR NOT NULL,
@@ -92,6 +106,18 @@ pub fn setup_sql() -> Result<Connection> {
     )?;
     conn.execute(
         "
+        CREATE TABLE IF NOT EXISTS tags_content (
+            content_id INTEGER NOT NULL,
+            tag_id INTEGER NOT NULL,
+            PRIMARY KEY (content_id, tag_id),
+            FOREIGN KEY (content_id) REFERENCES content(content_id),
+            FOREIGN KEY (tag_id) REFERENCES tags(tag_id)
+        )
+    ",
+        (),
+    )?;
+    conn.execute(
+        "
         CREATE TABLE IF NOT EXISTS tags_series (
             series_id INTEGER NOT NULL,
             tag_id INTEGER NOT NULL,
@@ -116,6 +142,61 @@ pub fn insert_tags(conn: &Connection, tags: &[String]) -> Result<()> {
             conn.execute("INSERT INTO tags (name) VALUES (?)", [&tag])?;
         }
     }
+
+    Ok(())
+}
+
+// Insert an entry into the database
+#[tracing::instrument]
+pub fn insert_content(
+    conn: &Connection,
+    title: &str,
+    path: &Path,
+    hash: &str,
+    date: DateTime<Utc>,
+) -> Result<()> {
+    conn.execute(
+        "INSERT INTO content
+        (title, path, hash, timestamp)
+        VALUES (?1, ?2, ?3, datetime(?4))
+        ",
+        (
+            &title,
+            &path
+                .to_str()
+                .context("Error while converting path to string")?,
+            &hash,
+            &date,
+        ),
+    )?;
+
+    Ok(())
+}
+
+// Update existing content in the database
+#[tracing::instrument]
+pub fn update_content(
+    conn: &Connection,
+    title: &str,
+    content: &str,
+    date: DateTime<Utc>,
+    path: &Path,
+) -> Result<()> {
+    conn.execute(
+        "
+    UPDATE content
+    SET title = (:title),
+        rendered_content = (:content),
+        timestamp = datetime(:timestamp)
+    WHERE path = (:path)
+    ",
+        named_params! {
+            ":title": &title,
+            ":content": &content,
+            ":timestamp": &date,
+            ":path": &path.to_str().context("Error while converting path to string")?,
+        },
+    )?;
 
     Ok(())
 }
@@ -305,6 +386,46 @@ pub fn insert_tagmaps(
                         (id, tag_id),
                     )?,
                 };
+            }
+        }
+    }
+
+    Ok(())
+}
+
+// Insert tag maps for blog content
+#[tracing::instrument]
+pub fn n_insert_tagmaps(conn: &Connection, path: &Path, tags: &[String]) -> Result<()> {
+    let path_str = path
+        .to_str()
+        .context("Error while converting path to string")?;
+
+    // A statement to check whether a tag-entity map already exists
+    let mut exists_stmt = conn.prepare(
+        "SELECT content_id, tag_id from tags_content WHERE (content_id = (?1) AND tag_id = (?2))",
+    )?;
+    // A statement to select tag id's from the database
+    let mut tags_stmt = conn.prepare("SELECT tag_id FROM tags WHERE name = ?")?;
+    // A statement to select id's for the entity from the database
+    let mut entity_stmt = conn.prepare("SELECT content_id FROM content WHERE path = ?")?;
+
+    let mut rows = entity_stmt.query([path_str])?;
+    let id: i32 = if let Some(row) = rows.next()? {
+        Ok(row.get(0)?)
+    } else {
+        Err(eyre!("Error while querying post from database"))
+    }?;
+
+    for tag in tags {
+        let mut rows = tags_stmt.query([&tag])?;
+        if let Some(row) = rows.next()? {
+            let tag_id: i32 = row.get(0)?;
+
+            if !exists_stmt.exists((id, tag_id))? {
+                conn.execute(
+                    "INSERT INTO tags_content (content_id, tag_id) VALUES (?1, ?2)",
+                    (id, tag_id),
+                )?;
             }
         }
     }

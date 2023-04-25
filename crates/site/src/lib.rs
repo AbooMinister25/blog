@@ -5,7 +5,7 @@
 #![allow(clippy::must_use_candidate)]
 
 use color_eyre::Result;
-use content::{post::Post, series::Series};
+use content::BlogContent;
 use entry::BuildStatus;
 use entry::Entry;
 use ignore::{DirEntry, Walk};
@@ -34,8 +34,7 @@ impl Site {
         let sass_dir = self.path.join("sass");
         let static_dir = self.path.join("static");
 
-        self.process_entry::<Post>(&content_dir)?;
-        self.process_entry::<Series>(&content_dir)?;
+        self.process_entry::<BlogContent>(&content_dir)?;
         self.process_entry::<Stylesheet>(&sass_dir)?;
         self.process_entry::<StaticAsset>(&static_dir)?;
 
@@ -49,12 +48,7 @@ impl Site {
         Walk::new(path)
             .filter_map(Result::ok)
             .map(DirEntry::into_path)
-            .filter(|p| {
-                !p.is_dir()
-                    && p.file_name()
-                        .expect("File name should never terminate in ..")
-                        != "index.md"
-            })
+            .filter(|p| !p.is_dir())
             .map(T::from_file)
             .collect()
     }

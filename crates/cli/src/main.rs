@@ -32,15 +32,6 @@ fn main() -> Result<()> {
     // Install panic and error report handlers
     color_eyre::install()?;
 
-    // Parse command line arguments
-    let args = Args::parse();
-
-    // Clean build
-    if args.clean {
-        ensure_removed(Path::new("blog.db"))?;
-        ensure_removed("public/")?;
-    }
-
     // Set up tracing subscribers
     let file_appender = tracing_appender::rolling::hourly("log/", "ssg.log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
@@ -56,6 +47,15 @@ fn main() -> Result<()> {
 
     subscriber::set_global_default(subscriber)?;
     info!("Set up subscribers");
+
+    // Parse command line arguments
+    let args = Args::parse();
+
+    // Clean build
+    if args.clean {
+        info!("Clean build, making sure existing database removed");
+        ensure_removed(Path::new("blog.db"))?;
+    }
 
     let conn = setup_sql()?;
     info!("Connected to database, created tables");
