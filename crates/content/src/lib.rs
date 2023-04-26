@@ -116,7 +116,7 @@ impl Entry for BlogContent {
         Ok(format!("{:016x}", seahash::hash(raw_markdown.as_bytes())))
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(tera))]
     fn build(&self, conn: &Connection, tera: &tera::Tera, status: BuildStatus) -> Result<()> {
         let content_type = self.content_type()?;
         ensure_directory(Path::new("public/").join(content_type.directory()))?;
@@ -182,7 +182,7 @@ impl Entry for BlogContent {
     }
 }
 
-#[tracing::instrument]
+#[tracing::instrument(skip(tera))]
 fn render(tera: &Tera, summary: &str, document: Document, content_type: ContentType) -> Result<()> {
     // Create the file
     let to_path = Path::new("public/")

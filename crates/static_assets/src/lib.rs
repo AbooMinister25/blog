@@ -93,8 +93,8 @@ impl Entry for StaticAsset {
         Ok(format!("{:016x}", seahash::hash(&raw_asset)))
     }
 
-    #[tracing::instrument]
-    fn build(&self, conn: &Connection, _: &Tera, status: BuildStatus) -> Result<()> {
+    #[tracing::instrument(skip(_tera))]
+    fn build(&self, conn: &Connection, _tera: &Tera, status: BuildStatus) -> Result<()> {
         ensure_directory(Path::new("public/static").join(self.directory()?))?;
 
         let status = self.build_status(conn)?;

@@ -28,7 +28,7 @@ impl Site {
         Self { path, tera, conn }
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     pub fn build(&self) -> Result<()> {
         let content_dir = self.path.join("contents");
         let sass_dir = self.path.join("sass");
@@ -41,7 +41,7 @@ impl Site {
         Ok(())
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     fn discover_entries<T: Entry>(&self, path: &Path) -> Vec<T> {
         // Discover entries
         debug!("Discovering entries at {:?}", path);
@@ -53,7 +53,7 @@ impl Site {
             .collect()
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     fn process_entry<T: Entry>(&self, directory: &Path) -> Result<()> {
         debug!("Processing entries at {:?}", directory);
         let entries = self.discover_entries::<T>(directory);

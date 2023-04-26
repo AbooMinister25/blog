@@ -36,8 +36,8 @@ impl Entry for Stylesheet {
         Ok(String::new())
     }
 
-    #[tracing::instrument]
-    fn build(&self, conn: &Connection, _: &Tera, _: BuildStatus) -> Result<()> {
+    #[tracing::instrument(skip(_tera))]
+    fn build(&self, conn: &Connection, _tera: &Tera, _: BuildStatus) -> Result<()> {
         ensure_directory(Path::new("public/styles"))?;
         debug!(
             "Building stylesheet at {}",
