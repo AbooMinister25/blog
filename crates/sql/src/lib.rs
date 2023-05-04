@@ -37,28 +37,9 @@ pub fn setup_sql() -> Result<Connection> {
     )?;
     conn.execute(
         "
-        CREATE TABLE IF NOT EXISTS posts (
-            post_id INTEGER PRIMARY KEY,
-            title VARCHAR NOT NULL,
-            path VARCHAR NOT NULL,
-            hash TEXT NOT NULL,
-            rendered_content TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            series_id INTEGER,
-            FOREIGN KEY (series_id) REFERENCES series(series_id)
-        )
-    ",
-        (),
-    )?;
-    conn.execute(
-        "
         CREATE TABLE IF NOT EXISTS series (
             series_id INTEGER PRIMARY KEY,
-            name VARCHAR NOT NULL,
-            path VARCHAR NOT NULL,
-            hash TEXT NOT NULL,
-            description VARCHAR NOT NULL,
-            timestamp TEXT NOT NULL
+            name VARCHAR NOT NULL
         )
     ",
         (),
@@ -94,18 +75,6 @@ pub fn setup_sql() -> Result<Connection> {
     )?;
     conn.execute(
         "
-        CREATE TABLE IF NOT EXISTS tags_posts (
-            post_id INTEGER NOT NULL,
-            tag_id INTEGER NOT NULL,
-            PRIMARY KEY (post_id, tag_id),
-            FOREIGN KEY (post_id) REFERENCES posts(post_id),
-            FOREIGN KEY (tag_id) REFERENCES tags(tag_id)
-        )
-    ",
-        (),
-    )?;
-    conn.execute(
-        "
         CREATE TABLE IF NOT EXISTS tags_content (
             content_id INTEGER NOT NULL,
             tag_id INTEGER NOT NULL,
@@ -116,19 +85,6 @@ pub fn setup_sql() -> Result<Connection> {
     ",
         (),
     )?;
-    conn.execute(
-        "
-        CREATE TABLE IF NOT EXISTS tags_series (
-            series_id INTEGER NOT NULL,
-            tag_id INTEGER NOT NULL,
-            PRIMARY KEY (series_id, tag_id),
-            FOREIGN KEY (series_id) REFERENCES series(series_id),
-            FOREIGN KEY (tag_id) REFERENCES tags(tag_id)
-        )
-    ",
-        (),
-    )?;
-
     Ok(conn)
 }
 
@@ -258,59 +214,9 @@ pub fn update_post(
     Ok(())
 }
 
-// Insert a series into the database
 #[tracing::instrument]
-pub fn insert_series(
-    conn: &Connection,
-    name: &str,
-    path: &Path,
-    hash: &str,
-    description: &str,
-    date: DateTime<Utc>,
-) -> Result<()> {
-    conn.execute(
-        "INSERT INTO series
-                (name, path, description, hash, timestamp)
-                VALUES (?1, ?2, ?3, ?4, datetime(?5))
-                ",
-        (
-            &name,
-            &path
-                .to_str()
-                .context("Error while converting path to string")?,
-            &description,
-            &hash,
-            &date,
-        ),
-    )?;
-
-    Ok(())
-}
-
-// Update an existing series in the database
-#[tracing::instrument]
-pub fn update_series(
-    conn: &Connection,
-    name: &str,
-    description: &str,
-    date: DateTime<Utc>,
-    path: &Path,
-) -> Result<()> {
-    conn.execute(
-        "
-    UPDATE series
-    SET name = (:name),
-        description = (:description),
-        timestamp = datetime(:timestamp)
-    WHERE path = (:path)
-    ",
-        named_params! {
-            ":name": &name,
-            ":description": &description,
-            ":timestamp": &date,
-            ":path": &path.to_str().context("Error while converting path to string")?,
-        },
-    )?;
+pub fn insert_series(conn: &Connection, name: &str) -> Result<()> {
+    conn.execute("INSERT INTO series (name) VALUES (?1)", [&name])?;
 
     Ok(())
 }
@@ -334,68 +240,9 @@ pub fn insert_asset(conn: &Connection, path: &Path, hash: &str) -> Result<()> {
     Ok(())
 }
 
-// Insert into the tags_posts or tags_series table
-#[tracing::instrument]
-pub fn insert_tagmaps(
-    conn: &Connection,
-    path: &Path,
-    tags: &[String],
-    entity: MapFor,
-) -> Result<()> {
-    let path_str = path
-        .to_str()
-        .context("Error while converting path to string")?;
-
-    // A statement to check whether a tag-entity map already exists
-    let mut exists_stmt = match entity {
-        MapFor::Post => conn.prepare(
-            "SELECT post_id, tag_id from tags_posts WHERE (post_id = (?1) AND tag_id = (?2))",
-        )?,
-        MapFor::Series => conn.prepare(
-            "SELECT series_id, tag_id from tags_series WHERE (series_id = (?1) AND tag_id = (?2))",
-        )?,
-    };
-    // A statement to select tag id's from the database
-    let mut tags_stmt = conn.prepare("SELECT tag_id FROM tags WHERE name = ?")?;
-    // A statement to select id's for the entity from the database
-    let mut entity_stmt = match entity {
-        MapFor::Post => conn.prepare("SELECT post_id FROM posts WHERE path = ?")?,
-        MapFor::Series => conn.prepare("SELECT series_id FROM series WHERE path = ?")?,
-    };
-
-    let mut rows = entity_stmt.query([path_str])?;
-    let id: i32 = if let Some(row) = rows.next()? {
-        Ok(row.get(0)?)
-    } else {
-        Err(eyre!("Error while querying post"))
-    }?;
-
-    for tag in tags {
-        let mut rows = tags_stmt.query([&tag])?;
-        if let Some(row) = rows.next()? {
-            let tag_id: i32 = row.get(0)?;
-
-            if !exists_stmt.exists((id, tag_id))? {
-                match entity {
-                    MapFor::Post => conn.execute(
-                        "INSERT INTO tags_posts (post_id, tag_id) VALUES (?1, ?2)",
-                        (id, tag_id),
-                    )?,
-                    MapFor::Series => conn.execute(
-                        "INSERT INTO tags_series (series_id, tag_id) VALUES (?1, ?2)",
-                        (id, tag_id),
-                    )?,
-                };
-            }
-        }
-    }
-
-    Ok(())
-}
-
 // Insert tag maps for blog content
 #[tracing::instrument]
-pub fn n_insert_tagmaps(conn: &Connection, path: &Path, tags: &[String]) -> Result<()> {
+pub fn insert_tagmaps(conn: &Connection, path: &Path, tags: &[String]) -> Result<()> {
     let path_str = path
         .to_str()
         .context("Error while converting path to string")?;

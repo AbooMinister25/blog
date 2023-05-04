@@ -12,7 +12,7 @@ use color_eyre::{eyre::ContextCompat, Result};
 use entry::{filesystem::ensure_directory, summary::get_summary, BuildStatus, Entry, DATE_FORMAT};
 use markdown::Document;
 use rusqlite::Connection;
-use sql::{insert_content, insert_tags, n_insert_tagmaps};
+use sql::{insert_content, insert_series, insert_tagmaps, insert_tags};
 use tera::{Context, Tera};
 use tracing::debug;
 
@@ -136,7 +136,11 @@ impl Entry for BlogContent {
                     &markdown_hash,
                     parsed_document.date,
                 )?;
-                n_insert_tagmaps(conn, &self.path, &parsed_document.frontmatter.tags)?;
+                insert_tagmaps(conn, &self.path, &parsed_document.frontmatter.tags)?;
+
+                if let ContentType::Series = content_type {
+                    insert_series(conn, &parsed_document.frontmatter.title)?;
+                }
 
                 let summary = get_summary(&parsed_document.content)?;
                 render(tera, &summary, parsed_document, content_type)?;
@@ -169,7 +173,11 @@ impl Entry for BlogContent {
                     &markdown_hash,
                     parsed_document.date,
                 )?;
-                n_insert_tagmaps(conn, &self.path, &parsed_document.frontmatter.tags)?;
+                insert_tagmaps(conn, &self.path, &parsed_document.frontmatter.tags)?;
+
+                if let ContentType::Series = content_type {
+                    insert_series(conn, &parsed_document.frontmatter.title)?;
+                }
 
                 let summary = get_summary(&parsed_document.content)?;
                 render(tera, &summary, parsed_document, content_type)?;
