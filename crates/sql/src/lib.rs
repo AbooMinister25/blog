@@ -7,13 +7,6 @@ use color_eyre::eyre::{eyre, ContextCompat, Result};
 use rusqlite::{named_params, Connection};
 use std::path::Path;
 
-// Represents what entity the function `insert_tagmaps` should insert the tag-entity maps for.
-#[derive(Debug)]
-pub enum MapFor {
-    Post,
-    Series,
-}
-
 /// Sets up SQLite database, creating initial tables if they don't exist, and acquiring the connection.
 #[tracing::instrument]
 pub fn setup_sql() -> Result<Connection> {
@@ -157,63 +150,6 @@ pub fn update_content(
     Ok(())
 }
 
-// Insert a post into the database
-#[tracing::instrument]
-pub fn insert_post(
-    conn: &Connection,
-    title: &str,
-    path: &Path,
-    hash: &str,
-    content: &str,
-    date: DateTime<Utc>,
-) -> Result<()> {
-    conn.execute(
-        "INSERT INTO posts
-        (title, path, hash, rendered_content, timestamp)
-        VALUES (?1, ?2, ?3, ?4, datetime(?5))
-        ",
-        (
-            &title,
-            &path
-                .to_str()
-                .context("Error while converting path to string")?,
-            &hash,
-            &content,
-            &date,
-        ),
-    )?;
-
-    Ok(())
-}
-
-// Update an existing post in the database
-#[tracing::instrument]
-pub fn update_post(
-    conn: &Connection,
-    title: &str,
-    content: &str,
-    date: DateTime<Utc>,
-    path: &Path,
-) -> Result<()> {
-    conn.execute(
-        "
-    UPDATE posts
-    SET title = (:title),
-        rendered_content = (:content),
-        timestamp = datetime(:timestamp)
-    WHERE path = (:path)
-    ",
-        named_params! {
-            ":title": &title,
-            ":content": &content,
-            ":timestamp": &date,
-            ":path": &path.to_str().context("Error while converting path to string")?,
-        },
-    )?;
-
-    Ok(())
-}
-
 #[tracing::instrument]
 pub fn insert_series(conn: &Connection, name: &str) -> Result<()> {
     conn.execute("INSERT INTO series (name) VALUES (?1)", [&name])?;
@@ -260,7 +196,7 @@ pub fn insert_tagmaps(conn: &Connection, path: &Path, tags: &[String]) -> Result
     let id: i32 = if let Some(row) = rows.next()? {
         Ok(row.get(0)?)
     } else {
-        Err(eyre!("Error while querying post from database"))
+        Err(eyre!("Error while querying content from database"))
     }?;
 
     for tag in tags {
