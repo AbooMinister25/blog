@@ -2,7 +2,7 @@ use color_eyre::eyre::{ContextCompat, Result};
 use entry::filesystem::ensure_directory;
 use entry::{BuildStatus, Entry};
 use rusqlite::Connection;
-use sql::insert_asset;
+use sql::{get_hash, insert_asset, update_hash, For};
 use std::path::Path;
 use std::{fs, path::PathBuf};
 use tera::Tera;
@@ -59,19 +59,7 @@ impl Entry for StaticAsset {
     #[tracing::instrument]
     fn build_status(&self, conn: &Connection) -> Result<BuildStatus> {
         let asset_hash = self.hash()?;
-
-        let mut stmt = conn.prepare("SELECT hash FROM static_assets WHERE path = :path")?;
-        let path_str = self
-            .path
-            .to_str()
-            .context("Error while converting path to string")?;
-
-        // Get the hashes found for this path
-        let hashes_iter = stmt.query_map(&[(":path", path_str)], |row| row.get(0))?;
-        let mut hashes: Vec<String> = Vec::new();
-        for hash in hashes_iter {
-            hashes.push(hash?);
-        }
+        let hashes = get_hash(conn, &self.path, For::STATIC)?;
 
         // If the hashes are empty, a new file was created. If it was different from the new
         // hash, then the file contents changed. Otherwise the file was not changed.
@@ -104,20 +92,7 @@ impl Entry for StaticAsset {
                 self.copy_asset()?;
             }
             BuildStatus::Changed(asset_hash) => {
-                conn.execute(
-                    "UPDATE static_assets SET hash = (:hash) WHERE path = (:path)",
-                    &[
-                        (":hash", &asset_hash),
-                        (
-                            ":path",
-                            &self
-                                .path
-                                .to_str()
-                                .context("Path should be valid unicode")?
-                                .to_string(),
-                        ),
-                    ],
-                )?;
+                update_hash(conn, &asset_hash, &self.path, For::CONTENT)?;
                 self.copy_asset()?
             }
             _ => (), // Don't do anything if the file was unchanged

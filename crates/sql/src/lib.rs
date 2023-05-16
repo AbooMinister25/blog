@@ -7,6 +7,13 @@ use color_eyre::eyre::{eyre, ContextCompat, Result};
 use rusqlite::{named_params, Connection};
 use std::path::Path;
 
+// The table to execute an operation for
+#[derive(Debug)]
+pub enum For {
+    STATIC,
+    CONTENT,
+}
+
 /// Sets up SQLite database, creating initial tables if they don't exist, and acquiring the connection.
 #[tracing::instrument]
 pub fn setup_sql() -> Result<Connection> {
@@ -52,16 +59,6 @@ pub fn setup_sql() -> Result<Connection> {
         CREATE TABLE IF NOT EXISTS tags (
             tag_id INTEGER PRIMARY KEY,
             name VARCHAR NOT NULL
-        )
-    ",
-        (),
-    )?;
-    conn.execute(
-        "
-        CREATE TABLE IF NOT EXISTS assets (
-            asset_id INTEGER PRIMARY KEY,
-            path VARCHAR NOT NULL,
-            hash TEXT NOT NULL
         )
     ",
         (),
@@ -148,6 +145,46 @@ pub fn update_content(
     )?;
 
     Ok(())
+}
+
+// Update hash for a content entry in the database
+#[tracing::instrument]
+pub fn update_hash(conn: &Connection, new_hash: &str, path: &Path, for_: For) -> Result<()> {
+    let mut stmt = match for_ {
+        For::CONTENT => conn.prepare("UPDATE content SET hash = (:hash) WHERE path = (:path)"),
+        For::STATIC => conn.prepare("UPDATE static_assets SET hash = (:hash) WHERE path = (:path)"),
+    }?;
+
+    stmt.execute(&[
+        (":hash", &new_hash),
+        (
+            ":path",
+            &path.to_str().context("Path should be valid unicode")?,
+        ),
+    ])?;
+
+    Ok(())
+}
+
+// Fetch the hash from the database
+#[tracing::instrument]
+pub fn get_hash(conn: &Connection, path: &Path, for_: For) -> Result<Vec<String>> {
+    let mut stmt = match for_ {
+        For::CONTENT => conn.prepare("SELECT hash FROM content WHERE path = :path"),
+        For::STATIC => conn.prepare("SELECT hash FROM static_assets WHERE path = :path"),
+    }?;
+    let path_str = path
+        .to_str()
+        .context("Error while converting path to string")?;
+
+    // Get the hashes found for the path
+    let hashes_iter = stmt.query_map(&[(":path", path_str)], |row| row.get(0))?;
+    let mut hashes: Vec<String> = Vec::new();
+    for hash in hashes_iter {
+        hashes.push(hash?);
+    }
+
+    Ok(hashes)
 }
 
 #[tracing::instrument]
