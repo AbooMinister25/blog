@@ -42,7 +42,7 @@ impl Site {
     }
 
     #[tracing::instrument(skip(self))]
-    fn discover_entries<T: Entry>(&self, path: &Path) -> Vec<T> {
+    fn discover_entries<T: Entry, C: AsRef<Path> + std::fmt::Debug>(&self, path: C) -> Vec<T> {
         // Discover entries
         debug!("Discovering entries at {:?}", path);
         Walk::new(path)
@@ -56,7 +56,7 @@ impl Site {
     #[tracing::instrument(skip(self))]
     fn process_entry<T: Entry>(&self, directory: &Path) -> Result<()> {
         debug!("Processing entries at {:?}", directory);
-        let entries = self.discover_entries::<T>(directory);
+        let entries = self.discover_entries::<T, _>(directory);
         let build_statuses = entries
             .iter()
             .map(|p| p.build_status(&self.conn))

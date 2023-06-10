@@ -12,7 +12,7 @@ use comrak::{
     Arena, ComrakOptions, ComrakPlugins,
 };
 use serde::Deserialize;
-use std::{fs, path::Path};
+use std::{fmt::Debug, fs, path::Path};
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 
 // The frontmatter for a parsed document
@@ -34,7 +34,7 @@ pub struct Document {
 
 impl Document {
     #[tracing::instrument]
-    pub fn from_file(path: &Path) -> Result<Self> {
+    pub fn from_file<T: AsRef<Path> + Debug>(path: T) -> Result<Self> {
         let contents = fs::read_to_string(path)?;
         Self::from_string(&contents)
     }
