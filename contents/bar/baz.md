@@ -6,7 +6,7 @@ series = "Hello World Series"
 
 test post
 hi this is a test post. It consists of _both_ tests and `tests`. Can't believe it, right?
-I didn't believe it at first myself. Also - don't mention it to anyone, but theres also a
+I didn't believe it at first myself. Also - don't mention it to anyone, but theres also a 
 
 `println!("Hello World")`
 
@@ -16,15 +16,22 @@ _italic_
 
 **_bolt_italic_** 
 
--   yeah this is a thing
+-   yeah this is a thing  and it keeps going
 -   b 
 -   c 
+- another bullet point
+- another bullet point
 
 ## Header 1
 
 Yeah, this has some code. Deal with it.
 test-lang.org">rust's website</a>
 </div>
+
+   
+```rs 
+not anymore bahahahah
+```
 
 ```rust
 fn main() {

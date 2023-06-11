@@ -5,6 +5,8 @@
 use clap::Parser;
 use color_eyre::Result;
 use entry::filesystem::ensure_removed;
+use notify::Config;
+use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use site::Site;
 use sql::setup_sql;
 use std::path::Path;
@@ -13,7 +15,6 @@ use tera::Tera;
 use tracing::{info, metadata::LevelFilter, subscriber};
 use tracing_subscriber::fmt;
 use tracing_subscriber::prelude::*;
-
 #[derive(Parser)]
 struct Args {
     /// Reload on file changes
@@ -27,7 +28,7 @@ struct Args {
 
 #[tracing::instrument]
 fn main() -> Result<()> {
-    let now = Instant::now();
+    let mut now = Instant::now();
 
     // Install panic and error report handlers
     color_eyre::install()?;
@@ -64,11 +65,38 @@ fn main() -> Result<()> {
     info!("Loaded templates");
 
     let site = Site::new(Path::new(".").to_owned(), tera, conn);
+
     site.build()?;
     info!("Built site");
 
     let elapsed = now.elapsed();
     info!("Built in {:.2?} seconds", elapsed);
+
+    if args.watch {
+        let (tx, rx) = std::sync::mpsc::channel();
+
+        let mut watcher_contents = RecommendedWatcher::new(tx.clone(), Config::default())?;
+        let mut watcher_sass = RecommendedWatcher::new(tx.clone(), Config::default())?;
+        let mut watcher_static = RecommendedWatcher::new(tx.clone(), Config::default())?;
+        let mut watcher_templates = RecommendedWatcher::new(tx, Config::default())?;
+
+        watcher_contents.watch(Path::new("contents/"), RecursiveMode::Recursive)?;
+        watcher_sass.watch(Path::new("sass/"), RecursiveMode::Recursive)?;
+        watcher_static.watch(Path::new("static/"), RecursiveMode::Recursive)?;
+        watcher_templates.watch(Path::new("templates/"), RecursiveMode::Recursive)?;
+
+        for res in rx {
+            let event = res?;
+            if event.kind.is_modify() || event.kind.is_create() {
+                now = Instant::now();
+                site.build()?;
+                info!("Built site");
+
+                let elapsed = now.elapsed();
+                info!("Built in {:.2?} seconds", elapsed);
+            }
+        }
+    }
 
     Ok(())
 }
