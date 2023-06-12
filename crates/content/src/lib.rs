@@ -129,8 +129,6 @@ impl Entry for BlogContent {
                 debug!("Building entry at {:?} (new)", self.path);
 
                 let parsed_document = Document::from_file(&self.path)?;
-                // TODO Have special case handling (maybe outside of the match) for top level
-                // TODO index.md files, as to not insert them into the database.
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
                 insert_content(
                     conn,

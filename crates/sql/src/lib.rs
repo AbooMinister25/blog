@@ -328,9 +328,3 @@ pub fn get_posts(conn: &Connection, limit: usize, kind: &str) -> Result<Vec<Post
 
     Ok(posts)
 }
-
-// ///  Get all series
-// ///
-// /// # Errors
-// /// When an error is encountered when querying the database
-// pub fn get_all_series(conn: &Connection) -> Result<Vec<Post>> {}
