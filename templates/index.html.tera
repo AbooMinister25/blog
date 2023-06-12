@@ -5,27 +5,16 @@
     <title> Home </title>
     <meta name="og:title" property="og:title" content="Home" />
     <meta name="twitter:title" content="Home" />
-    <link rel="stylesheet" href="styles/index.css" />
-    <link rel="stylesheet" href="styles/postsview.css" />
+    <link rel="stylesheet" href="styles/post.css" />
+    <link rel="stylesheet" href="styles/post_list.css" />
     <meta name="description" content="Rayyan Cyclegar's Blog"/>
     <meta name="og:description" property="og:description" content="Rayyan Cyclegar's Blog" />
     <meta name="twitter:description" content="Rayyan Cyclegar's Blog" />
 {% endblock head %}
 
 {% block content %}
-    <div class="posts-content">
-        <p class="bio">
-            Hi, I'm Rayyan Cyclegar, high school student and programming
-            enthusiast. You can find me and my projects on
-            <a href="https://github.com/AbooMinister25">Github</a>. Here,
-            I'll occasionally write about tech, and sometimes
-            about non-tech.
-            <br />
-            <br />
-            If you want to get in touch with me, you can do so through my email,
-            <a href="mailto:aboominister@gmail.com">aboominister@gmail.com</a>, or on Discord, through the user
-            <code>AbooMinister#8971</code>.
-        </p>
+    <div class="post-content">
+        {{ markup | safe }}
         <div class="posts">
             <h1 class="posts-header">Latest Posts</h1>
             {% for post in posts %}

@@ -2,16 +2,30 @@
 #![allow(clippy::missing_panics_doc)]
 #![allow(clippy::module_name_repetitions)]
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use color_eyre::eyre::{eyre, ContextCompat, Result};
+use entry::summary::get_summary;
 use rusqlite::{named_params, Connection};
+use serde::Serialize;
 use std::path::Path;
+
+const DATE_FORMAT: &str = "%b %e, %Y";
 
 // The table to execute an operation for
 #[derive(Debug)]
 pub enum For {
     STATIC,
     CONTENT,
+}
+
+// Represents a blog post
+#[derive(Serialize)]
+pub struct Post {
+    pub title: String,
+    pub content: String,
+    pub summary: String,
+    pub timestamp: String,
+    pub tags: Vec<String>,
 }
 
 /// Sets up SQLite database, creating initial tables if they don't exist, and acquiring the connection.
@@ -27,7 +41,9 @@ pub fn setup_sql() -> Result<Connection> {
             content_id INTEGER PRIMARY KEY,
             title VARCHAR NOT NULL,
             path VARCHAR NOT NULL,
+            is_meta BOOLEAN NOT NULL,
             hash TEXT NOT NULL,
+            rendered_content TEXT NOT NULL,
             timestamp TEXT NOT NULL,
             series_id INTEGER,
             FOREIGN KEY (series_id) REFERENCES series(series_id)
@@ -98,20 +114,24 @@ pub fn insert_content(
     conn: &Connection,
     title: &str,
     path: &Path,
+    is_meta: bool,
     hash: &str,
+    rendered_content: &str,
     date: DateTime<Utc>,
 ) -> Result<()> {
     conn.execute(
         "INSERT INTO content
-        (title, path, hash, timestamp)
-        VALUES (?1, ?2, ?3, datetime(?4))
+        (title, path, is_meta, hash, rendered_content, timestamp)
+        VALUES (?1, ?2, ?3, ?4, ?5, datetime(?6))
         ",
         (
             &title,
             &path
                 .to_str()
                 .context("Error while converting path to string")?,
+            is_meta,
             &hash,
+            &rendered_content,
             &date,
         ),
     )?;
@@ -251,4 +271,60 @@ pub fn insert_tagmaps(conn: &Connection, path: &Path, tags: &[String]) -> Result
     }
 
     Ok(())
+}
+
+/// Fetch last ten posts from the database
+///
+/// this is like, super fucky, so I'm just going to refactor it later
+///
+/// # Errors
+/// When an error is encountered when querying the database
+pub fn get_posts(conn: &Connection) -> Result<Vec<Post>> {
+    let mut content_stmt = conn.prepare("SELECT content_id, title, rendered_content, timestamp FROM content WHERE NOT content.is_meta ORDER BY content_id LIMIT 10")?;
+    let mut tags_stmt = conn.prepare(
+        "
+        SELECT tags.name 
+        FROM content
+        INNER JOIN 
+            tags_content ON tags_content.content_id = content.content_id 
+        INNER JOIN 
+            tags ON tags_content.tag_id = tags.tag_id 
+        WHERE content.content_id = (?)",
+    )?;
+
+    // Load into an iterator of `Post`s
+    let posts_iter = content_stmt.query_map([], |row| {
+        let id: i32 = row.get(0)?;
+        let summary_str: String = row.get(2)?;
+        let date: NaiveDateTime = row.get(3)?;
+
+        // Fetch tags for post
+        let tags_iter = tags_stmt
+            .query_map([id], |tags_row| {
+                let tag_name = tags_row.get(0)?;
+                Ok(tag_name)
+            })
+            .expect("Error while fetching tags from database");
+
+        let mut tags = vec![];
+        for tag in tags_iter {
+            tags.push(tag.expect("Error while collecting tags"));
+        }
+
+        Ok(Post {
+            title: row.get(1)?,
+            content: row.get(2)?,
+            summary: get_summary(&summary_str).expect("Error while rewriting HTML"),
+            timestamp: date.format(DATE_FORMAT).to_string(),
+            tags,
+        })
+    })?;
+
+    // Collect iterator into a vec
+    let mut posts = vec![];
+    for post in posts_iter {
+        posts.push(post?);
+    }
+
+    Ok(posts)
 }

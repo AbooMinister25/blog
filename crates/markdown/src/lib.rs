@@ -21,6 +21,7 @@ pub struct Frontmatter {
     pub title: String,
     pub tags: Vec<String>,
     pub series: Option<String>,
+    pub is_meta: Option<bool>,
 }
 
 // Represent a parsed markdown document

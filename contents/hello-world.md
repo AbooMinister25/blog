@@ -22,7 +22,10 @@ _italic_
 ## Header 1
 
 Yeah, this has some code. Deal with it.
-test-lang.org">rust's website</a>
+
+
+<div class="blog-note">
+    This code is written in rust, so its very safe and blazingly fast. For more info, see <a href="https://rust-lang.org">rust's website</a>
 </div>
 
 ```rust

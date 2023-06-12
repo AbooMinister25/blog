@@ -12,9 +12,12 @@ use color_eyre::{eyre::ContextCompat, Result};
 use entry::{filesystem::ensure_directory, summary::get_summary, BuildStatus, Entry, DATE_FORMAT};
 use markdown::Document;
 use rusqlite::Connection;
-use sql::{get_hash, insert_content, insert_series, insert_tagmaps, insert_tags, update_hash, For};
+use sql::{
+    get_hash, get_posts, insert_content, insert_series, insert_tagmaps, insert_tags,
+    update_content, update_hash, For,
+};
 use tera::{Context, Tera};
-use tracing::debug;
+use tracing::{debug, info};
 
 // Represents a possible content type
 #[derive(Debug)]
@@ -33,11 +36,11 @@ impl ContentType {
         }
     }
 
-    pub fn template_name(&self) -> &str {
+    pub const fn template_name(&self) -> &str {
         match self {
             Self::Post => "post.html.tera",
             Self::Series => "series.html.tera",
-            Self::Index => todo!("Add a template for index page"),
+            Self::Index => "index.html.tera",
         }
     }
 }
@@ -54,7 +57,7 @@ impl BlogContent {
             .path
             .parent()
             .context("Path should have a parent directory")?;
-        let in_subdir = parent != Path::new("/contents");
+        let in_subdir = parent != Path::new("./contents");
 
         if self
             .path
@@ -121,7 +124,9 @@ impl Entry for BlogContent {
                     conn,
                     &parsed_document.frontmatter.title,
                     &self.path,
+                    parsed_document.frontmatter.is_meta.unwrap_or_default(),
                     &markdown_hash,
+                    &parsed_document.content,
                     parsed_document.date,
                 )?;
                 insert_tagmaps(conn, &self.path, &parsed_document.frontmatter.tags)?;
@@ -131,7 +136,7 @@ impl Entry for BlogContent {
                 }
 
                 let summary = get_summary(&parsed_document.content)?;
-                render(tera, &summary, parsed_document, content_type)?;
+                render(conn, tera, &summary, parsed_document, content_type)?;
                 debug!("Built entry");
             }
             BuildStatus::Changed(markdown_hash) => {
@@ -140,12 +145,12 @@ impl Entry for BlogContent {
 
                 let parsed_document = Document::from_file(&self.path)?;
                 insert_tags(conn, &parsed_document.frontmatter.tags)?;
-                insert_content(
+                update_content(
                     conn,
                     &parsed_document.frontmatter.title,
-                    &self.path,
-                    &markdown_hash,
+                    &parsed_document.content,
                     parsed_document.date,
+                    &self.path,
                 )?;
                 insert_tagmaps(conn, &self.path, &parsed_document.frontmatter.tags)?;
 
@@ -154,7 +159,7 @@ impl Entry for BlogContent {
                 }
 
                 let summary = get_summary(&parsed_document.content)?;
-                render(tera, &summary, parsed_document, content_type)?;
+                render(conn, tera, &summary, parsed_document, content_type)?;
                 debug!("Built entry");
             }
             BuildStatus::Unchanged => (), // Don't do anything if the file was unchanged
@@ -165,7 +170,13 @@ impl Entry for BlogContent {
 }
 
 #[tracing::instrument(skip(tera))]
-fn render(tera: &Tera, summary: &str, document: Document, content_type: ContentType) -> Result<()> {
+fn render(
+    conn: &Connection,
+    tera: &Tera,
+    summary: &str,
+    document: Document,
+    content_type: ContentType,
+) -> Result<()> {
     // Create the file
     let to_path = Path::new("public/")
         .join(content_type.directory())
@@ -181,6 +192,11 @@ fn render(tera: &Tera, summary: &str, document: Document, content_type: ContentT
     context.insert("toc", &document.toc);
     context.insert("markup", &document.content);
     context.insert("summary", summary);
+
+    if matches!(content_type, ContentType::Index) {
+        let posts = get_posts(conn)?;
+        context.insert("posts", &posts);
+    }
 
     // Render the template
     tera.render_to(content_type.template_name(), &context, file)?;
