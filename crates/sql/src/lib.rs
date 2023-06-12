@@ -41,7 +41,7 @@ pub fn setup_sql() -> Result<Connection> {
             content_id INTEGER PRIMARY KEY,
             title VARCHAR NOT NULL,
             path VARCHAR NOT NULL,
-            is_meta BOOLEAN NOT NULL,
+            kind TEXT NOT NULL,
             hash TEXT NOT NULL,
             rendered_content TEXT NOT NULL,
             timestamp TEXT NOT NULL,
@@ -114,14 +114,14 @@ pub fn insert_content(
     conn: &Connection,
     title: &str,
     path: &Path,
-    is_meta: bool,
+    kind: &str,
     hash: &str,
     rendered_content: &str,
     date: DateTime<Utc>,
 ) -> Result<()> {
     conn.execute(
         "INSERT INTO content
-        (title, path, is_meta, hash, rendered_content, timestamp)
+        (title, path, kind, hash, rendered_content, timestamp)
         VALUES (?1, ?2, ?3, ?4, ?5, datetime(?6))
         ",
         (
@@ -129,7 +129,7 @@ pub fn insert_content(
             &path
                 .to_str()
                 .context("Error while converting path to string")?,
-            is_meta,
+            &kind,
             &hash,
             &rendered_content,
             &date,
@@ -280,7 +280,7 @@ pub fn insert_tagmaps(conn: &Connection, path: &Path, tags: &[String]) -> Result
 /// # Errors
 /// When an error is encountered when querying the database
 pub fn get_posts(conn: &Connection) -> Result<Vec<Post>> {
-    let mut content_stmt = conn.prepare("SELECT content_id, title, rendered_content, timestamp FROM content WHERE NOT content.is_meta ORDER BY content_id LIMIT 10")?;
+    let mut content_stmt = conn.prepare("SELECT content_id, title, rendered_content, timestamp FROM content WHERE content.kind = 'post' ORDER BY content_id LIMIT 10")?;
     let mut tags_stmt = conn.prepare(
         "
         SELECT tags.name 

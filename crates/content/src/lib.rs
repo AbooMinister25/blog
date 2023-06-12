@@ -3,6 +3,8 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::must_use_candidate)]
 
+pub mod series_index;
+
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -17,7 +19,7 @@ use sql::{
     update_content, update_hash, For,
 };
 use tera::{Context, Tera};
-use tracing::{debug, info};
+use tracing::debug;
 
 // Represents a possible content type
 #[derive(Debug)]
@@ -41,6 +43,16 @@ impl ContentType {
             Self::Post => "post.html.tera",
             Self::Series => "series.html.tera",
             Self::Index => "index.html.tera",
+        }
+    }
+}
+
+impl std::fmt::Display for ContentType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Post => write!(f, "post"),
+            Self::Series => write!(f, "series"),
+            Self::Index => write!(f, "index"),
         }
     }
 }
@@ -124,7 +136,7 @@ impl Entry for BlogContent {
                     conn,
                     &parsed_document.frontmatter.title,
                     &self.path,
-                    parsed_document.frontmatter.is_meta.unwrap_or_default(),
+                    &content_type.to_string(),
                     &markdown_hash,
                     &parsed_document.content,
                     parsed_document.date,
