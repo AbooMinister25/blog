@@ -14,7 +14,6 @@
 
 .post-content h1 {
     font-size: 2rem;
-    margin-bottom: 0;
     color: latte.$text;
 
     @media (min-width: 801px) {
@@ -86,6 +85,10 @@
     @media (min-width: 600px) {
         font-size: 0.9rem;
     }
+}
+
+.post-content .post-title {
+    margin-bottom: 0;
 }
 
 .post-content .details {

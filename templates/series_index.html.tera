@@ -1,0 +1,30 @@
+{% extends "base.html.tera" %}
+
+{% block head %}
+    {{ super() }}
+    <title> Home </title>
+    <meta name="og:title" property="og:title" content="Series" />
+    <meta name="twitter:title" content="Series" />
+    <link rel="stylesheet" href="../styles/post.css" />
+    <link rel="stylesheet" href="../styles/post_list.css" />
+    <meta name="description" content="Rayyan Cyclegar's Blog"/>
+    <meta name="og:description" property="og:description" content="Rayyan Cyclegar's Blog" />
+    <meta name="twitter:description" content="Rayyan Cyclegar's Blog" />
+{% endblock head %}
+
+{% block content %}
+    <div class="post-content">
+        <p>Series are a collection of related articles that discuss some topic over a longer period of time, as opposed to individual posts which are one-off, and don't typically have follow-up parts.</p>
+        <p>Are you looking for <a href="/posts">posts</a> instead?</p>
+        <div class="posts">
+            <h1 class="posts-header">Series</h1>
+            {% for post in posts %}
+                <div class="post-card">
+                    <h1><a href={{ "/posts/" ~ post.title | urlencode }} class="header">{{ post.title }}</a></h1>
+                    <p class="details"> {{ post.timestamp }} * {{ post.tags | join(sep=", ") }} </p>
+                    <div class="summary"> {{ post.summary | safe }} </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}

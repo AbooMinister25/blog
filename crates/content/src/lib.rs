@@ -206,7 +206,7 @@ fn render(
     context.insert("summary", summary);
 
     if matches!(content_type, ContentType::Index) {
-        let posts = get_posts(conn)?;
+        let posts = get_posts(conn, 10, "post")?;
         context.insert("posts", &posts);
     }
 

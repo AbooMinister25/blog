@@ -38,6 +38,8 @@ impl Site {
         self.process_entry::<Stylesheet>(&sass_dir)?;
         self.process_entry::<StaticAsset>(&static_dir)?;
 
+        content::series_index::build_series_index(&self.conn, &self.tera)?;
+
         Ok(())
     }
 

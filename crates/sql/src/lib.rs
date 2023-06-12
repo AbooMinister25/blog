@@ -273,14 +273,14 @@ pub fn insert_tagmaps(conn: &Connection, path: &Path, tags: &[String]) -> Result
     Ok(())
 }
 
-/// Fetch last ten posts from the database
+/// Fetch posts from the database
 ///
 /// this is like, super fucky, so I'm just going to refactor it later
 ///
 /// # Errors
 /// When an error is encountered when querying the database
-pub fn get_posts(conn: &Connection) -> Result<Vec<Post>> {
-    let mut content_stmt = conn.prepare("SELECT content_id, title, rendered_content, timestamp FROM content WHERE content.kind = 'post' ORDER BY content_id LIMIT 10")?;
+pub fn get_posts(conn: &Connection, limit: usize, kind: &str) -> Result<Vec<Post>> {
+    let mut content_stmt = conn.prepare("SELECT content_id, title, rendered_content, timestamp FROM content WHERE content.kind = (?1) ORDER BY content_id LIMIT (?2)")?;
     let mut tags_stmt = conn.prepare(
         "
         SELECT tags.name 
@@ -293,7 +293,7 @@ pub fn get_posts(conn: &Connection) -> Result<Vec<Post>> {
     )?;
 
     // Load into an iterator of `Post`s
-    let posts_iter = content_stmt.query_map([], |row| {
+    let posts_iter = content_stmt.query_map((kind, limit), |row| {
         let id: i32 = row.get(0)?;
         let summary_str: String = row.get(2)?;
         let date: NaiveDateTime = row.get(3)?;
@@ -328,3 +328,9 @@ pub fn get_posts(conn: &Connection) -> Result<Vec<Post>> {
 
     Ok(posts)
 }
+
+// ///  Get all series
+// ///
+// /// # Errors
+// /// When an error is encountered when querying the database
+// pub fn get_all_series(conn: &Connection) -> Result<Vec<Post>> {}
