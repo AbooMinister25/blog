@@ -1,1 +1,7 @@
 /target
+*.db
+public/
+log
+flamegraph.svg
+perf.data
+perf.data.old
