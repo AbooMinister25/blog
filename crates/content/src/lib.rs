@@ -1,4 +1,5 @@
 use std::{
+    fmt::Debug,
     fs,
     path::{Path, PathBuf},
 };
@@ -41,10 +42,19 @@ impl Entry {
     }
 }
 
+impl From<Entry> for Post {
+    fn from(value: Entry) -> Self {
+        Self {
+            path: value.path,
+            content: value.content,
+        }
+    }
+}
+
 /// Traverses the files in the current folder, reads in their contents, hashes them, and yields `Entry`s.
 #[tracing::instrument]
-pub fn discover_entries(path: &Path) -> Result<Vec<Entry>> {
-    let content_path = path.join("contents");
+pub fn discover_entries<P: AsRef<Path> + Debug>(path: P) -> Result<Vec<Entry>> {
+    let content_path = path.as_ref().join("contents");
     trace!("Discovering entries at {:?}", content_path);
 
     Walk::new(content_path)

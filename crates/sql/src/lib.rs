@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::path::Path;
 
 use color_eyre::{eyre::ContextCompat, Result};
@@ -25,9 +26,10 @@ pub fn setup_sql() -> Result<Connection> {
 
 // Fetch hash from database
 #[tracing::instrument]
-pub fn get_hashes(conn: &Connection, path: &Path) -> Result<Vec<String>> {
+pub fn get_hashes<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<Vec<String>> {
     let mut stmt = conn.prepare("SELECT hash FROM posts WHERE path = :path")?;
     let path_str = path
+        .as_ref()
         .to_str()
         .context("Error while converting path to string")?;
 
