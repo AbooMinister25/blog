@@ -46,11 +46,12 @@ pub fn get_hashes<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<
 
 // Insert a post into the database
 #[tracing::instrument]
-pub fn insert_post(conn: &Connection, path: &Path, hash: &str) -> Result<()> {
+pub fn insert_post<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &str) -> Result<()> {
     conn.execute(
         "INSERT INTO posts (path, hash) VALUES (?1, ?2)",
         (
             &path
+                .as_ref()
                 .to_str()
                 .context("Error while converting path to string")?,
             &hash,
@@ -62,13 +63,20 @@ pub fn insert_post(conn: &Connection, path: &Path, hash: &str) -> Result<()> {
 
 // Update an existing post in the database with a new hash
 #[tracing::instrument]
-pub fn update_hash(conn: &Connection, path: &Path, new_hash: &str) -> Result<()> {
+pub fn update_hash<P: AsRef<Path> + Debug>(
+    conn: &Connection,
+    path: P,
+    new_hash: &str,
+) -> Result<()> {
     let mut stmt = conn.prepare("UPDATE posts SET hash = (:hash) WHERE path = (:path)")?;
     stmt.execute(&[
         (":hash", &new_hash),
         (
             ":path",
-            &path.to_str().context("Path should be valid unicode")?,
+            &path
+                .as_ref()
+                .to_str()
+                .context("Path should be valid unicode")?,
         ),
     ])?;
 
