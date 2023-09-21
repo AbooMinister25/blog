@@ -1,6 +1,6 @@
 use std::{
     fmt::Debug,
-    fs,
+    fs, io,
     path::{Path, PathBuf},
 };
 
@@ -30,15 +30,12 @@ impl Post {
 }
 
 impl Entry {
-    pub fn from_file(path: PathBuf) -> Result<Self> {
-        let content = fs::read_to_string(&path)?;
-        let hash = format!("{:016x}", seahash::hash(content.as_bytes()));
-
-        Ok(Self {
+    pub fn new(path: PathBuf, content: String, hash: String) -> Self {
+        Self {
             path,
             content,
             hash,
-        })
+        }
     }
 }
 
@@ -51,36 +48,44 @@ impl From<Entry> for Post {
     }
 }
 
-/// Traverses the files in the current folder, reads in their contents, hashes them, and yields `Entry`s.
+/// Traverse files in content folder, read in their content, hash them, and then filter to get
+/// only the ones that have changed, or have been newly created, since the last run of the program.
 #[tracing::instrument]
-pub fn discover_entries<P: AsRef<Path> + Debug>(path: P) -> Result<Vec<Entry>> {
-    let content_path = path.as_ref().join("contents");
-    trace!("Discovering entries at {:?}", content_path);
+pub fn discover_entries<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<Vec<Entry>> {
+    let mut ret = Vec::new();
 
-    Walk::new(content_path)
+    let content_path = path.as_ref().join("contents");
+    trace!("Discovering posts at {:?}", content_path);
+
+    // TODO: Refactor this when introducing parallel stuff, it aint ideal right now
+
+    let entries = Walk::new(content_path)
         .filter_map(Result::ok)
         .map(DirEntry::into_path)
         .filter(|p| !p.is_dir())
-        .map(Entry::from_file)
-        .collect()
-}
+        .collect::<Vec<PathBuf>>();
 
-/// Filter entries to get only the ones that have changed, or have been newly created, since the last run of the program.
-#[tracing::instrument]
-pub fn to_build(conn: &Connection, entries: Vec<Entry>) -> Result<Vec<Entry>> {
-    let mut ret = Vec::new();
+    let content = entries
+        .iter()
+        .map(fs::read_to_string)
+        .collect::<Result<Vec<String>, io::Error>>()?;
 
-    for entry in entries {
-        let hashes = get_hashes(conn, &entry.path)?;
+    let hashes = content
+        .iter()
+        .map(|s| format!("{:016x}", seahash::hash(s.as_bytes())))
+        .collect::<Vec<String>>();
+
+    for ((path, content), hash) in entries.into_iter().zip(content).zip(hashes) {
+        let hashes = get_hashes(conn, &path)?;
 
         if hashes.is_empty() {
             // A new file was created.
-            insert_post(conn, &entry.path, &entry.hash)?;
-            ret.push(entry)
-        } else if hashes[0] != entry.hash {
+            insert_post(conn, &path, &hash)?;
+            ret.push(Entry::new(path, content, hash))
+        } else if hashes[0] != hash {
             // Existing file was changed.
-            update_hash(conn, &entry.path, &entry.hash)?;
-            ret.push(entry)
+            update_hash(conn, &path, &hash)?;
+            ret.push(Entry::new(path, content, hash))
         }
     }
 

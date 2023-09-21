@@ -26,9 +26,8 @@ pub struct Site {
 
 impl Site {
     pub fn new<P: AsRef<Path> + Debug>(conn: Connection, path: P) -> Result<Self> {
-        let entries = content::discover_entries(&path)?;
-        let to_build = content::to_build(&conn, entries)?;
-        let posts = to_build.into_iter().map(Post::from).collect::<Vec<Post>>();
+        let entries = content::discover_entries(&conn, &path)?;
+        let posts = entries.into_iter().map(Post::from).collect::<Vec<Post>>();
 
         let ctx = Context::new(conn);
 
