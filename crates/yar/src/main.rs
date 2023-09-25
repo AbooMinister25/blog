@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic, clippy::nursery)]
+
 use std::time::Instant;
 
 use clap::Parser;

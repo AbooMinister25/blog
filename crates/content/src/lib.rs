@@ -1,3 +1,7 @@
+#![warn(clippy::pedantic, clippy::nursery)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::missing_const_for_fn)]
+
 use std::{
     fmt::Debug,
     fs, io,
@@ -81,11 +85,11 @@ pub fn discover_entries<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> R
         if hashes.is_empty() {
             // A new file was created.
             insert_post(conn, &path, &hash)?;
-            ret.push(Entry::new(path, content, hash))
+            ret.push(Entry::new(path, content, hash));
         } else if hashes[0] != hash {
             // Existing file was changed.
             update_hash(conn, &path, &hash)?;
-            ret.push(Entry::new(path, content, hash))
+            ret.push(Entry::new(path, content, hash));
         }
     }
 

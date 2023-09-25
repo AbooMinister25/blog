@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic, clippy::nursery)]
+
 use std::fmt::Debug;
 use std::path::Path;
 

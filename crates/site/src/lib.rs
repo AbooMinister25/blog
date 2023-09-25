@@ -1,3 +1,6 @@
+#![warn(clippy::pedantic, clippy::nursery)]
+#![allow(clippy::missing_errors_doc)]
+
 use std::fmt::Debug;
 use std::path::{Path, PathBuf};
 

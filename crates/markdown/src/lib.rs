@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic, clippy::nursery)]
+
 use color_eyre::Result;
 use comrak::{
     plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder},
