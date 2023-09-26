@@ -1,5 +1,7 @@
 #![warn(clippy::pedantic, clippy::nursery)]
 
+mod summary;
+
 use chrono::{DateTime, Utc};
 use color_eyre::Result;
 use comrak::{
@@ -33,6 +35,7 @@ pub struct Document {
     pub content: String,
     pub frontmatter: Frontmatter,
     pub toc: Option<Vec<String>>,
+    pub summary: String,
 }
 
 impl MarkdownRenderer {
@@ -81,6 +84,7 @@ impl MarkdownRenderer {
             content: String::from_utf8(html)?,
             frontmatter,
             toc: (!toc.is_empty()).then_some(toc),
+            summary: summary::get_summary(content)?,
         })
     }
 
