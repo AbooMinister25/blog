@@ -9,6 +9,7 @@ edition = "2021"
 chrono = { version = "0.4.31", features = ["serde"] }
 color-eyre = "0.6.2"
 comrak = "0.18.0"
+lol_html = "1.2.0"
 serde = { version = "1.0.188", features = ["derive"] }
 syntect = { version = "5.1.0", default-features = false, features = [
     "default-fancy",
