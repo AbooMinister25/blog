@@ -79,12 +79,14 @@ impl MarkdownRenderer {
         let mut html = Vec::new();
         format_html_with_plugins(root, &self.options, &mut html, &plugins)?;
 
+        let string_html = String::from_utf8(html)?;
+
         Ok(Document {
             date: Utc::now(),
-            content: String::from_utf8(html)?,
+            summary: summary::get_summary(&string_html)?,
+            content: string_html,
             frontmatter,
             toc: (!toc.is_empty()).then_some(toc),
-            summary: summary::get_summary(content)?,
         })
     }
 
