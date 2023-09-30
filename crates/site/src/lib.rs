@@ -6,16 +6,21 @@ use std::path::{Path, PathBuf};
 
 use color_eyre::Result;
 use content::Post;
+use markdown::MarkdownRenderer;
 use rusqlite::Connection;
 
 #[derive(Debug)]
 pub struct Context {
     pub conn: Connection,
+    pub markdown_renderer: MarkdownRenderer,
 }
 
 impl Context {
-    pub fn new(conn: Connection) -> Self {
-        Self { conn }
+    pub fn new(conn: Connection, markdown_renderer: MarkdownRenderer) -> Self {
+        Self {
+            conn,
+            markdown_renderer,
+        }
     }
 }
 
@@ -32,7 +37,9 @@ impl Site {
         let entries = content::discover_entries(&conn, &path)?;
         let posts = entries.into_iter().map(Post::from).collect::<Vec<Post>>();
 
-        let ctx = Context::new(conn);
+        let renderer = MarkdownRenderer::new()?;
+
+        let ctx = Context::new(conn, renderer);
 
         Ok(Self {
             ctx,

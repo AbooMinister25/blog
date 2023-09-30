@@ -8,5 +8,6 @@ edition = "2021"
 [dependencies]
 color-eyre = "0.6.2"
 content = { path = "../content" }
+markdown = { path = "../markdown" }
 
 rusqlite = "0.29.0"

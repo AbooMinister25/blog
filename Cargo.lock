@@ -320,6 +320,7 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "ignore",
+ "markdown",
  "rusqlite",
  "seahash",
  "sql",
@@ -1375,6 +1376,7 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "content",
+ "markdown",
  "rusqlite",
 ]
 
