@@ -3,6 +3,7 @@
 #![allow(clippy::missing_const_for_fn)]
 
 use std::{
+    default::Default,
     fmt::Debug,
     fs, io,
     path::{Path, PathBuf},
@@ -21,15 +22,20 @@ pub struct Entry {
     pub hash: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Post {
     pub path: PathBuf,
+    pub raw_content: String,
     pub content: String,
 }
 
 impl Post {
     pub fn new(path: PathBuf, content: String) -> Self {
-        Self { path, content }
+        Self {
+            path,
+            raw_content: content,
+            ..Default::default()
+        }
     }
 }
 
@@ -45,10 +51,7 @@ impl Entry {
 
 impl From<Entry> for Post {
     fn from(value: Entry) -> Self {
-        Self {
-            path: value.path,
-            content: value.content,
-        }
+        Self::new(value.path, value.content)
     }
 }
 
