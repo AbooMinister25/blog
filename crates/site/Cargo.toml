@@ -11,3 +11,5 @@ content = { path = "../content" }
 markdown = { path = "../markdown" }
 
 rusqlite = "0.29.0"
+tera = "1.19.1"
+tracing = "0.1.37"
