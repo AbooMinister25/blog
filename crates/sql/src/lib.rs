@@ -22,6 +22,16 @@ pub fn setup_sql() -> Result<Connection> {
     ",
         (),
     )?;
+    conn.execute(
+        "
+        CREATE TABLE IF NOT EXISTS static_assets (
+            asset_id INTEGER PRIMARY KEY,
+            path VARCHAR NOT NULL,
+            hash TEXT NOT NULL
+        )
+    ",
+        (),
+    )?;
 
     Ok(conn)
 }
