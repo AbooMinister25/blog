@@ -18,6 +18,7 @@ use rusqlite::Connection;
 use sql::{get_hashes, insert_post, update_hash};
 use tera::{Context, Tera};
 use tracing::trace;
+use utils::fs::ensure_directory;
 
 pub const DATE_FORMAT: &str = "%b %e, %Y";
 
@@ -132,13 +133,4 @@ pub fn discover_entries<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> R
     }
 
     Ok(ret)
-}
-
-// If the given directory doesn't exist, creates it.
-pub fn ensure_directory<T: AsRef<Path>>(path: T) -> Result<()> {
-    if !path.as_ref().exists() {
-        fs::create_dir_all(path)?;
-    }
-
-    Ok(())
 }

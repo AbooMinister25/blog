@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 sql = { path = "../sql" }
 markdown = { path = "../markdown" }
+utils = { path = "../utils" }
 
 color-eyre = "0.6.2"
 ignore = "0.4.20"

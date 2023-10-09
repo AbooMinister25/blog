@@ -12,6 +12,7 @@ pub fn setup_sql() -> Result<Connection> {
     // Establish connection to the database
     let conn = Connection::open("blog.db")?;
 
+    // TODO: Maybe merge these into a single table.
     conn.execute(
         "
         CREATE TABLE IF NOT EXISTS posts (
