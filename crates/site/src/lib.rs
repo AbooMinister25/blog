@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use color_eyre::Result;
 use content::Post;
-use entry::{discover_entries, Entry};
+use entry::discover_entries;
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
 use sass::Stylesheet;
@@ -36,14 +36,12 @@ pub struct Site {
     pub ctx: Context,
     pub root: PathBuf,
     pub posts: Vec<Post>,
+    pub stylesheets: Vec<Stylesheet>,
 }
 
 impl Site {
     #[tracing::instrument]
     pub fn new<P: AsRef<Path> + Debug>(conn: Connection, path: P) -> Result<Self> {
-        // let entries = content::discover_entries(&conn, &path)?;
-        // let posts = entries.into_iter().map(Post::from).collect::<Vec<Post>>();
-
         let renderer = MarkdownRenderer::new()?;
 
         info!("Loaded templates");
@@ -54,6 +52,7 @@ impl Site {
             ctx,
             root: path.as_ref().to_path_buf(),
             posts: Vec::new(),
+            stylesheets: Vec::new(),
         })
     }
 
@@ -73,15 +72,25 @@ impl Site {
             }
         }
 
-        let _ = posts
+        self.posts = posts;
+        self.stylesheets = stylesheets;
+
+        Ok(())
+    }
+
+    #[tracing::instrument]
+    pub fn render(&mut self) -> Result<()> {
+        let _ = self
+            .posts
             .iter_mut()
             .map(|p| p.render(&self.ctx.tera, &self.ctx.markdown_renderer, &self.root))
-            .collect::<Result<Vec<()>>>();
+            .collect::<Result<Vec<()>>>()?;
 
-        let _ = stylesheets
+        let _ = self
+            .stylesheets
             .iter_mut()
             .map(|s| s.render(&self.root))
-            .collect::<Result<Vec<()>>>();
+            .collect::<Result<Vec<()>>>()?;
 
         Ok(())
     }
