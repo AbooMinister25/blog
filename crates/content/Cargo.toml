@@ -6,13 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sql = { path = "../sql" }
 markdown = { path = "../markdown" }
 utils = { path = "../utils" }
+entry = { path = "../entry" }
 
 color-eyre = "0.6.2"
-ignore = "0.4.20"
-rusqlite = "0.29.0"
 seahash = "4.1.0"
 tracing = "0.1.37"
 tera = "1.19.1"

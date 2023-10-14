@@ -6,8 +6,10 @@ use std::path::{Path, PathBuf};
 
 use color_eyre::Result;
 use content::Post;
+use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
+use sass::Stylesheet;
 use tera::Tera;
 use tracing::info;
 
@@ -32,26 +34,56 @@ impl Context {
 #[derive(Debug)]
 pub struct Site {
     pub ctx: Context,
-    pub site_path: PathBuf,
+    pub root: PathBuf,
     pub posts: Vec<Post>,
 }
 
 impl Site {
     #[tracing::instrument]
     pub fn new<P: AsRef<Path> + Debug>(conn: Connection, path: P) -> Result<Self> {
-        let entries = content::discover_entries(&conn, &path)?;
-        let posts = entries.into_iter().map(Post::from).collect::<Vec<Post>>();
+        // let entries = content::discover_entries(&conn, &path)?;
+        // let posts = entries.into_iter().map(Post::from).collect::<Vec<Post>>();
 
         let renderer = MarkdownRenderer::new()?;
+
         info!("Loaded templates");
         let tera = Tera::new("templates/**/*.tera")?;
         let ctx = Context::new(conn, renderer, tera);
 
         Ok(Self {
             ctx,
-            site_path: path.as_ref().to_path_buf(),
-            posts,
+            root: path.as_ref().to_path_buf(),
+            posts: Vec::new(),
         })
+    }
+
+    #[tracing::instrument]
+    pub fn discover(&mut self) -> Result<()> {
+        info!("Discovering entries");
+        let entries = discover_entries(&self.ctx.conn, &self.root)?;
+
+        let mut posts = Vec::new();
+        let mut stylesheets = Vec::new();
+
+        for entry in entries {
+            if entry.path.extension().is_some_and(|e| e == ".md") {
+                posts.push(Post::from(entry));
+            } else if entry.path.extension().is_some_and(|e| e == ".scss") {
+                stylesheets.push(Stylesheet::from(entry));
+            }
+        }
+
+        let _ = posts
+            .iter_mut()
+            .map(|p| p.render(&self.ctx.tera, &self.ctx.markdown_renderer, &self.root))
+            .collect::<Result<Vec<()>>>();
+
+        let _ = stylesheets
+            .iter_mut()
+            .map(|s| s.render(&self.root))
+            .collect::<Result<Vec<()>>>();
+
+        Ok(())
     }
 
     #[tracing::instrument]
