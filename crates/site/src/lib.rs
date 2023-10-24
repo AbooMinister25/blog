@@ -36,13 +36,14 @@ impl Context {
 pub struct Site {
     pub ctx: Context,
     pub root: PathBuf,
+    pub output_path: PathBuf,
     pub posts: Vec<Post>,
     pub stylesheets: Vec<Stylesheet>,
 }
 
 impl Site {
     #[tracing::instrument]
-    pub fn new<P: AsRef<Path> + Debug>(conn: Connection, path: P) -> Result<Self> {
+    pub fn new<P: AsRef<Path> + Debug>(conn: Connection, path: P, output_path: P) -> Result<Self> {
         let renderer = MarkdownRenderer::new()?;
 
         info!("Loaded templates");
@@ -52,6 +53,7 @@ impl Site {
         Ok(Self {
             ctx,
             root: path.as_ref().to_path_buf(),
+            output_path: path.as_ref().to_path_buf(),
             posts: Vec::new(),
             stylesheets: Vec::new(),
         })
@@ -90,13 +92,13 @@ impl Site {
         let _ = self
             .posts
             .iter_mut()
-            .map(|p| p.render(&self.ctx.tera, &self.ctx.markdown_renderer, &self.root))
+            .map(|p| p.render(&self.ctx.tera, &self.ctx.markdown_renderer, &self.output_path))
             .collect::<Result<Vec<()>>>()?;
 
         let _ = self
             .stylesheets
             .iter_mut()
-            .map(|s| s.render(&self.root))
+            .map(|s| s.render(&self.output_path))
             .collect::<Result<Vec<()>>>()?;
 
         Ok(())

@@ -53,7 +53,7 @@ fn main() -> Result<()> {
     let conn = setup_sql()?;
     info!("Connected to database, created tables");
 
-    let mut site = Site::new(conn, ".")?;
+    let mut site = Site::new(conn, ".", "public/")?;
     site.build()?;
 
     info!("Built site");
