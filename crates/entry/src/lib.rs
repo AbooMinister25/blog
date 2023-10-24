@@ -34,8 +34,8 @@ pub fn discover_entries<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> R
     let mut ret = Vec::new();
 
     trace!("Discovering entries at {:?}", path);
+    
     // TODO: Refactor this when introducing parallel stuff, it aint ideal right now
-
     let entries = read_entries(conn, &path)?;
     let hashes = entries
         .iter()

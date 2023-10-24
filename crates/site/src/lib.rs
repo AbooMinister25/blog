@@ -44,10 +44,15 @@ pub struct Site {
 impl Site {
     #[tracing::instrument]
     pub fn new<P: AsRef<Path> + Debug>(conn: Connection, path: P, output_path: P) -> Result<Self> {
-        let renderer = MarkdownRenderer::new()?;
+        let renderer = MarkdownRenderer::new(&path)?;
 
         info!("Loaded templates");
-        let tera = Tera::new("templates/**/*.tera")?;
+        let tera = Tera::new(
+            path.as_ref()
+                .join("templates/**/*.tera")
+                .to_str()
+                .context("Filename should be valid UTF-8")?,
+        )?;
         let ctx = Context::new(conn, renderer, tera);
 
         Ok(Self {
@@ -92,7 +97,13 @@ impl Site {
         let _ = self
             .posts
             .iter_mut()
-            .map(|p| p.render(&self.ctx.tera, &self.ctx.markdown_renderer, &self.output_path))
+            .map(|p| {
+                p.render(
+                    &self.ctx.tera,
+                    &self.ctx.markdown_renderer,
+                    &self.output_path,
+                )
+            })
             .collect::<Result<Vec<()>>>()?;
 
         let _ = self

@@ -2,6 +2,9 @@
 
 mod summary;
 
+use std::fmt::Debug;
+use std::path::Path;
+
 use chrono::{DateTime, Utc};
 use color_eyre::Result;
 use comrak::{
@@ -40,10 +43,10 @@ pub struct Document {
 
 impl MarkdownRenderer {
     #[tracing::instrument]
-    pub fn new() -> Result<Self> {
+    pub fn new<P: AsRef<Path> + Debug>(path: P) -> Result<Self> {
         // Load the theme set
         let ss = SyntaxSet::load_defaults_newlines();
-        let theme_set = ThemeSet::load_from_folder("themes/")?;
+        let theme_set = ThemeSet::load_from_folder(path.as_ref().join("themes/"))?;
 
         // Create an adapter and choose the syntax highlighting theme.
         let adapter = SyntectAdapterBuilder::new()
