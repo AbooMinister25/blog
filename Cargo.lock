@@ -356,13 +356,12 @@ name = "content"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
- "ignore",
+ "entry",
  "markdown",
- "rusqlite",
  "seahash",
- "sql",
  "tera",
  "tracing",
+ "utils",
 ]
 
 [[package]]
@@ -515,6 +514,18 @@ name = "entities"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5320ae4c3782150d900b79807611a59a99fc9a1d61d686faafc24b93fc8d7ca"
+
+[[package]]
+name = "entry"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "ignore",
+ "rusqlite",
+ "seahash",
+ "sql",
+ "tracing",
+]
 
 [[package]]
 name = "equivalent"
@@ -1586,8 +1597,10 @@ name = "sass"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "entry",
  "rsass",
  "tracing",
+ "utils",
 ]
 
 [[package]]
@@ -1710,8 +1723,10 @@ version = "0.1.0"
 dependencies = [
  "color-eyre",
  "content",
+ "entry",
  "markdown",
  "rusqlite",
+ "sass",
  "tera",
  "tracing",
 ]
@@ -2092,6 +2107,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
 
 [[package]]
+name = "utils"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+]
+
+[[package]]
 name = "valuable"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2322,6 +2344,8 @@ dependencies = [
  "clap",
  "color-eyre",
  "notify",
+ "site",
+ "sql",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
