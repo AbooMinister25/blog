@@ -4,6 +4,8 @@ use std::time::Instant;
 
 use clap::Parser;
 use color_eyre::Result;
+use site::Site;
+use sql::setup_sql;
 use tracing::{info, metadata::LevelFilter, subscriber};
 use tracing_subscriber::fmt;
 use tracing_subscriber::prelude::*;
@@ -26,7 +28,6 @@ fn main() -> Result<()> {
     // Install panic and error report handlers
     color_eyre::install()?;
 
-    // Set up tracing subscribers
     let file_appender = tracing_appender::rolling::hourly("log/", "ssg.log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
 
@@ -42,13 +43,18 @@ fn main() -> Result<()> {
     subscriber::set_global_default(subscriber)?;
     info!("Set up subscribers");
 
-    // Parse command line arguments
     let args = Args::parse();
 
     // Clean build
     if args.clean {
         todo!()
     }
+
+    let conn = setup_sql()?;
+    info!("Connected to database, created tables");
+
+    let mut site = Site::new(conn, ".")?;
+    site.build()?;
 
     info!("Built site");
 

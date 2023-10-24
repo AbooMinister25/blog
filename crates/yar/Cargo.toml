@@ -6,6 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+site = { path = "../site" }
+sql = { path = "../sql" }
+
 clap = { version = "4.4.2", features = ["derive"] }
 color-eyre = "0.6.2"
 notify = "6.1.1"

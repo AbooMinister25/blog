@@ -4,6 +4,7 @@
 use std::fmt::Debug;
 use std::path::{Path, PathBuf};
 
+use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
 use content::Post;
 use entry::discover_entries;
@@ -65,10 +66,16 @@ impl Site {
         let mut stylesheets = Vec::new();
 
         for entry in entries {
-            if entry.path.extension().is_some_and(|e| e == ".md") {
-                posts.push(Post::from(entry));
-            } else if entry.path.extension().is_some_and(|e| e == ".scss") {
-                stylesheets.push(Stylesheet::from(entry));
+            match entry
+                .path
+                .extension()
+                .context("File name should have an extension.")?
+                .to_str()
+                .context("File name should be valid unicode")?
+            {
+                ".md" => posts.push(Post::from(entry)),
+                ".scss" => stylesheets.push(Stylesheet::from(entry)),
+                _ => todo!(),
             }
         }
 
@@ -97,9 +104,8 @@ impl Site {
 
     #[tracing::instrument]
     pub fn build(&mut self) -> Result<()> {
-        for post in &mut self.posts {
-            post.render(&self.ctx.tera, &self.ctx.markdown_renderer, "public/")?;
-        }
+        self.discover()?;
+        self.build()?;
 
         Ok(())
     }
