@@ -15,18 +15,8 @@ pub fn setup_sql() -> Result<Connection> {
     // TODO: Maybe merge these into a single table.
     conn.execute(
         "
-        CREATE TABLE IF NOT EXISTS posts (
+        CREATE TABLE IF NOT EXISTS entries (
             post_id INTEGER PRIMARY KEY,
-            path VARCHAR NOT NULL,
-            hash TEXT NOT NULL
-        )
-    ",
-        (),
-    )?;
-    conn.execute(
-        "
-        CREATE TABLE IF NOT EXISTS static_assets (
-            asset_id INTEGER PRIMARY KEY,
             path VARCHAR NOT NULL,
             hash TEXT NOT NULL
         )
@@ -40,7 +30,7 @@ pub fn setup_sql() -> Result<Connection> {
 // Fetch hash from database
 #[tracing::instrument]
 pub fn get_hashes<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<Vec<String>> {
-    let mut stmt = conn.prepare("SELECT hash FROM posts WHERE path = :path")?;
+    let mut stmt = conn.prepare("SELECT hash FROM entries WHERE path = :path")?;
     let path_str = path
         .as_ref()
         .to_str()
@@ -59,9 +49,9 @@ pub fn get_hashes<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<
 
 // Insert a post into the database
 #[tracing::instrument]
-pub fn insert_post<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &str) -> Result<()> {
+pub fn insert_entry<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &str) -> Result<()> {
     conn.execute(
-        "INSERT INTO posts (path, hash) VALUES (?1, ?2)",
+        "INSERT INTO entries (path, hash) VALUES (?1, ?2)",
         (
             &path
                 .as_ref()
@@ -76,12 +66,12 @@ pub fn insert_post<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &st
 
 // Update an existing post in the database with a new hash
 #[tracing::instrument]
-pub fn update_hash<P: AsRef<Path> + Debug>(
+pub fn update_entry_hash<P: AsRef<Path> + Debug>(
     conn: &Connection,
     path: P,
     new_hash: &str,
 ) -> Result<()> {
-    let mut stmt = conn.prepare("UPDATE posts SET hash = (:hash) WHERE path = (:path)")?;
+    let mut stmt = conn.prepare("UPDATE entries SET hash = (:hash) WHERE path = (:path)")?;
     stmt.execute(&[
         (":hash", &new_hash),
         (

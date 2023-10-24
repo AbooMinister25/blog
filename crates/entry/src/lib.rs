@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use color_eyre::Result;
 use ignore::Walk;
 use rusqlite::Connection;
-use sql::{get_hashes, insert_post, update_hash};
+use sql::{get_hashes, insert_entry, update_entry_hash};
 use tracing::trace;
 
 /// Represent an entry - any item that is to be processed by the static site generator.
@@ -47,11 +47,11 @@ pub fn discover_entries<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> R
 
         if hashes.is_empty() {
             // A new file was created.
-            insert_post(conn, &path, &hash)?;
+            insert_entry(conn, &path, &hash)?;
             ret.push(Entry::new(path, content, hash));
         } else if hashes[0] != hash {
             // Existing file was changed.
-            update_hash(conn, &path, &hash)?;
+            update_entry_hash(conn, &path, &hash)?;
             ret.push(Entry::new(path, content, hash));
         }
     }
