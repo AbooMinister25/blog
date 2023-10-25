@@ -36,7 +36,7 @@ impl Post {
         }
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(renderer))]
     pub fn render<T: AsRef<Path> + Debug>(
         &mut self,
         tera: &Tera,

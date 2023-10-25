@@ -67,7 +67,7 @@ impl MarkdownRenderer {
         Ok(Self { adapter, options })
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     pub fn render(&self, content: &str) -> Result<Document> {
         let arena = Arena::new();
         let root = parse_document(&arena, content, &self.options);
@@ -93,7 +93,7 @@ impl MarkdownRenderer {
         })
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     fn parse_toc<'a>(&self, root: &'a AstNode<'a>) -> Vec<String> {
         let mut toc_headers = Vec::new();
 
@@ -116,7 +116,7 @@ impl MarkdownRenderer {
         toc_headers
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     fn collect_text<'a>(&self, node: &'a AstNode<'a>, output: &mut Vec<u8>) {
         match node.data.borrow().value {
             NodeValue::Text(ref literal) | NodeValue::Code(NodeCode { ref literal, .. }) => {
@@ -129,7 +129,7 @@ impl MarkdownRenderer {
         }
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     fn parse_frontmatter(&self, content: &str) -> Result<Frontmatter> {
         let mut opening_delim = false;
         let mut frontmatter_content = String::new();

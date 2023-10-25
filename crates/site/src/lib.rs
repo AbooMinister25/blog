@@ -58,13 +58,13 @@ impl Site {
         Ok(Self {
             ctx,
             root: path.as_ref().to_path_buf(),
-            output_path: path.as_ref().to_path_buf(),
+            output_path: output_path.as_ref().to_path_buf(),
             posts: Vec::new(),
             stylesheets: Vec::new(),
         })
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     pub fn discover(&mut self) -> Result<()> {
         info!("Discovering entries");
         let entries = discover_entries(&self.ctx.conn, &self.root)?;
@@ -80,9 +80,9 @@ impl Site {
                 .to_str()
                 .context("File name should be valid unicode")?
             {
-                ".md" => posts.push(Post::from(entry)),
-                ".scss" => stylesheets.push(Stylesheet::from(entry)),
-                _ => todo!(),
+                "md" => posts.push(Post::from(entry)),
+                "scss" => stylesheets.push(Stylesheet::from(entry)),
+                _ => continue,
             }
         }
 
@@ -92,7 +92,7 @@ impl Site {
         Ok(())
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     pub fn render(&mut self) -> Result<()> {
         let _ = self
             .posts
@@ -115,10 +115,10 @@ impl Site {
         Ok(())
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     pub fn build(&mut self) -> Result<()> {
         self.discover()?;
-        self.build()?;
+        self.render()?;
 
         Ok(())
     }

@@ -30,13 +30,14 @@ impl Entry {
 /// filter out only the ones that have changed or have been newly created since the last
 /// run of the program.
 #[tracing::instrument]
-pub fn discover_entries<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<Vec<Entry>> {
+pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> Result<Vec<Entry>> {
     let mut ret = Vec::new();
 
     trace!("Discovering entries at {:?}", path);
-    
+
     // TODO: Refactor this when introducing parallel stuff, it aint ideal right now
     let entries = read_entries(conn, &path)?;
+
     let hashes = entries
         .iter()
         .map(|(_, s)| format!("{:016x}", seahash::hash(s.as_bytes())))
@@ -56,24 +57,24 @@ pub fn discover_entries<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> R
         }
     }
 
-    trace!("Discoverd entries");
+    trace!("Discovered entries");
 
     Ok(ret)
 }
 
 #[tracing::instrument]
-fn read_entries<P: AsRef<Path> + Debug>(
+fn read_entries<T: AsRef<Path> + Debug>(
     conn: &Connection,
-    path: P,
+    path: T,
 ) -> Result<Vec<(PathBuf, String)>> {
     let mut ret = Vec::new();
 
-    for entry in Walk::new(path.as_ref()).filter_map(Result::ok) {
-        if entry.path().is_dir() {
-            let entries = read_entries(conn, &path)?;
-            ret.extend(entries);
-        }
-        ret.push((entry.into_path(), fs::read_to_string(path.as_ref())?))
+    for entry in Walk::new(path.as_ref())
+        .filter_map(Result::ok)
+        .filter(|e| !e.path().is_dir())
+    {
+        let content = fs::read_to_string(entry.path())?;
+        ret.push((entry.into_path(), content))
     }
 
     Ok(ret)
