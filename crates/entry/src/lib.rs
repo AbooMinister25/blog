@@ -73,6 +73,7 @@ fn read_entries<T: AsRef<Path> + Debug>(
         .filter_map(Result::ok)
         .filter(|e| !e.path().is_dir())
     {
+        trace!("Reading entry at {:?}", entry.path());
         let content = fs::read_to_string(entry.path())?;
         ret.push((entry.into_path(), content))
     }
