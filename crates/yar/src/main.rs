@@ -9,6 +9,7 @@ use sql::setup_sql;
 use tracing::{info, metadata::LevelFilter, subscriber};
 use tracing_subscriber::fmt;
 use tracing_subscriber::prelude::*;
+use utils::fs::ensure_removed;
 
 #[derive(Parser)]
 struct Args {
@@ -47,7 +48,8 @@ fn main() -> Result<()> {
 
     // Clean build
     if args.clean {
-        todo!()
+        info!("Clean build, making sure existing database removed.");
+        ensure_removed("blog.db")?;
     }
 
     let conn = setup_sql()?;

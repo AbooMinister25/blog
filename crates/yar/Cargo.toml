@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 site = { path = "../site" }
 sql = { path = "../sql" }
+utils = { path = "../utils" }
 
 clap = { version = "4.4.2", features = ["derive"] }
 color-eyre = "0.6.2"

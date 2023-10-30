@@ -2349,4 +2349,5 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
+ "utils",
 ]
