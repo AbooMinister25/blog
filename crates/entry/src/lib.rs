@@ -6,7 +6,7 @@ use color_eyre::Result;
 use ignore::Walk;
 use rusqlite::Connection;
 use sql::{get_hashes, insert_entry, update_entry_hash};
-use tracing::trace;
+use tracing::{info, trace};
 
 /// Represent an entry - any item that is to be processed by the static site generator.
 #[derive(Debug)]
@@ -37,6 +37,7 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> R
 
     // TODO: Refactor this when introducing parallel stuff, it aint ideal right now
     let entries = read_entries(conn, &path)?;
+    info!("Discovered {:?} entries", entries.len());
 
     let hashes = entries
         .iter()
@@ -57,7 +58,7 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> R
         }
     }
 
-    trace!("Discovered entries");
+    info!("Building {:?} entries", ret.len());
 
     Ok(ret)
 }
