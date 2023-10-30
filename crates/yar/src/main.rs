@@ -50,6 +50,7 @@ fn main() -> Result<()> {
     if args.clean {
         info!("Clean build, making sure existing database removed.");
         ensure_removed("blog.db")?;
+        ensure_removed("public/")?;
     }
 
     let conn = setup_sql()?;

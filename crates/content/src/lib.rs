@@ -64,10 +64,10 @@ impl Post {
         context.insert("summary", &document.summary);
 
         let rendered_html = tera.render("post.html.tera", &context)?;
-        fs::write(out_path, &rendered_html)?;
+        fs::write(&out_path, &rendered_html)?;
         self.content = rendered_html;
 
-        trace!("Rendered post");
+        trace!("Rendered post at {:?}", out_path);
 
         Ok(())
     }
@@ -75,6 +75,9 @@ impl Post {
 
 impl From<Entry> for Post {
     fn from(value: Entry) -> Self {
-        Self::new(value.path, value.content)
+        Self::new(
+            value.path,
+            String::from_utf8_lossy(&value.raw_content).to_string(),
+        )
     }
 }

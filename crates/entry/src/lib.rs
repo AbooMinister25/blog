@@ -12,15 +12,15 @@ use tracing::{info, trace};
 #[derive(Debug)]
 pub struct Entry {
     pub path: PathBuf,
-    pub content: String,
+    pub raw_content: Vec<u8>,
     pub hash: String,
 }
 
 impl Entry {
-    pub fn new(path: PathBuf, content: String, hash: String) -> Self {
+    pub fn new(path: PathBuf, raw_content: Vec<u8>, hash: String) -> Self {
         Self {
             path,
-            content,
+            raw_content,
             hash,
         }
     }
@@ -41,7 +41,7 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> R
 
     let hashes = entries
         .iter()
-        .map(|(_, s)| format!("{:016x}", seahash::hash(s.as_bytes())))
+        .map(|(_, s)| format!("{:016x}", seahash::hash(s)))
         .collect::<Vec<String>>();
 
     for ((path, content), hash) in entries.into_iter().zip(hashes) {
@@ -67,7 +67,7 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> R
 fn read_entries<T: AsRef<Path> + Debug>(
     conn: &Connection,
     path: T,
-) -> Result<Vec<(PathBuf, String)>> {
+) -> Result<Vec<(PathBuf, Vec<u8>)>> {
     let mut ret = Vec::new();
 
     for entry in Walk::new(path.as_ref())
@@ -75,7 +75,7 @@ fn read_entries<T: AsRef<Path> + Debug>(
         .filter(|e| !e.path().is_dir())
     {
         trace!("Reading entry at {:?}", entry.path());
-        let content = fs::read_to_string(entry.path())?;
+        let content = fs::read(entry.path())?;
         ret.push((entry.into_path(), content))
     }
 

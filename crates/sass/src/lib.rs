@@ -57,9 +57,9 @@ impl Stylesheet {
 
         // Compile and write the CSS to disk
         let css = compile_scss_path(&self.path, format)?;
-        fs::write(out_path, css)?;
+        fs::write(&out_path, css)?;
 
-        trace!("Rendered stylesheet");
+        trace!("Rendered stylesheet at {:?}", out_path);
 
         Ok(())
     }
@@ -67,6 +67,9 @@ impl Stylesheet {
 
 impl From<Entry> for Stylesheet {
     fn from(value: Entry) -> Self {
-        Self::new(value.path, value.content)
+        Self::new(
+            value.path,
+            String::from_utf8_lossy(&value.raw_content).to_string(),
+        )
     }
 }

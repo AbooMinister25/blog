@@ -11,6 +11,7 @@ use entry::discover_entries;
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
 use sass::Stylesheet;
+use static_assets::StaticAsset;
 use tera::Tera;
 use tracing::info;
 
@@ -39,6 +40,7 @@ pub struct Site {
     pub output_path: PathBuf,
     pub posts: Vec<Post>,
     pub stylesheets: Vec<Stylesheet>,
+    pub static_assets: Vec<StaticAsset>,
 }
 
 impl Site {
@@ -61,6 +63,7 @@ impl Site {
             output_path: output_path.as_ref().to_path_buf(),
             posts: Vec::new(),
             stylesheets: Vec::new(),
+            static_assets: Vec::new(),
         })
     }
 
@@ -69,25 +72,19 @@ impl Site {
         info!("Discovering entries");
         let entries = discover_entries(&self.ctx.conn, &self.root)?;
 
-        let mut posts = Vec::new();
-        let mut stylesheets = Vec::new();
-
         for entry in entries {
-            match entry
-                .path
-                .extension()
-                .context("File name should have an extension.")?
-                .to_str()
-                .context("File name should be valid unicode")?
-            {
-                "md" => posts.push(Post::from(entry)),
-                "scss" => stylesheets.push(Stylesheet::from(entry)),
+            match entry.path.extension() {
+                Some(e) => match e.to_string_lossy().as_ref() {
+                    "md" => self.posts.push(Post::from(entry)),
+                    "scss" | "sass" => self.stylesheets.push(Stylesheet::from(entry)),
+                    "png" | "ico" | "webmanifest" => {
+                        self.static_assets.push(StaticAsset::from(entry));
+                    }
+                    _ => continue,
+                },
                 _ => continue,
             }
         }
-
-        self.posts = posts;
-        self.stylesheets = stylesheets;
 
         Ok(())
     }
@@ -110,6 +107,12 @@ impl Site {
             .stylesheets
             .iter_mut()
             .map(|s| s.render(&self.output_path))
+            .collect::<Result<Vec<()>>>()?;
+
+        let _ = self
+            .static_assets
+            .iter_mut()
+            .map(|a| a.render(&self.output_path))
             .collect::<Result<Vec<()>>>()?;
 
         Ok(())

@@ -1,18 +1,13 @@
 [package]
-name = "site"
+name = "static_assets"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-content = { path = "../content" }
-markdown = { path = "../markdown" }
+utils = { path = "../utils" }
 entry = { path = "../entry" }
-sass = { path = "../sass" }
-static_assets = { path = "../static_assets" }
 
 color-eyre = "0.6.2"
-rusqlite = "0.29.0"
-tera = "1.19.1"
 tracing = "0.1.37"
