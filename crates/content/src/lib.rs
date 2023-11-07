@@ -20,13 +20,13 @@ use utils::fs::ensure_directory;
 pub const DATE_FORMAT: &str = "%b %e, %Y";
 
 #[derive(Debug, Default)]
-pub struct Post {
+pub struct Page {
     pub path: PathBuf,
     pub raw_content: String,
     pub content: String,
 }
 
-impl Post {
+impl Page {
     #[tracing::instrument]
     pub fn new(path: PathBuf, content: String) -> Self {
         Self {
@@ -73,7 +73,7 @@ impl Post {
     }
 }
 
-impl From<Entry> for Post {
+impl From<Entry> for Page {
     fn from(value: Entry) -> Self {
         Self::new(
             value.path,

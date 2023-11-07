@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
-use content::Post;
+use content::Page;
 use entry::discover_entries;
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
@@ -38,7 +38,7 @@ pub struct Site {
     pub ctx: Context,
     pub root: PathBuf,
     pub output_path: PathBuf,
-    pub posts: Vec<Post>,
+    pub posts: Vec<Page>,
     pub stylesheets: Vec<Stylesheet>,
     pub static_assets: Vec<StaticAsset>,
 }
@@ -75,7 +75,7 @@ impl Site {
         for entry in entries {
             match entry.path.extension() {
                 Some(e) => match e.to_string_lossy().as_ref() {
-                    "md" => self.posts.push(Post::from(entry)),
+                    "md" => self.posts.push(Page::from(entry)),
                     "scss" | "sass" => self.stylesheets.push(Stylesheet::from(entry)),
                     "png" | "ico" | "webmanifest" => {
                         self.static_assets.push(StaticAsset::from(entry));
