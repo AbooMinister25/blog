@@ -14,7 +14,7 @@ use color_eyre::Result;
 use entry::Entry;
 use markdown::MarkdownRenderer;
 use tera::{Context, Tera};
-use tracing::{info, trace};
+use tracing::trace;
 use utils::fs::ensure_directory;
 
 pub const DATE_FORMAT: &str = "%b %e, %Y";
@@ -25,13 +25,6 @@ pub struct Page {
     pub raw_content: String,
     pub content: String,
 }
-
-// #[derive(Debug)]
-// enum ContentType {
-//     Post,
-//     Series,
-//     Page,
-// }
 
 impl Page {
     #[tracing::instrument]
