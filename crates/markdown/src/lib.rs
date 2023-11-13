@@ -38,7 +38,7 @@ pub struct Document {
     pub date: DateTime<Utc>,
     pub content: String,
     pub frontmatter: Frontmatter,
-    pub toc: Option<Vec<String>>,
+    pub toc: Vec<String>,
     pub summary: String,
 }
 
@@ -90,7 +90,7 @@ impl MarkdownRenderer {
             summary: summary::get_summary(&string_html)?,
             content: string_html,
             frontmatter,
-            toc: (!toc.is_empty()).then_some(toc),
+            toc,
         })
     }
 

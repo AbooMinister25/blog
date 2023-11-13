@@ -14,7 +14,7 @@ use color_eyre::Result;
 use entry::Entry;
 use markdown::MarkdownRenderer;
 use tera::{Context, Tera};
-use tracing::trace;
+use tracing::{info, trace};
 use utils::fs::ensure_directory;
 
 pub const DATE_FORMAT: &str = "%b %e, %Y";
@@ -25,6 +25,13 @@ pub struct Page {
     pub raw_content: String,
     pub content: String,
 }
+
+// #[derive(Debug)]
+// enum ContentType {
+//     Post,
+//     Series,
+//     Page,
+// }
 
 impl Page {
     #[tracing::instrument]
@@ -43,15 +50,13 @@ impl Page {
         renderer: &MarkdownRenderer,
         output_directory: T,
     ) -> Result<()> {
-        ensure_directory(output_directory.as_ref().join("posts/"))?;
+        let directory = output_directory.as_ref().join(self.directory());
+        ensure_directory(&directory)?;
 
         trace!("Rendering post at {:?}", self.path);
 
         let document = renderer.render(&self.raw_content)?;
-        let out_path = output_directory
-            .as_ref()
-            .join("posts/")
-            .join(format!("{}.html", document.frontmatter.title));
+        let out_path = directory.join(format!("{}.html", document.frontmatter.title));
 
         trace!("Rendering post to {:?}", out_path);
 
@@ -70,6 +75,23 @@ impl Page {
         trace!("Rendered post at {:?}", out_path);
 
         Ok(())
+    }
+
+    #[tracing::instrument]
+    fn directory(&self) -> PathBuf {
+        self.path.parent().map_or_else(
+            || Path::new("").to_path_buf(),
+            |parent| {
+                if parent == Path::new("blog/") {
+                    Path::new("").to_path_buf()
+                } else if parent == Path::new("blog/posts/") {
+                    Path::new("posts").to_path_buf()
+                } else {
+                    Path::new("series/")
+                        .join(parent.file_name().expect("Path should have a filename"))
+                }
+            },
+        )
     }
 }
 
