@@ -15,10 +15,10 @@ use comrak::{
     plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder},
     Arena, ComrakOptions, ComrakPlugins,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct SeriesInfo {
     pub part: Option<i32>,
 }

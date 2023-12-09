@@ -54,6 +54,7 @@ impl Page {
         let mut context = Context::new();
         context.insert("title", &document.frontmatter.title);
         context.insert("tags", &document.frontmatter.tags.join(", "));
+        context.insert("series", &document.frontmatter.series);
         context.insert("date", &document.date.format(DATE_FORMAT).to_string());
         context.insert("toc", &document.toc);
         context.insert("markup", &document.content);
