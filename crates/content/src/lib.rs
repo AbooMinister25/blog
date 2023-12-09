@@ -10,7 +10,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use color_eyre::Result;
+use color_eyre::{eyre::ContextCompat, Result};
 use entry::Entry;
 use markdown::MarkdownRenderer;
 use tera::{Context, Tera};
@@ -43,13 +43,11 @@ impl Page {
         renderer: &MarkdownRenderer,
         output_directory: T,
     ) -> Result<()> {
-        let directory = output_directory.as_ref().join(self.directory());
-        ensure_directory(&directory)?;
-
         trace!("Rendering post at {:?}", self.path);
 
         let document = renderer.render(&self.raw_content)?;
-        let out_path = directory.join(format!("{}.html", document.frontmatter.title));
+        let out_path = self.out_path(output_directory, &document.frontmatter.title)?;
+        ensure_directory(out_path.parent().context("Path should have a parent")?)?;
 
         trace!("Rendering post to {:?}", out_path);
 
@@ -71,20 +69,39 @@ impl Page {
     }
 
     #[tracing::instrument]
-    fn directory(&self) -> PathBuf {
-        self.path.parent().map_or_else(
-            || Path::new("").to_path_buf(),
-            |parent| {
-                if parent == Path::new("blog/") {
-                    Path::new("").to_path_buf()
-                } else if parent == Path::new("blog/posts/") {
-                    Path::new("posts").to_path_buf()
-                } else {
-                    Path::new("series/")
-                        .join(parent.file_name().expect("Path should have a filename"))
-                }
-            },
-        )
+    fn out_path<T: AsRef<Path> + Debug>(
+        &self,
+        output_directory: T,
+        title: &str,
+    ) -> Result<PathBuf> {
+        let parent = self
+            .path
+            .parent()
+            .context("Path should have a parent")?
+            .file_name()
+            .context("Path should have a filename")?
+            .to_string_lossy();
+
+        let filename = self
+            .path
+            .file_name()
+            .context("Path should have a filename")?
+            .to_string_lossy();
+
+        let directory = output_directory.as_ref();
+
+        match (parent.as_ref(), filename.as_ref()) {
+            ("content", "index") => Ok(directory.join("index.html")),
+            ("content", _) => Ok(directory.join(format!("{title}.html"))),
+            (_, "index") => Ok(directory.join(parent.as_ref()).join("index.html")),
+            ("posts", _) => Ok(directory
+                .join(parent.as_ref())
+                .join(format!("{title}.html"))),
+            _ => Ok(directory
+                .join("series")
+                .join(parent.as_ref())
+                .join(format!("{title}.html"))),
+        }
     }
 }
 
