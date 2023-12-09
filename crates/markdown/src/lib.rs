@@ -18,12 +18,17 @@ use comrak::{
 use serde::Deserialize;
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 
+#[derive(Debug, Deserialize)]
+pub struct SeriesInfo {
+    pub part: Option<i32>,
+}
+
 /// The frontmatter for a parsed document
 #[derive(Debug, Deserialize)]
 pub struct Frontmatter {
     pub title: String,
     pub tags: Vec<String>,
-    pub series: Option<String>,
+    pub series: Option<SeriesInfo>,
 }
 
 /// Renders some content to markdown
