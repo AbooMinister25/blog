@@ -77,7 +77,7 @@ impl Site {
                 Some(e) => match e.to_string_lossy().as_ref() {
                     "md" => self.posts.push(Page::from(entry)),
                     "scss" | "sass" => self.stylesheets.push(Stylesheet::from(entry)),
-                    "png" | "ico" | "webmanifest" => {
+                    "png" | "ico" | "webmanifest" | "svg" | "woff2" => {
                         self.static_assets.push(StaticAsset::from(entry));
                     }
                     _ => continue,

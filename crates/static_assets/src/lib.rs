@@ -1,5 +1,7 @@
 #![warn(clippy::pedantic, clippy::nursery)]
 
+mod embed_fonts;
+
 use std::{
     fmt::Debug,
     fs,
@@ -7,8 +9,9 @@ use std::{
 };
 
 use color_eyre::{eyre::ContextCompat, Result};
+use embed_fonts::embed_font;
 use entry::Entry;
-use tracing::trace;
+use tracing::{info, trace};
 use utils::fs::ensure_directory;
 
 /// Represents a static asset. For the most part, they're copied over
@@ -50,6 +53,12 @@ impl StaticAsset {
             .join(filename);
 
         fs::copy(&self.path, &out_path)?;
+
+        if let Some(e) = self.path.extension() {
+            if e == "svg" {
+                embed_font(&out_path)?;
+            }
+        }
 
         trace!("Rendered static asset at {:?}", out_path);
 
