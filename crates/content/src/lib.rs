@@ -12,7 +12,7 @@ use std::{
 
 use color_eyre::{eyre::ContextCompat, Result};
 use entry::Entry;
-use markdown::MarkdownRenderer;
+use markdown::{Frontmatter, MarkdownRenderer};
 use tera::{Context, Tera};
 use tracing::trace;
 use utils::fs::ensure_directory;
@@ -24,6 +24,7 @@ pub struct Page {
     pub path: PathBuf,
     pub raw_content: String,
     pub content: String,
+    pub frontmatter: Option<Frontmatter>,
 }
 
 impl Page {
@@ -65,6 +66,8 @@ impl Page {
         self.content = rendered_html;
 
         trace!("Rendered post at {:?}", out_path);
+
+        self.frontmatter = Some(document.frontmatter);
 
         Ok(())
     }

@@ -1,5 +1,5 @@
 ---
-title = "foo"
+title = "baz"
 tags = ["programming", "test"]
 
 [series]

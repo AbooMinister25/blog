@@ -11,7 +11,7 @@ use std::{
 use color_eyre::{eyre::ContextCompat, Result};
 use embed_fonts::embed_font;
 use entry::Entry;
-use tracing::{info, trace};
+use tracing::trace;
 use utils::fs::ensure_directory;
 
 /// Represents a static asset. For the most part, they're copied over
