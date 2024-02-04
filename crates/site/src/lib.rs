@@ -35,9 +35,9 @@ impl Context {
 /// Represents the static site, and hold all its pages.
 #[derive(Debug)]
 pub struct Site {
-    pub ctx: Context,
-    pub root: PathBuf,
-    pub output_path: PathBuf,
+    ctx: Context,
+    root: PathBuf,
+    output_path: PathBuf,
     discovered_posts: Vec<Entry>,
     pub pages: Vec<Page>,
     pub stylesheets: Vec<Stylesheet>,
@@ -67,6 +67,14 @@ impl Site {
             static_assets: Vec::new(),
             pages: Vec::new(),
         })
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub fn build(&mut self) -> Result<()> {
+        self.discover()?;
+        self.render()?;
+
+        Ok(())
     }
 
     #[tracing::instrument(skip(self))]
@@ -120,14 +128,6 @@ impl Site {
             .iter_mut()
             .map(|a| a.render(&self.output_path))
             .collect::<Result<Vec<()>>>()?;
-
-        Ok(())
-    }
-
-    #[tracing::instrument(skip(self))]
-    pub fn build(&mut self) -> Result<()> {
-        self.discover()?;
-        self.render()?;
 
         Ok(())
     }
