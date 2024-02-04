@@ -6,8 +6,8 @@ use std::path::{Path, PathBuf};
 
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
-use content::Page;
-use entry::discover_entries;
+use content::{render_page, Page};
+use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
 use sass::Stylesheet;
@@ -38,7 +38,8 @@ pub struct Site {
     pub ctx: Context,
     pub root: PathBuf,
     pub output_path: PathBuf,
-    pub posts: Vec<Page>,
+    discovered_posts: Vec<Entry>,
+    pub pages: Vec<Page>,
     pub stylesheets: Vec<Stylesheet>,
     pub static_assets: Vec<StaticAsset>,
 }
@@ -61,9 +62,10 @@ impl Site {
             ctx,
             root: path.as_ref().to_path_buf(),
             output_path: output_path.as_ref().to_path_buf(),
-            posts: Vec::new(),
+            discovered_posts: Vec::new(),
             stylesheets: Vec::new(),
             static_assets: Vec::new(),
+            pages: Vec::new(),
         })
     }
 
@@ -75,7 +77,7 @@ impl Site {
         for entry in entries {
             match entry.path.extension() {
                 Some(e) => match e.to_string_lossy().as_ref() {
-                    "md" => self.posts.push(Page::from(entry)),
+                    "md" => self.discovered_posts.push(entry),
                     "scss" | "sass" => self.stylesheets.push(Stylesheet::from(entry)),
                     "png" | "ico" | "webmanifest" | "svg" | "woff2" => {
                         self.static_assets.push(StaticAsset::from(entry));
@@ -91,17 +93,21 @@ impl Site {
 
     #[tracing::instrument(skip(self))]
     pub fn render(&mut self) -> Result<()> {
-        let _ = self
-            .posts
+        let pages = self
+            .discovered_posts
             .iter_mut()
             .map(|p| {
-                p.render(
+                render_page(
                     &self.ctx.tera,
                     &self.ctx.markdown_renderer,
+                    &p.path,
                     &self.output_path,
+                    String::from_utf8_lossy(&p.raw_content).to_string(),
                 )
             })
-            .collect::<Result<Vec<()>>>()?;
+            .collect::<Result<Vec<Page>>>()?;
+
+        self.pages = pages;
 
         let _ = self
             .stylesheets
