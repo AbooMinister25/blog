@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
-use content::{render_page, Page};
+use content::page::{render_page, Page};
 use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
