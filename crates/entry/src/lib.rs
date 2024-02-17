@@ -8,29 +8,32 @@ use rusqlite::Connection;
 use sql::{get_hashes, insert_entry, update_entry_hash};
 use tracing::{info, trace};
 
+#[salsa::jar(db = Db)]
+pub struct Jar(Entry);
+
+pub trait Db: salsa::DbWithJar<Jar> {}
+impl<DB> Db for DB where DB: ?Sized + salsa::DbWithJar<Jar> {}
+
 /// Represent an entry - any item that is to be processed by the static site generator.
+#[salsa::input]
 #[derive(Debug)]
 pub struct Entry {
     pub path: PathBuf,
+    #[return_ref]
     pub raw_content: Vec<u8>,
+    #[return_ref]
     pub hash: String,
-}
-
-impl Entry {
-    pub fn new(path: PathBuf, raw_content: Vec<u8>, hash: String) -> Self {
-        Self {
-            path,
-            raw_content,
-            hash,
-        }
-    }
 }
 
 /// Recursively traverse the files in the given path, read them, hash them, and then
 /// filter out only the ones that have changed or have been newly created since the last
 /// run of the program.
-#[tracing::instrument]
-pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> Result<Vec<Entry>> {
+#[tracing::instrument(skip(db))]
+pub fn discover_entries<T: AsRef<Path> + Debug>(
+    db: &dyn Db,
+    conn: &Connection,
+    path: T,
+) -> Result<Vec<Entry>> {
     let mut ret = Vec::new();
 
     trace!("Discovering entries at {:?}", path);
@@ -50,11 +53,11 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> R
         if hashes.is_empty() {
             // A new file was created.
             insert_entry(conn, &path, &hash)?;
-            ret.push(Entry::new(path, content, hash));
+            ret.push(Entry::new(db, path, content, hash));
         } else if hashes[0] != hash {
             // Existing file was changed.
             update_entry_hash(conn, &path, &hash)?;
-            ret.push(Entry::new(path, content, hash));
+            ret.push(Entry::new(db, path, content, hash));
         }
     }
 

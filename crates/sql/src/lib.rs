@@ -3,6 +3,7 @@
 use std::fmt::Debug;
 use std::path::Path;
 
+use chrono::{DateTime, Utc};
 use color_eyre::{eyre::ContextCompat, Result};
 use rusqlite::Connection;
 
@@ -12,11 +13,10 @@ pub fn setup_sql() -> Result<Connection> {
     // Establish connection to the database
     let conn = Connection::open("blog.db")?;
 
-    // TODO: Maybe merge these into a single table.
     conn.execute(
         "
         CREATE TABLE IF NOT EXISTS entries (
-            post_id INTEGER PRIMARY KEY,
+            entry_id INTEGER PRIMARY KEY,
             path VARCHAR NOT NULL,
             hash TEXT NOT NULL
         )
@@ -24,10 +24,21 @@ pub fn setup_sql() -> Result<Connection> {
         (),
     )?;
 
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS posts (
+            post_id INTEGER PRIMARY KEY,
+            path VARCHAR NOT NULL,
+            title VARCHAR NOT NULL,
+            timestamp TEXT NOT NULL,
+            tags TEXT NOT NULL,
+        )",
+        (),
+    )?;
+
     Ok(conn)
 }
 
-// Fetch hash from database
+/// Fetch hash from database
 #[tracing::instrument]
 pub fn get_hashes<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<Vec<String>> {
     let mut stmt = conn.prepare("SELECT hash FROM entries WHERE path = :path")?;
@@ -47,7 +58,7 @@ pub fn get_hashes<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<
     Ok(hashes)
 }
 
-// Insert a post into the database
+/// Insert a post into the database
 #[tracing::instrument]
 pub fn insert_entry<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &str) -> Result<()> {
     conn.execute(
@@ -64,7 +75,7 @@ pub fn insert_entry<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &s
     Ok(())
 }
 
-// Update an existing post in the database with a new hash
+/// Update an existing post in the database with a new hash
 #[tracing::instrument]
 pub fn update_entry_hash<P: AsRef<Path> + Debug>(
     conn: &Connection,
@@ -82,6 +93,34 @@ pub fn update_entry_hash<P: AsRef<Path> + Debug>(
                 .context("Path should be valid unicode")?,
         ),
     ])?;
+
+    Ok(())
+}
+
+/// Insert a post into the database
+#[tracing::instrument]
+pub fn insert_post<P: AsRef<Path> + Debug>(
+    conn: &Connection,
+    path: P,
+    title: &str,
+    timestamp: DateTime<Utc>,
+    tags: Vec<String>,
+) -> Result<()> {
+    conn.execute(
+        "INSERT INTO posts
+        (path, title, timestamp, tags)
+        VALUES (?1, ?2, datetime(?3), ?4)
+        ",
+        (
+            &path
+                .as_ref()
+                .to_str()
+                .context("Path should be a valid UTF-8")?,
+            &title,
+            &timestamp,
+            &tags.join(","),
+        ),
+    )?;
 
     Ok(())
 }
