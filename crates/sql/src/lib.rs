@@ -3,7 +3,6 @@
 use std::fmt::Debug;
 use std::path::Path;
 
-use chrono::{DateTime, Utc};
 use color_eyre::{eyre::ContextCompat, Result};
 use rusqlite::Connection;
 
@@ -21,17 +20,6 @@ pub fn setup_sql() -> Result<Connection> {
             hash TEXT NOT NULL
         )
     ",
-        (),
-    )?;
-
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS posts (
-            post_id INTEGER PRIMARY KEY,
-            path VARCHAR NOT NULL,
-            title VARCHAR NOT NULL,
-            timestamp TEXT NOT NULL,
-            tags TEXT NOT NULL,
-        )",
         (),
     )?;
 
@@ -58,7 +46,7 @@ pub fn get_hashes<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<
     Ok(hashes)
 }
 
-/// Insert a post into the database
+/// Insert an entry into the database
 #[tracing::instrument]
 pub fn insert_entry<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &str) -> Result<()> {
     conn.execute(
@@ -75,7 +63,7 @@ pub fn insert_entry<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &s
     Ok(())
 }
 
-/// Update an existing post in the database with a new hash
+/// Update an existing entry in the database with a new hash
 #[tracing::instrument]
 pub fn update_entry_hash<P: AsRef<Path> + Debug>(
     conn: &Connection,
@@ -93,34 +81,6 @@ pub fn update_entry_hash<P: AsRef<Path> + Debug>(
                 .context("Path should be valid unicode")?,
         ),
     ])?;
-
-    Ok(())
-}
-
-/// Insert a post into the database
-#[tracing::instrument]
-pub fn insert_post<P: AsRef<Path> + Debug>(
-    conn: &Connection,
-    path: P,
-    title: &str,
-    timestamp: DateTime<Utc>,
-    tags: Vec<String>,
-) -> Result<()> {
-    conn.execute(
-        "INSERT INTO posts
-        (path, title, timestamp, tags)
-        VALUES (?1, ?2, datetime(?3), ?4)
-        ",
-        (
-            &path
-                .as_ref()
-                .to_str()
-                .context("Path should be a valid UTF-8")?,
-            &title,
-            &timestamp,
-            &tags.join(","),
-        ),
-    )?;
 
     Ok(())
 }
