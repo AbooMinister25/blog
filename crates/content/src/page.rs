@@ -18,8 +18,10 @@ pub const DATE_FORMAT: &str = "%b %e, %Y";
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct Page {
     pub path: PathBuf,
+    #[serde(rename = "body")]
     pub raw_content: String,
     pub content: String,
+    #[serde(flatten)]
     pub frontmatter: Frontmatter,
     pub hash: String,
 }
