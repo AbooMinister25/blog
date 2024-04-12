@@ -12,8 +12,13 @@ use markdown::MarkdownRenderer;
 use rusqlite::Connection;
 use sass::Stylesheet;
 use static_assets::StaticAsset;
+use std::collections::HashSet;
 use tera::Tera;
 use tracing::info;
+
+pub mod index;
+
+use crate::index::Index;
 
 #[derive(Debug)]
 pub struct Context {
@@ -39,7 +44,7 @@ pub struct Site {
     root: PathBuf,
     output_path: PathBuf,
     discovered_posts: Vec<Entry>,
-    pub pages: Vec<Page>,
+    pub pages: Index,
     pub stylesheets: Vec<Stylesheet>,
     pub static_assets: Vec<StaticAsset>,
 }
@@ -65,7 +70,7 @@ impl Site {
             discovered_posts: Vec::new(),
             stylesheets: Vec::new(),
             static_assets: Vec::new(),
-            pages: Vec::new(),
+            pages: Index::default(),
         })
     }
 
@@ -74,11 +79,13 @@ impl Site {
         self.discover()?;
         self.render()?;
 
+        self.pages.build_index(&self.output_path)?;
+
         Ok(())
     }
 
     #[tracing::instrument(skip(self))]
-    pub fn discover(&mut self) -> Result<()> {
+    fn discover(&mut self) -> Result<()> {
         info!("Discovering entries");
         let entries = discover_entries(&self.ctx.conn, &self.root)?;
 
@@ -111,11 +118,12 @@ impl Site {
                     &p.path,
                     &self.output_path,
                     String::from_utf8_lossy(&p.raw_content).to_string(),
+                    &p.hash,
                 )
             })
-            .collect::<Result<Vec<Page>>>()?;
+            .collect::<Result<HashSet<Page>>>()?;
 
-        self.pages = pages;
+        self.pages = Index::from(pages);
 
         let _ = self
             .stylesheets

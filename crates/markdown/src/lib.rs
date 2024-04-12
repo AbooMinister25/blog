@@ -18,13 +18,13 @@ use comrak::{
 use serde::{Deserialize, Serialize};
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Hash, PartialEq, Eq, Clone)]
 pub struct SeriesInfo {
     pub part: Option<i32>,
 }
 
 /// The frontmatter for a parsed document
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Hash, PartialEq, Eq, Clone)]
 pub struct Frontmatter {
     pub title: String,
     pub tags: Vec<String>,

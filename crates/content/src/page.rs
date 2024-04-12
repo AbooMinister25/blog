@@ -1,11 +1,13 @@
 use std::{
     fmt::Debug,
     fs,
+    hash::Hash,
     path::{Path, PathBuf},
 };
 
 use color_eyre::{eyre::ContextCompat, Result};
 use markdown::{Frontmatter, MarkdownRenderer};
+use serde::{Deserialize, Serialize};
 use tera::{Context, Tera};
 use tracing::trace;
 use utils::fs::ensure_directory;
@@ -13,12 +15,25 @@ use utils::fs::ensure_directory;
 pub const DATE_FORMAT: &str = "%b %e, %Y";
 
 /// Represents a single markdown page in the blog.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct Page {
     pub path: PathBuf,
     pub raw_content: String,
     pub content: String,
     pub frontmatter: Frontmatter,
+    pub hash: String,
+}
+
+impl Hash for Page {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.path.hash(state);
+    }
+}
+
+impl PartialEq for Page {
+    fn eq(&self, other: &Self) -> bool {
+        self.path == other.path
+    }
 }
 
 impl Page {
@@ -28,12 +43,14 @@ impl Page {
         raw_content: String,
         content: String,
         frontmatter: Frontmatter,
+        hash: String,
     ) -> Self {
         Self {
             path,
             raw_content,
             content,
             frontmatter,
+            hash,
         }
     }
 }
@@ -45,6 +62,7 @@ pub fn render_page<T: AsRef<Path> + Debug>(
     path: T,
     output_directory: T,
     raw_content: String,
+    hash: &str,
 ) -> Result<Page> {
     trace!("Rendering post at {path:?}");
 
@@ -73,6 +91,7 @@ pub fn render_page<T: AsRef<Path> + Debug>(
         raw_content,
         rendered_html,
         document.frontmatter,
+        hash.to_owned(),
     ))
 }
 
