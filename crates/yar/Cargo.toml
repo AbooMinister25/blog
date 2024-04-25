@@ -9,6 +9,7 @@ edition = "2021"
 site = { path = "../site" }
 sql = { path = "../sql" }
 utils = { path = "../utils" }
+config = { path = "../config" }
 
 clap = { version = "4.4.2", features = ["derive"] }
 color-eyre = "0.6.2"
@@ -16,3 +17,5 @@ notify = "6.1.1"
 tracing = "0.1.37"
 tracing-appender = "0.2.2"
 tracing-subscriber = "0.3.17"
+figment = { version = "0.10", features = ["toml"] }
+serde = { version = "1.0.197", features = ["derive"] }

@@ -2,10 +2,10 @@
 #![allow(clippy::missing_errors_doc)]
 
 use std::fmt::Debug;
-use std::path::{Path, PathBuf};
 
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
+use config::Config;
 use content::page::{render_page, Page};
 use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
@@ -41,8 +41,7 @@ impl Context {
 #[derive(Debug)]
 pub struct Site {
     ctx: Context,
-    root: PathBuf,
-    output_path: PathBuf,
+    config: Config,
     discovered_posts: Vec<Entry>,
     pub pages: Index,
     pub stylesheets: Vec<Stylesheet>,
@@ -51,12 +50,13 @@ pub struct Site {
 
 impl Site {
     #[tracing::instrument]
-    pub fn new<P: AsRef<Path> + Debug>(conn: Connection, path: P, output_path: P) -> Result<Self> {
-        let renderer = MarkdownRenderer::new(&path)?;
+    pub fn new(conn: Connection, config: Config) -> Result<Self> {
+        let renderer = MarkdownRenderer::new(&config.root)?;
 
         info!("Loaded templates");
         let tera = Tera::new(
-            path.as_ref()
+            config
+                .root
                 .join("templates/**/*.tera")
                 .to_str()
                 .context("Filename should be valid UTF-8")?,
@@ -65,8 +65,7 @@ impl Site {
 
         Ok(Self {
             ctx,
-            root: path.as_ref().to_path_buf(),
-            output_path: output_path.as_ref().to_path_buf(),
+            config,
             discovered_posts: Vec::new(),
             stylesheets: Vec::new(),
             static_assets: Vec::new(),
@@ -79,7 +78,7 @@ impl Site {
         self.discover()?;
         self.render()?;
 
-        self.pages.build_index(&self.output_path)?;
+        self.pages.build_index(&self.config.output_path)?;
 
         Ok(())
     }
@@ -87,7 +86,7 @@ impl Site {
     #[tracing::instrument(skip(self))]
     fn discover(&mut self) -> Result<()> {
         info!("Discovering entries");
-        let entries = discover_entries(&self.ctx.conn, &self.root)?;
+        let entries = discover_entries(&self.ctx.conn, &self.config.root)?;
 
         for entry in entries {
             match entry.path.extension() {
@@ -116,7 +115,7 @@ impl Site {
                     &self.ctx.tera,
                     &self.ctx.markdown_renderer,
                     &p.path,
-                    &self.output_path,
+                    &self.config.output_path,
                     String::from_utf8_lossy(&p.raw_content).to_string(),
                     &p.hash,
                 )
@@ -128,13 +127,13 @@ impl Site {
         let _ = self
             .stylesheets
             .iter_mut()
-            .map(|s| s.render(&self.output_path))
+            .map(|s| s.render(&self.config.output_path))
             .collect::<Result<Vec<()>>>()?;
 
         let _ = self
             .static_assets
             .iter_mut()
-            .map(|a| a.render(&self.output_path))
+            .map(|a| a.render(&self.config.output_path))
             .collect::<Result<Vec<()>>>()?;
 
         Ok(())
