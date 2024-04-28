@@ -23,6 +23,7 @@ pub struct Page {
     pub content: String,
     #[serde(flatten)]
     pub frontmatter: Frontmatter,
+    pub summary: String,
     pub hash: String,
 }
 
@@ -45,6 +46,7 @@ impl Page {
         raw_content: String,
         content: String,
         frontmatter: Frontmatter,
+        summary: String,
         hash: String,
     ) -> Self {
         Self {
@@ -52,6 +54,7 @@ impl Page {
             raw_content,
             content,
             frontmatter,
+            summary,
             hash,
         }
     }
@@ -93,6 +96,7 @@ pub fn render_page<T: AsRef<Path> + Debug>(
         raw_content,
         rendered_html,
         document.frontmatter,
+        document.summary,
         hash.to_owned(),
     ))
 }
