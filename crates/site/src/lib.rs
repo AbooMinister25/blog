@@ -11,6 +11,7 @@ use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
 use sass::Stylesheet;
+use sql::{insert_post, update_entry, PostSQL};
 use static_assets::StaticAsset;
 use std::collections::HashSet;
 use tera::Tera;
@@ -25,14 +26,21 @@ pub struct Context {
     pub conn: Connection,
     pub markdown_renderer: MarkdownRenderer,
     pub tera: Tera,
+    pub config: Config,
 }
 
 impl Context {
-    pub fn new(conn: Connection, markdown_renderer: MarkdownRenderer, tera: Tera) -> Self {
+    pub fn new(
+        conn: Connection,
+        markdown_renderer: MarkdownRenderer,
+        tera: Tera,
+        config: Config,
+    ) -> Self {
         Self {
             conn,
             markdown_renderer,
             tera,
+            config,
         }
     }
 }
@@ -41,7 +49,6 @@ impl Context {
 #[derive(Debug)]
 pub struct Site {
     ctx: Context,
-    config: Config,
     discovered_posts: Vec<Entry>,
     pub pages: Index,
     pub stylesheets: Vec<Stylesheet>,
@@ -61,11 +68,10 @@ impl Site {
                 .to_str()
                 .context("Filename should be valid UTF-8")?,
         )?;
-        let ctx = Context::new(conn, renderer, tera);
+        let ctx = Context::new(conn, renderer, tera, config);
 
         Ok(Self {
             ctx,
-            config,
             discovered_posts: Vec::new(),
             stylesheets: Vec::new(),
             static_assets: Vec::new(),
@@ -78,7 +84,8 @@ impl Site {
         self.discover()?;
         self.render()?;
 
-        self.pages.build_index(&self.config.output_path)?;
+        self.pages.build_index(&self.ctx.config.output_path)?;
+        self.update_db()?;
 
         Ok(())
     }
@@ -86,7 +93,7 @@ impl Site {
     #[tracing::instrument(skip(self))]
     fn discover(&mut self) -> Result<()> {
         info!("Discovering entries");
-        let entries = discover_entries(&self.ctx.conn, &self.config.root)?;
+        let entries = discover_entries(&self.ctx.conn, &self.ctx.config.root)?;
 
         for entry in entries {
             match entry.path.extension() {
@@ -114,10 +121,12 @@ impl Site {
                 render_page(
                     &self.ctx.tera,
                     &self.ctx.markdown_renderer,
+                    &self.ctx.config.url,
                     &p.path,
-                    &self.config.output_path,
+                    &self.ctx.config.output_path,
                     String::from_utf8_lossy(&p.raw_content).to_string(),
                     &p.hash,
+                    p.new,
                 )
             })
             .collect::<Result<HashSet<Page>>>()?;
@@ -127,14 +136,37 @@ impl Site {
         let _ = self
             .stylesheets
             .iter_mut()
-            .map(|s| s.render(&self.config.output_path))
+            .map(|s| s.render(&self.ctx.config.output_path))
             .collect::<Result<Vec<()>>>()?;
 
         let _ = self
             .static_assets
             .iter_mut()
-            .map(|a| a.render(&self.config.output_path))
+            .map(|a| a.render(&self.ctx.config.output_path))
             .collect::<Result<Vec<()>>>()?;
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    fn update_db(&mut self) -> Result<()> {
+        for page in &self.pages.pages {
+            let post_sql = PostSQL::new(
+                &page.path,
+                &page.permalink,
+                &page.frontmatter.title,
+                &page.frontmatter.tags,
+                &page.date,
+                &page.summary,
+                &page.hash,
+            );
+
+            if page.new {
+                insert_post(&self.ctx.conn, post_sql)?;
+            } else {
+                update_entry(&self.ctx.conn, post_sql)?;
+            }
+        }
 
         Ok(())
     }

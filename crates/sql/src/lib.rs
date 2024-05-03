@@ -1,10 +1,45 @@
 #![warn(clippy::pedantic, clippy::nursery)]
+#![allow(clippy::must_use_candidate, clippy::missing_const_for_fn)]
 
 use std::fmt::Debug;
 use std::path::Path;
 
+use chrono::{DateTime, Utc};
 use color_eyre::{eyre::ContextCompat, Result};
 use rusqlite::Connection;
+
+#[derive(Debug)]
+pub struct PostSQL<'a> {
+    path: &'a Path,
+    permalink: &'a str,
+    title: &'a str,
+    tags: &'a Vec<String>,
+    date: &'a DateTime<Utc>,
+    summary: &'a str,
+    hash: &'a str,
+}
+
+impl<'a> PostSQL<'a> {
+    pub fn new(
+        path: &'a Path,
+        permalink: &'a str,
+        title: &'a str,
+        tags: &'a Vec<String>,
+        date: &'a DateTime<Utc>,
+        summary: &'a str,
+        hash: &'a str,
+    ) -> Self {
+        Self {
+            path,
+            permalink,
+            title,
+            tags,
+            date,
+            summary,
+            hash,
+        }
+    }
+}
 
 /// Sets up the SQLite database, creating the initial tables if they don't exist, and acquiring the connection.
 #[tracing::instrument]
@@ -20,6 +55,22 @@ pub fn setup_sql() -> Result<Connection> {
             hash TEXT NOT NULL
         )
     ",
+        (),
+    )?;
+
+    conn.execute(
+        "
+        CREATE TABLE IF NOT EXISTS posts (
+            post_id INTEGER PRIMARY KEY,
+            path VARCHAR NOT NULL,
+            permalink TEXT NOT NULL,
+            title TEXT NOT NULL,
+            tags JSON NOT NULL,
+            date TEXT NOT NULL,
+            summary TEXT NOT NULL,
+            hash TEXT NOT NULL
+        )
+        ",
         (),
     )?;
 
@@ -81,6 +132,56 @@ pub fn update_entry_hash<P: AsRef<Path> + Debug>(
                 .context("Path should be valid unicode")?,
         ),
     ])?;
+
+    Ok(())
+}
+
+/// Insert a post into the database
+#[tracing::instrument]
+pub fn insert_post(conn: &Connection, post: PostSQL) -> Result<()> {
+    conn.execute(
+        "
+    INSERT INTO posts (path, permalink, title, tags, date, summary, hash)
+    VALUES (?1, ?2, ?3, json(?4), datetime(?5), ?6, ?7)
+    ",
+        (
+            &post.path.to_str().context("Path should be valid unicode")?,
+            &post.permalink,
+            &post.title,
+            &serde_json::to_string(&post.tags)?,
+            &post.date,
+            &post.summary,
+            &post.hash,
+        ),
+    )?;
+
+    Ok(())
+}
+
+/// Update an existing post in the database
+#[tracing::instrument]
+pub fn update_entry(conn: &Connection, post: PostSQL) -> Result<()> {
+    conn.execute(
+        "
+    UPDATE posts 
+    SET permalink = ?1,
+        title = ?2,
+        tags = json(?3),
+        date = datetime(?4),
+        summary = ?5,
+        hash = ?6
+    WHERE path = (?7)
+    ",
+        (
+            &post.permalink,
+            &post.title,
+            &serde_json::to_string(&post.tags)?,
+            &post.date,
+            &post.summary,
+            &post.hash,
+            &post.path.to_str().context("Path should be valid unicode")?,
+        ),
+    )?;
 
     Ok(())
 }

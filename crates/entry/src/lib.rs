@@ -14,14 +14,16 @@ pub struct Entry {
     pub path: PathBuf,
     pub raw_content: Vec<u8>,
     pub hash: String,
+    pub new: bool,
 }
 
 impl Entry {
-    pub fn new(path: PathBuf, raw_content: Vec<u8>, hash: String) -> Self {
+    pub fn new(path: PathBuf, raw_content: Vec<u8>, hash: String, new: bool) -> Self {
         Self {
             path,
             raw_content,
             hash,
+            new,
         }
     }
 }
@@ -50,11 +52,11 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> R
         if hashes.is_empty() {
             // A new file was created.
             insert_entry(conn, &path, &hash)?;
-            ret.push(Entry::new(path, content, hash));
+            ret.push(Entry::new(path, content, hash, true));
         } else if hashes[0] != hash {
             // Existing file was changed.
             update_entry_hash(conn, &path, &hash)?;
-            ret.push(Entry::new(path, content, hash));
+            ret.push(Entry::new(path, content, hash, false));
         }
     }
 

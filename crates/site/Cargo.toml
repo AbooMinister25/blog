@@ -10,11 +10,12 @@ content = { path = "../content" }
 config = { path = "../config" }
 markdown = { path = "../markdown" }
 entry = { path = "../entry" }
+sql = { path = "../sql" }
 sass = { path = "../sass" }
 static_assets = { path = "../static_assets" }
 
 color-eyre = "0.6.2"
-rusqlite = "0.29.0"
+rusqlite = "0.31.0"
 tera = "1.19.1"
 tracing = "0.1.37"
 serde = { version = "1.0.197", features = ["derive"] }

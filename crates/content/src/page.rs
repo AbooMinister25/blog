@@ -5,6 +5,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use chrono::{DateTime, Utc};
 use color_eyre::{eyre::ContextCompat, Result};
 use markdown::{Frontmatter, MarkdownRenderer};
 use serde::{Deserialize, Serialize};
@@ -18,6 +19,7 @@ pub const DATE_FORMAT: &str = "%b %e, %Y";
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct Page {
     pub path: PathBuf,
+    pub permalink: String,
     #[serde(rename = "body")]
     pub raw_content: String,
     pub content: String,
@@ -25,6 +27,9 @@ pub struct Page {
     pub frontmatter: Frontmatter,
     pub summary: String,
     pub hash: String,
+    pub date: DateTime<Utc>,
+    #[serde(skip)]
+    pub new: bool,
 }
 
 impl Hash for Page {
@@ -43,19 +48,25 @@ impl Page {
     #[tracing::instrument]
     pub fn new(
         path: PathBuf,
+        permalink: String,
         raw_content: String,
         content: String,
         frontmatter: Frontmatter,
         summary: String,
         hash: String,
+        date: DateTime<Utc>,
+        new: bool,
     ) -> Self {
         Self {
             path,
+            permalink,
             raw_content,
             content,
             frontmatter,
             summary,
             hash,
+            date,
+            new,
         }
     }
 }
@@ -64,10 +75,12 @@ impl Page {
 pub fn render_page<T: AsRef<Path> + Debug>(
     tera: &Tera,
     renderer: &MarkdownRenderer,
+    url: &str,
     path: T,
     output_directory: T,
     raw_content: String,
     hash: &str,
+    new: bool,
 ) -> Result<Page> {
     trace!("Rendering post at {path:?}");
 
@@ -93,11 +106,14 @@ pub fn render_page<T: AsRef<Path> + Debug>(
 
     Ok(Page::new(
         path.as_ref().to_path_buf(),
+        format!("{url}/posts/{}", document.frontmatter.title),
         raw_content,
         rendered_html,
         document.frontmatter,
         document.summary,
         hash.to_owned(),
+        document.date,
+        new,
     ))
 }
 
