@@ -150,7 +150,7 @@ impl Site {
 
     #[tracing::instrument(skip(self))]
     fn update_db(&mut self) -> Result<()> {
-        for page in &self.pages.pages {
+        for page in self.pages.pages.iter().filter(|p| !p.index) {
             let post_sql = PostSQL::new(
                 &page.path,
                 &page.permalink,

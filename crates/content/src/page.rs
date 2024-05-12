@@ -30,6 +30,7 @@ pub struct Page {
     pub date: DateTime<Utc>,
     #[serde(skip)]
     pub new: bool,
+    pub index: bool,
 }
 
 impl Hash for Page {
@@ -56,6 +57,7 @@ impl Page {
         hash: String,
         date: DateTime<Utc>,
         new: bool,
+        index: bool,
     ) -> Self {
         Self {
             path,
@@ -67,6 +69,7 @@ impl Page {
             hash,
             date,
             new,
+            index,
         }
     }
 }
@@ -114,6 +117,7 @@ pub fn render_page<T: AsRef<Path> + Debug>(
         hash.to_owned(),
         document.date,
         new,
+        path.as_ref().ends_with("index.md"),
     ))
 }
 
