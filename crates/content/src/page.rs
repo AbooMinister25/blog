@@ -74,7 +74,7 @@ impl Page {
     }
 }
 
-#[tracing::instrument(skip(renderer))]
+#[tracing::instrument(skip(renderer, tera))]
 pub fn render_page<T: AsRef<Path> + Debug>(
     tera: &Tera,
     renderer: &MarkdownRenderer,
@@ -123,32 +123,18 @@ pub fn render_page<T: AsRef<Path> + Debug>(
 
 #[tracing::instrument]
 fn out_path<T: AsRef<Path> + Debug>(path: T, output_directory: T, title: &str) -> Result<PathBuf> {
-    let parent = path
-        .as_ref()
-        .parent()
-        .context("Path should have a parent")?
-        .file_name()
-        .context("Path should have a filename")?
-        .to_string_lossy();
-
-    let filename = path
-        .as_ref()
-        .file_name()
-        .context("Path should have a filename")?
-        .to_string_lossy();
-
     let directory = output_directory.as_ref();
 
-    match (parent.as_ref(), filename.as_ref()) {
-        ("content", "index") => Ok(directory.join("index.html")),
-        ("content", _) => Ok(directory.join(format!("{title}.html"))),
-        (_, "index") => Ok(directory.join(parent.as_ref()).join("index.html")),
-        ("posts", _) => Ok(directory
-            .join(parent.as_ref())
-            .join(format!("{title}.html"))),
-        _ => Ok(directory
-            .join("series")
-            .join(parent.as_ref())
-            .join(format!("{title}.html"))),
-    }
+    let filename = if path.as_ref().ends_with("index.md") {
+        "index"
+    } else {
+        title
+    };
+
+    let mut components = path.as_ref().components();
+    components.next_back();
+
+    Ok(directory
+        .join(components.skip(2).collect::<PathBuf>())
+        .join(format!("{filename}.html")))
 }

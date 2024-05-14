@@ -1,5 +1,5 @@
 ---
-title = "foo"
+title = ""
 tags = ["programming", "test"]
 ---
 
