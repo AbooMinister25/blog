@@ -1,0 +1,16 @@
+{% extends "base.html.tera" %}
+
+{% block head %}
+    {{ super() }}
+    <title> Posts </title>
+    <meta name="og:title" property="og:title" content="Posts" />
+    <meta name="twitter:title" content="Posts" />
+    <link rel="stylesheet" href="/styles/post.css" />
+    <meta name="description" content="Rayyan Cyclegar's Blog"/>
+    <meta name="og:description" property="og:description" content="Rayyan Cyclegar's Blog" />
+    <meta name="twitter:description" content="Rayyan Cyclegar's Blog" />
+{% endblock head %}
+
+{% block content %}
+
+{% endblock content %}
