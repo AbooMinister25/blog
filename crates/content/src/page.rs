@@ -102,7 +102,12 @@ pub fn render_page<T: AsRef<Path> + Debug>(
     context.insert("markup", &document.content);
     context.insert("summary", &document.summary);
 
-    let rendered_html = tera.render("post.html.tera", &context)?;
+    let template = document
+        .frontmatter
+        .template
+        .as_ref()
+        .map_or("post.html.tera", |s| s);
+    let rendered_html = tera.render(template, &context)?;
     fs::write(&out_path, &rendered_html)?;
 
     trace!("Rendered post at {:?}", out_path);

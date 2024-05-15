@@ -12,5 +12,7 @@
 {% endblock head %}
 
 {% block content %}
+blah blah
 
+{{ markup | safe }}
 {% endblock content %}

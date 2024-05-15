@@ -28,6 +28,7 @@ pub struct SeriesInfo {
 pub struct Frontmatter {
     pub title: String,
     pub tags: Vec<String>,
+    pub template: Option<String>,
     pub series: Option<SeriesInfo>,
 }
 
