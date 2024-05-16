@@ -11,7 +11,7 @@ use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
 use sass::Stylesheet;
-use sql::{insert_post, update_entry, PostSQL};
+use sql::{insert_post, update_post, PostSQL};
 use static_assets::StaticAsset;
 use std::collections::HashSet;
 use tera::Tera;
@@ -50,7 +50,7 @@ impl Context {
 pub struct Site {
     ctx: Context,
     discovered_posts: Vec<Entry>,
-    pub pages: Index,
+    pub working_index: Index,
     pub stylesheets: Vec<Stylesheet>,
     pub static_assets: Vec<StaticAsset>,
 }
@@ -75,7 +75,7 @@ impl Site {
             discovered_posts: Vec::new(),
             stylesheets: Vec::new(),
             static_assets: Vec::new(),
-            pages: Index::default(),
+            working_index: Index::default(),
         })
     }
 
@@ -84,9 +84,15 @@ impl Site {
         self.discover()?;
         self.render()?;
 
-        self.pages.build_index(&self.ctx.config.output_path)?;
+        self.working_index
+            .build_index(&self.ctx.config.output_path)?;
         self.update_db()?;
 
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    pub fn load_index(&mut self) -> Result<()> {
         Ok(())
     }
 
@@ -131,7 +137,7 @@ impl Site {
             })
             .collect::<Result<HashSet<Page>>>()?;
 
-        self.pages = Index::from(pages);
+        self.working_index = Index::from(pages);
 
         let _ = self
             .stylesheets
@@ -150,7 +156,7 @@ impl Site {
 
     #[tracing::instrument(skip(self))]
     fn update_db(&mut self) -> Result<()> {
-        for page in self.pages.pages.iter().filter(|p| !p.index) {
+        for page in self.working_index.pages.iter().filter(|p| !p.index) {
             let post_sql = PostSQL::new(
                 &page.path,
                 &page.permalink,
@@ -164,7 +170,7 @@ impl Site {
             if page.new {
                 insert_post(&self.ctx.conn, post_sql)?;
             } else {
-                update_entry(&self.ctx.conn, post_sql)?;
+                update_post(&self.ctx.conn, post_sql)?;
             }
         }
 
