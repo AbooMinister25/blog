@@ -391,6 +391,7 @@ dependencies = [
  "markdown",
  "seahash",
  "serde",
+ "sql",
  "tera",
  "tracing",
  "utils",

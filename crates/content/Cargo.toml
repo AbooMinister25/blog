@@ -9,6 +9,7 @@ edition = "2021"
 markdown = { path = "../markdown" }
 utils = { path = "../utils" }
 entry = { path = "../entry" }
+sql = { path = "../sql" }
 
 color-eyre = "0.6.2"
 seahash = "4.1.0"

@@ -6,12 +6,12 @@ use std::fmt::Debug;
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
 use config::Config;
-use content::page::{render_page, Page};
+use content::page::{render_page, write_index_to_disk, write_page_to_disk, Page};
 use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
 use sass::Stylesheet;
-use sql::{insert_post, update_post, PostSQL};
+use sql::{get_posts, insert_post, update_post, PostSQL};
 use static_assets::StaticAsset;
 use std::collections::HashSet;
 use tera::Tera;
@@ -82,18 +82,30 @@ impl Site {
     #[tracing::instrument(skip(self))]
     pub fn build(&mut self) -> Result<()> {
         self.discover()?;
-        self.render()?;
+        let indexes = self.render()?;
 
         self.working_index
             .build_index(&self.ctx.config.output_path)?;
         self.update_db()?;
 
+        let index = self.load_index()?;
+
+        indexes
+            .into_iter()
+            .map(|p| write_index_to_disk(&self.ctx.tera, p, &index))
+            .collect::<Result<Vec<()>>>()?;
+
         Ok(())
     }
 
     #[tracing::instrument(skip(self))]
-    pub fn load_index(&mut self) -> Result<()> {
-        Ok(())
+    pub fn load_index(&mut self) -> Result<Vec<Page>> {
+        let posts = get_posts(&self.ctx.conn)?
+            .into_iter()
+            .map(Page::from)
+            .collect::<Vec<Page>>();
+
+        Ok(posts)
     }
 
     #[tracing::instrument(skip(self))]
@@ -119,13 +131,12 @@ impl Site {
     }
 
     #[tracing::instrument(skip(self))]
-    pub fn render(&mut self) -> Result<()> {
+    pub fn render(&mut self) -> Result<Vec<Page>> {
         let pages = self
             .discovered_posts
             .iter_mut()
             .map(|p| {
                 render_page(
-                    &self.ctx.tera,
                     &self.ctx.markdown_renderer,
                     &self.ctx.config.url,
                     &p.path,
@@ -137,7 +148,23 @@ impl Site {
             })
             .collect::<Result<HashSet<Page>>>()?;
 
-        self.working_index = Index::from(pages);
+        let mut indexes = Vec::new();
+        let mut posts = Vec::new();
+
+        for page in pages {
+            if page.index {
+                indexes.push(page);
+            } else {
+                posts.push(page);
+            }
+        }
+
+        let written_posts = posts
+            .into_iter()
+            .map(|p| write_page_to_disk(&self.ctx.tera, p))
+            .collect::<Result<HashSet<Page>>>()?;
+
+        self.working_index = Index::from(written_posts);
 
         let _ = self
             .stylesheets
@@ -151,20 +178,21 @@ impl Site {
             .map(|a| a.render(&self.ctx.config.output_path))
             .collect::<Result<Vec<()>>>()?;
 
-        Ok(())
+        Ok(indexes)
     }
 
     #[tracing::instrument(skip(self))]
     fn update_db(&mut self) -> Result<()> {
-        for page in self.working_index.pages.iter().filter(|p| !p.index) {
+        for page in self.working_index.working_pages.iter().filter(|p| !p.index) {
             let post_sql = PostSQL::new(
                 &page.path,
                 &page.permalink,
-                &page.frontmatter.title,
-                &page.frontmatter.tags,
+                &page.title,
+                &page.tags,
                 &page.date,
                 &page.summary,
                 &page.hash,
+                page.new,
             );
 
             if page.new {
