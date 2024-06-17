@@ -82,15 +82,14 @@ impl Site {
     #[tracing::instrument(skip(self))]
     pub fn build(&mut self) -> Result<()> {
         self.discover()?;
-        let indexes = self.render()?;
+        let index_pages = self.render()?;
 
         self.working_index
             .build_index(&self.ctx.config.output_path)?;
         self.update_db()?;
 
         let index = self.load_index()?;
-
-        indexes
+        index_pages
             .into_iter()
             .map(|p| write_index_to_disk(&self.ctx.tera, p, &index))
             .collect::<Result<Vec<()>>>()?;
@@ -148,12 +147,12 @@ impl Site {
             })
             .collect::<Result<HashSet<Page>>>()?;
 
-        let mut indexes = Vec::new();
+        let mut index_pages = Vec::new();
         let mut posts = Vec::new();
 
         for page in pages {
             if page.index {
-                indexes.push(page);
+                index_pages.push(page);
             } else {
                 posts.push(page);
             }
@@ -178,7 +177,7 @@ impl Site {
             .map(|a| a.render(&self.ctx.config.output_path))
             .collect::<Result<Vec<()>>>()?;
 
-        Ok(indexes)
+        Ok(index_pages)
     }
 
     #[tracing::instrument(skip(self))]
