@@ -26,7 +26,6 @@ pub struct Page {
     #[serde(rename = "body")]
     pub raw_content: Option<String>,
     pub content: Option<String>,
-    #[serde(flatten)]
     pub frontmatter: Option<Frontmatter>,
     pub toc: Option<Vec<String>>,
     pub summary: String,
