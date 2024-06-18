@@ -18,6 +18,7 @@ use tera::Tera;
 use tracing::info;
 
 pub mod index;
+mod tera_functions;
 
 use crate::index::Index;
 
@@ -61,13 +62,14 @@ impl Site {
         let renderer = MarkdownRenderer::new(&config.root)?;
 
         info!("Loaded templates");
-        let tera = Tera::new(
+        let mut tera = Tera::new(
             config
                 .root
                 .join("templates/**/*.tera")
                 .to_str()
                 .context("Filename should be valid UTF-8")?,
         )?;
+        tera.register_function("posts_in_series", tera_functions::posts_in_series);
         let ctx = Context::new(conn, renderer, tera, config);
 
         Ok(Self {

@@ -1,0 +1,35 @@
+{% extends "base.html.tera" %} {% block head %}
+{{ super() }}
+
+<title>{{ title }}</title>
+<meta name="og:title" property="og:title" content={{ title }} />
+<meta name="twitter:title" content={{ title }} />
+<link rel="stylesheet" href="/styles/post.css" />
+<meta name="description" content="Rayyan Cyclegar's Blog" />
+<meta
+    name="og:description"
+    property="og:description"
+    content="Rayyan Cyclegar's Blog"
+/>
+<meta name="twitter:description" content="Rayyan Cyclegar's Blog" />
+{% endblock head %} {% block content %}
+
+<div>
+    {{ markup | safe }}
+    <div>
+        <h1>Latest Posts</h1>
+        {% for post in posts_in_series(series=title, posts=posts) %}
+        <div>
+            <h1>
+                <a href={{ post.permalink }}> {{ post.title }} </a>
+                <p>{{ post.date }} | {{ post.tags | join(sep=", ") }}</p>
+                <div>
+                    {{ post.summary | safe }}
+                </div>
+            </h1>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}

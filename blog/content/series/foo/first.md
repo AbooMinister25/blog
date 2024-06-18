@@ -1,9 +1,9 @@
 ---
-title = "baz"
+title = "first"
 tags = ["programming", "test"]
 
 [series]
 part=1
 ---
 
-hi!
+This is the first part of the series!
