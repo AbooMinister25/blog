@@ -35,7 +35,5 @@ pub fn get_series_indexes(args: &HashMap<String, Value>) -> Result<Value, Error>
         })
         .collect::<Vec<Page>>();
 
-    println!("{:#?}", series_indexes);
-
     Ok(to_value(series_indexes)?)
 }
