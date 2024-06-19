@@ -2,8 +2,8 @@
 {{ super() }}
 
 <title>{{ title }}</title>
-<meta name="og:title" property="og:title" content={{ title }} />
-<meta name="twitter:title" content={{ title }} />
+<meta name="og:title" property="og:title" content="{{ title }}" />
+<meta name="twitter:title" content="{{ title }}" />
 <link rel="stylesheet" href="/styles/post.css" />
 <meta name="description" content="Rayyan Cyclegar's Blog" />
 <meta
@@ -21,12 +21,12 @@
         {% for post in posts_in_series(series=title, posts=posts) %}
         <div>
             <h1>
-                <a href={{ post.permalink }}> {{ post.title }} </a>
-                <p>{{ post.date }} | {{ post.tags | join(sep=", ") }}</p>
-                <div>
-                    {{ post.summary | safe }}
-                </div>
+                <a href="{{ post.permalink }}"> {{ post.title }} </a>
             </h1>
+            <p>{{ post.date }} | {{ post.tags | join(sep=", ") }}</p>
+            <div>
+                {{ post.summary | safe }}
+            </div>
         </div>
         {% endfor %}
     </div>

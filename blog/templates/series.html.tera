@@ -20,12 +20,12 @@
         {% for page in get_series_indexes(indexes=index_pages) %}
         <div>
             <h1>
-                <a href={{ page.permalink }}> {{ page.title }} </a>
-                <p>{{ page.date }} | {{ page.tags | join(sep=", ") }}</p>
-                <div>
-                    {{ page.summary | safe }}
-                </div>
+                <a href="{{ page.permalink }}"> {{ page.title }} </a>
             </h1>
+            <p>{{ page.date }} | {{ page.tags | join(sep=", ") }}</p>
+            <div>
+                {{ page.summary | safe }}
+            </div>
         </div>
         {% endfor %}
     </div>
