@@ -1,7 +1,7 @@
 ---
 title = ""
 tags = []
-template = "index.html.tera"
+template = "series.html.tera"
 ---
 
 hi hi

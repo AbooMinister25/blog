@@ -183,7 +183,12 @@ pub fn write_page_to_disk(tera: &Tera, page: Page) -> Result<Page> {
 }
 
 #[tracing::instrument(skip(tera))]
-pub fn write_index_to_disk(tera: &Tera, page: Page, posts: &[Page]) -> Result<()> {
+pub fn write_index_to_disk(
+    tera: &Tera,
+    page: &Page,
+    posts: &[Page],
+    index_pages: &[Page],
+) -> Result<()> {
     trace!("Rendering template for post at {:?}", page.path);
 
     let frontmatter = page
@@ -200,6 +205,7 @@ pub fn write_index_to_disk(tera: &Tera, page: Page, posts: &[Page]) -> Result<()
     context.insert("markup", &page.content);
     context.insert("summary", &page.summary);
     context.insert("posts", &posts);
+    context.insert("index_pages", &index_pages);
 
     let template = frontmatter
         .template

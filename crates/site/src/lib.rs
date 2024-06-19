@@ -70,6 +70,7 @@ impl Site {
                 .context("Filename should be valid UTF-8")?,
         )?;
         tera.register_function("posts_in_series", tera_functions::posts_in_series);
+        tera.register_function("get_series_indexes", tera_functions::get_series_indexes);
         let ctx = Context::new(conn, renderer, tera, config);
 
         Ok(Self {
@@ -92,8 +93,8 @@ impl Site {
 
         let index = self.load_index()?;
         index_pages
-            .into_iter()
-            .map(|p| write_index_to_disk(&self.ctx.tera, p, &index))
+            .iter()
+            .map(|p| write_index_to_disk(&self.ctx.tera, p, &index, &index_pages))
             .collect::<Result<Vec<()>>>()?;
 
         Ok(())
