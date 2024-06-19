@@ -22,7 +22,10 @@
             <h1>
                 <a href="{{ post.permalink }}"> {{ post.title }} </a>
             </h1>
-            <p>{{ post.date }} | {{ post.tags | join(sep=", ") }}</p>
+            <p>
+                {{ post.date | date(format="%b %e, %Y")}} |
+                {{ post.tags | join(sep=", ") }}
+            </p>
             <div>
                 {{ post.summary | safe }}
             </div>

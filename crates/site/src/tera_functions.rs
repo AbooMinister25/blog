@@ -30,8 +30,12 @@ pub fn get_series_indexes(args: &HashMap<String, Value>) -> Result<Value, Error>
 
     let series_indexes = indexes
         .into_iter()
-        .filter(|p| p.path.starts_with("public/series/"))
+        .filter(|p| {
+            p.path.starts_with("public/series/") && !p.path.starts_with("public/series/index.html")
+        })
         .collect::<Vec<Page>>();
+
+    println!("{:#?}", series_indexes);
 
     Ok(to_value(series_indexes)?)
 }

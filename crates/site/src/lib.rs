@@ -85,7 +85,8 @@ impl Site {
     #[tracing::instrument(skip(self))]
     pub fn build(&mut self) -> Result<()> {
         self.discover()?;
-        let index_pages = self.render()?;
+        let mut index_pages = self.render()?;
+        index_pages.sort_by(|a, b| b.date.cmp(&a.date));
 
         self.working_index
             .build_index(&self.ctx.config.output_path)?;

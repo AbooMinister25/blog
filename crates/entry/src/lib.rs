@@ -57,6 +57,8 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> R
             // Existing file was changed.
             update_entry_hash(conn, &path, &hash)?;
             ret.push(Entry::new(path, content, hash, false));
+        } else if path.ends_with("index.md") {
+            ret.push(Entry::new(path, content, hash, false));
         }
     }
 
