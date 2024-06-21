@@ -121,7 +121,7 @@ impl Site {
                 Some(e) => match e.to_string_lossy().as_ref() {
                     "md" => self.discovered_posts.push(entry),
                     "scss" | "sass" => self.stylesheets.push(Stylesheet::from(entry)),
-                    "png" | "ico" | "webmanifest" | "svg" | "woff2" => {
+                    "png" | "jpg" | "ico" | "webmanifest" | "svg" | "woff2" => {
                         self.static_assets.push(StaticAsset::from(entry));
                     }
                     _ => continue,

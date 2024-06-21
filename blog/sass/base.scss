@@ -1,10 +1,55 @@
 @use "fonts";
 @use "themes/latte";
 
-body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    min-height: 100vh;
-    flex-direction: column;
+* {
+    font-family: fonts.$sans-serif;
+    color: latte.$text;
+    background-color: latte.$base;
+}
+
+.wrapper {
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "navbar"
+        "posts"
+        "sidebar"
+        "footer";
+    @media screen and (min-width: 801px) {
+        grid-template-columns: 1fr 3fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "navbar navbar"
+            "sidebar posts"
+            "footer footer";
+    }
+    justify-items: center;
+    max-width: 900px;
+}
+
+.navbar {
+    grid-area: navbar;
+    margin: 1rem;
+    padding: auto 1rem;
+
+    @media screen and (min-width: 801px) {
+        font-size: 1.5rem;
+        margin: 3rem;
+    }
+}
+
+.nav-link {
+    margin: 1rem;
+    text-decoration: none;
+
+    &:hover {
+        opacity: 75%;
+        border-bottom: 1px solid latte.$overlay2;
+    }
+}
+
+.footer {
+    grid-area: footer;
 }

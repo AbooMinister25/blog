@@ -1,0 +1,61 @@
+@use "themes/latte";
+@use "fonts";
+
+.header {
+    text-align: center;
+    grid-area: header;
+}
+
+.sidebar {
+    margin: 5rem 1rem;
+    grid-area: sidebar;
+}
+
+.pfp {
+    display: inline-block;
+    object-fit: cover;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 2px solid latte.$overlay2;
+}
+
+.posts-view {
+    grid-area: posts;
+    margin: 0 2rem;
+}
+
+.posts-header {
+    text-align: center;
+
+    @media screen and (min-width: 801px) {
+        text-align: left;
+    }
+}
+
+.inline-link {
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: latte.$subtext1;
+
+    &:hover {
+        opacity: 75%;
+    }
+}
+
+.post-header a {
+    color: latte.$subtext1;
+    text-decoration: none;
+
+    &:visited {
+        color: latte.$subtext1;
+    }
+}
+
+.post-details {
+    color: latte.$subtext0;
+    font-size: 0.8rem;
+    font-family: fonts.$monospace;
+    margin: 0;
+    padding: 0;
+}
