@@ -7,6 +7,21 @@
     background-color: latte.$base;
 }
 
+a {
+    color: latte.$rosewater;
+
+    &:visited {
+        color: latte.$rosewater;
+    }
+}
+
+code {
+    font-family: fonts.$monospace;
+    font-size: 0.9rem;
+    // background-color: latte.$base;
+    // opacity: 30%;
+}
+
 .wrapper {
     margin: auto;
     display: grid;
@@ -30,26 +45,39 @@
 }
 
 .navbar {
+    border-bottom: 1px solid latte.$overlay2;
     grid-area: navbar;
     margin: 1rem;
-    padding: auto 1rem;
+    padding: 0 1rem 1rem;
 
     @media screen and (min-width: 801px) {
-        font-size: 1.5rem;
-        margin: 3rem;
+        font-size: 1.3rem;
+        margin: 2rem;
     }
 }
 
 .nav-link {
     margin: 1rem;
     text-decoration: none;
+    color: latte.$text;
 
     &:hover {
         opacity: 75%;
         border-bottom: 1px solid latte.$overlay2;
     }
+
+    &:visited {
+        color: latte.$text;
+    }
 }
 
 .footer {
+    margin: 2rem;
+    width: 100%;
+    text-align: center;
     grid-area: footer;
+
+    @media screen and (min-width: 801px) {
+        border-top: 1px solid latte.$overlay2;
+    }
 }

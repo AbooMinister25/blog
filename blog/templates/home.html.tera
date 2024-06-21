@@ -13,17 +13,10 @@
 <meta name="twitter:description" content="Rayyan Cyclegar's Blog" />
 {% endblock head %} {% block content %}
 
-{{ markup | safe }}
 <div class="sidebar">
     <img class="pfp" src="/static/assets/gojo.jpg" />
     <p>
-        Hi, I'm Rayyan Cyclegar! This is my blog! I occasionally write about
-        tech, and sometimes about non-tech.
-
-        <br />
-        <br />
-
-        You can find me over on my GitHub, or on Discord.
+        {{ markup | safe }}
     </p>
 </div>
 <div class="posts-view">
