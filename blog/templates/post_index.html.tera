@@ -1,6 +1,6 @@
 {% extends "base.html.tera" %} {% block head %}
 {{ super() }}
-<title>Home</title>
+<title>Posts</title>
 <meta name="og:title" property="og:title" content="Posts" />
 <meta name="twitter:title" content="Posts" />
 <link rel="stylesheet" href="/styles/home.css" />

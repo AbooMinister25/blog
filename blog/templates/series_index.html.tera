@@ -1,38 +1,40 @@
 {% extends "base.html.tera" %} {% block head %}
 {{ super() }}
-
-<title>{{ title }}</title>
-<meta name="og:title" property="og:title" content="{{ title }}" />
-<meta name="twitter:title" content="{{ title }}" />
-<link rel="stylesheet" href="/styles/post.css" />
-<meta name="description" content="Rayyan Cyclegar's Blog" />
+<title>Series</title>
+<meta name="og:title" property="og:title" content="Series" />
+<meta name="twitter:title" content="Series" />
+<link rel="stylesheet" href="/styles/home.css" />
+<meta name="description" content="Rayyan Cyclegar's Blog - Series" />
 <meta
     name="og:description"
     property="og:description"
-    content="Rayyan Cyclegar's Blog"
+    content="Rayyan Cyclegar's Blog - Series"
 />
-<meta name="twitter:description" content="Rayyan Cyclegar's Blog" />
+<meta name="twitter:description" content="Rayyan Cyclegar's Blog - Series" />
 {% endblock head %} {% block content %}
 
-<div>
-    {{ markup | safe }}
+<div class="sidebar">
+    <img class="pfp" src="/static/assets/gojo.jpg" />
+    <p>
+        {{ markup | safe }}
+    </p>
+</div>
+<div class="posts-view">
+    <h1 class="posts-header">All Series</h1>
+    {% for post in posts_in_series(series=title, posts=posts) %}
     <div>
-        <h1>Latest Posts</h1>
-        {% for post in posts_in_series(series=title, posts=posts) %}
+        <h1 class="post-header">
+            <a href="{{ post.permalink }}"> {{ post.title }} </a>
+        </h1>
         <div>
-            <h1>
-                <a href="{{ post.permalink }}"> {{ post.title }} </a>
-            </h1>
-            <p>
-                {{ post.date | date(format="%b %e, %Y") }} |
-                {{ post.tags | join(sep=", ") }}
-            </p>
-            <div>
-                {{ post.summary | safe }}
-            </div>
+            {{ post.summary | safe }}
         </div>
-        {% endfor %}
+        <p class="post-details">
+            {{ post.date | date(format="%b %e, %Y")}} *
+            {{ post.tags | join(sep=", ") }}
+        </p>
     </div>
+    {% endfor %}
 </div>
 
 {% endblock content %}

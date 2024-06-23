@@ -11,7 +11,7 @@
     padding: 2rem 1rem;
     grid-area: sidebar;
 
-    @media screen and (min-width: 801px) {
+    @media screen and (min-width: 1000px) {
         border: none;
         padding: 0;
     }
@@ -29,12 +29,17 @@
 .posts-view {
     grid-area: posts;
     margin: 0 2rem;
+
+    @media screen and (min-width: 1000px) {
+        width: 100%;
+        margin-left: 3rem;
+    }
 }
 
 .posts-header {
     text-align: center;
 
-    @media screen and (min-width: 801px) {
+    @media screen and (min-width: 1000px) {
         text-align: left;
     }
 }
