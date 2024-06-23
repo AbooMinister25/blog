@@ -15,8 +15,8 @@
     <div class="post-content">
         <h1 class="post-title">{{ title }}</h1>
         <p class="details"> {{ date }} * {{ tags }} </p>
+        <h2 class="toc-header">Contents</h2>
         <ul class="table-of-contents">
-            <h2 class="toc-header">Contents</h2>
             {% for header in toc %}
                 <li class="toc-item">
                     <a href={{ '#' ~ header | lower | replace(from=' ', to='-') }}>{{ header }}</a>

@@ -3,13 +3,12 @@
 
 .header {
     text-align: center;
-    grid-area: header;
 }
 
 .sidebar {
     border-top: 1px solid latte.$overlay2;
     margin: 3rem 1rem 0;
-    padding: 1rem;
+    padding: 2rem 1rem;
     grid-area: sidebar;
 
     @media screen and (min-width: 801px) {

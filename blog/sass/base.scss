@@ -1,10 +1,9 @@
 @use "fonts";
 @use "themes/latte";
 
-* {
+body {
     font-family: fonts.$sans-serif;
     color: latte.$text;
-    background-color: latte.$base;
 }
 
 a {
@@ -18,20 +17,38 @@ a {
 code {
     font-family: fonts.$monospace;
     font-size: 0.9rem;
-    // background-color: latte.$base;
-    // opacity: 30%;
+}
+
+pre code {
+    font-size: inherit;
+    font-family: fonts.$monospace;
+}
+
+pre {
+    overflow: auto;
+    font-size: 0.8rem;
+    line-height: 1.25rem;
+    border-radius: 5px;
+    padding: 1rem;
+    margin: 1rem 0 3rem;
+    font-family: fonts.$monospace;
+
+    @media screen and (min-width: 600px) {
+        font-size: 0.9rem;
+    }
 }
 
 .wrapper {
     margin: auto;
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto;
     grid-template-areas:
         "navbar"
         "posts"
         "sidebar"
         "footer";
+    max-width: 900px;
     @media screen and (min-width: 801px) {
         grid-template-columns: 1fr 3fr;
         grid-template-rows: auto;
@@ -40,11 +57,13 @@ code {
             "sidebar posts"
             "footer footer";
     }
-    justify-items: center;
-    max-width: 900px;
+    @media screen and (min-width: 600px) {
+        justify-items: center;
+    }
 }
 
 .navbar {
+    text-align: center;
     border-bottom: 1px solid latte.$overlay2;
     grid-area: navbar;
     margin: 1rem;
@@ -73,11 +92,11 @@ code {
 
 .footer {
     margin: 2rem;
-    width: 100%;
     text-align: center;
     grid-area: footer;
 
     @media screen and (min-width: 801px) {
+        width: 100%;
         border-top: 1px solid latte.$overlay2;
     }
 }
