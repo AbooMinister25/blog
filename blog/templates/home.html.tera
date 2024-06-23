@@ -24,7 +24,27 @@
         Latest Posts
         <a href="/posts" class="inline-link"> >> View All</a>
     </h1>
-    {% for post in posts %}
+    {% for post in posts %} {% if loop.index > 4 %} {% break %} {% endif %}
+    <div>
+        <h1 class="post-header">
+            <a href="{{ post.permalink }}"> {{ post.title }} </a>
+        </h1>
+        <div>
+            {{ post.summary | safe }}
+        </div>
+        <p class="post-details">
+            {{ post.date | date(format="%b %e, %Y")}} *
+            {{ post.tags | join(sep=", ") }}
+        </p>
+    </div>
+    {% endfor %}
+
+    <h1 class="posts-header">
+        Latest Series
+        <a href="/series" class="inline-link"> >> View All</a>
+    </h1>
+    {% for post in posts_in_series(series=title, posts=posts) %} {% if
+    loop.index > 4 %} {% break %} {% endif %}
     <div>
         <h1 class="post-header">
             <a href="{{ post.permalink }}"> {{ post.title }} </a>
