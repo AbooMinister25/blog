@@ -1,37 +1,40 @@
 {% extends "base.html.tera" %} {% block head %}
 {{ super() }}
 <title>Series</title>
-<meta name="og:title" property="og:title" content="Series" />
-<meta name="twitter:title" content="Series" />
-<link rel="stylesheet" href="/styles/post.css" />
-<meta name="description" content="Rayyan Cyclegar's Blog" />
-<meta
-    name="og:description"
-    property="og:description"
-    content="Rayyan Cyclegar's Blog"
-/>
-<meta name="twitter:description" content="Rayyan Cyclegar's Blog" />
+<meta name="og:title" property="og:title" content=""{{ title }}" " />
+<meta name="twitter:title" content="{{ title }}" />
+<link rel="stylesheet" href="/styles/home.css" />
+<link rel="stylesheet" href="/styles/series.css" />
+<meta name="description" content="{{ title }}" />
+<meta name="og:description" property="og:description" content="{{ title }}" />
+<meta name="twitter:description" content="{{ title }}" />
 {% endblock head %} {% block content %}
-
-<div>
+<div class="series-content">
+    {% set posts_for_series = posts_in_series(series=title, posts=posts) %}
+    <h1>{{ title }}</h1>
+    <p class="details">
+        {{ date }} * {{ tags }} * {{ posts_for_series | length }} post{{
+            posts_for_series | length | pluralize
+        }}
+        in series
+    </p>
     {{ markup | safe }}
     <div>
-        <h1>Latest Posts</h1>
-        {% for page in get_series_indexes(indexes=index_pages) %}
-        <div>
-            <h1>
-                <a href="{{ page.permalink }}"> {{ page.title }} </a>
+        <h1 class="posts-header">Updates</h1>
+        {% for post in posts_for_series %}
+        <div class="post-list">
+            <h1 class="post-header">
+                <a href="{{ post.permalink }}"> {{ post.title }} </a>
             </h1>
-            <p>
-                {{ page.date | date(format="%b %e, %Y") }} |
-                {{ page.tags | join(sep=", ") }}
-            </p>
             <div>
-                {{ page.summary | safe }}
+                {{ post.summary | safe }}
             </div>
+            <p class="post-details">
+                {{ post.date | date(format="%b %e, %Y") }} *
+                {{ post.tags | join(sep=", ") }}
+            </p>
         </div>
         {% endfor %}
     </div>
 </div>
-
 {% endblock content %}

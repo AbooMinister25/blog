@@ -21,20 +21,22 @@
 </div>
 <div class="posts-view">
     <h1 class="posts-header">All Posts</h1>
-    {% for post in posts %}
-    <div>
-        <h1 class="post-header">
-            <a href="{{ post.permalink }}"> {{ post.title }} </a>
-        </h1>
+    <div class="post-list">
+        {% for post in posts %}
         <div>
-            {{ post.summary | safe }}
+            <h1 class="post-header">
+                <a href="{{ post.permalink }}"> {{ post.title }} </a>
+            </h1>
+            <div>
+                {{ post.summary | safe }}
+            </div>
+            <p class="post-details">
+                {{ post.date | date(format="%b %e, %Y")}} *
+                {{ post.tags | join(sep=", ") }}
+            </p>
         </div>
-        <p class="post-details">
-            {{ post.date | date(format="%b %e, %Y")}} *
-            {{ post.tags | join(sep=", ") }}
-        </p>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 
 {% endblock content %}

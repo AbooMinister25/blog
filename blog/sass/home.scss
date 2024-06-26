@@ -1,19 +1,16 @@
 @use "themes/latte";
 @use "fonts";
 
-.header {
-    text-align: center;
-}
-
 .sidebar {
-    border-top: 1px solid latte.$overlay2;
+    background-color: latte.$mantle;
+    height: max-content;
     margin: 3rem 1rem 0;
     padding: 2rem 1rem;
     grid-area: sidebar;
 
     @media screen and (min-width: 1000px) {
         border: none;
-        padding: 0;
+        padding: 1rem;
     }
 }
 
@@ -56,6 +53,17 @@
     &:visited {
         color: latte.$subtext1;
     }
+}
+
+.posts-header {
+    max-width: fit-content;
+    border-bottom: 3px solid latte.$yellow;
+    padding-bottom: 1rem;
+}
+
+.post-list {
+    padding: 1rem;
+    background-color: latte.$mantle;
 }
 
 .post-header a {

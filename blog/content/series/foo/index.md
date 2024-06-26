@@ -1,7 +1,7 @@
 ---
 title = "foo"
 tags = ["programming", "test"]
-template = "series_index.html.tera"
+template = "series.html.tera"
 ---
 
-this is one of the series of all time
+this is one of the series of all time, I'll talk a bit about this one thing, and then follow it up to some extent with discussion about this other thing. It's pretty based.

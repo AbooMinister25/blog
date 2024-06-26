@@ -1,7 +1,7 @@
 ---
 title = "bar"
 tags = ["programming", "test"]
-template = "series_index.html.tera"
+template = "series.html.tera"
 ---
 
 this is another one of the series of all time
