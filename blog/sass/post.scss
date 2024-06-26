@@ -9,6 +9,9 @@
     font-size: 1.2rem;
     max-width: 750px;
     line-height: 1.8rem;
+    @media screen and (min-width: 600px) {
+        width: 100%;
+    }
 }
 
 .post-content h1 {
