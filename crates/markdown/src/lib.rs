@@ -29,6 +29,7 @@ pub struct Frontmatter {
     pub title: String,
     pub tags: Vec<String>,
     pub template: Option<String>,
+    pub completed: Option<bool>,
     pub series: Option<SeriesInfo>,
 }
 

@@ -16,7 +16,11 @@
         {{ date }} * {{ tags }} * {{ posts_for_series | length }} post{{
             posts_for_series | length | pluralize
         }}
-        in series
+        in series *
+        <span class="status"
+            >{% if frontmatter.completed %} completed {% else %} ongoing {%
+            endif %}</span
+        >
     </p>
     {{ markup | safe }}
     <div>

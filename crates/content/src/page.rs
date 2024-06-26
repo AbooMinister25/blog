@@ -166,6 +166,7 @@ pub fn write_page_to_disk(tera: &Tera, page: Page) -> Result<Page> {
     context.insert("toc", &page.toc);
     context.insert("markup", &page.content);
     context.insert("summary", &page.summary);
+    context.insert("frontmatter", &page.frontmatter);
 
     let template = frontmatter
         .template
@@ -206,6 +207,7 @@ pub fn write_index_to_disk(
     context.insert("summary", &page.summary);
     context.insert("posts", &posts);
     context.insert("index_pages", &index_pages);
+    context.insert("frontmatter", &page.frontmatter);
 
     let template = frontmatter
         .template
