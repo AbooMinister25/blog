@@ -6,4 +6,4 @@ tags = ["programming", "test"]
 part=1
 ---
 
-This is the first part of the series!
+This is the first part of the series! Yay!

@@ -221,8 +221,8 @@ pub fn update_post(conn: &Connection, post: PostSQL) -> Result<()> {
             &post.date,
             &post.summary,
             &post.hash,
-            &post.path.to_str().context("Path should be valid unicode")?,
             &post.new,
+            &post.path.to_str().context("Path should be valid unicode")?,
         ),
     )?;
 
@@ -235,7 +235,7 @@ pub fn get_posts(conn: &Connection) -> Result<Vec<RetPostSQL>> {
     let mut stmt = conn.prepare(
         "
     SELECT path, permalink, title, tags, date, summary, hash, new
-    FROM posts 
+    FROM posts
     ORDER BY datetime(date) DESC
     ",
     )?;

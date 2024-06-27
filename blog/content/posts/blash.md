@@ -1,15 +1,14 @@
 ---
-title = "anotheranotherone"
+title = "blash"
 tags = ["programming", "test"]
-date = "2024-06-01T8:45:00"
+date = "2024-06-23T8:45:00"
 ---
-again please
+notagain
 adfkja;dfja;lkdf dddd dd d
 test postxcddd
 hi this is a test post. It consists of _both_ tests and `tests`. Can't believe it, right?
 I didn't believe it at first myself. Also - don't mention it to anyone, but theres also a
 cf dd
-![hi](/static/assets/neat.excalidraw.svg)
 
 `println!("Hello World")`
 dfafa

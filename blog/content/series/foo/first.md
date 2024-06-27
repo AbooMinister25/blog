@@ -1,6 +1,6 @@
 ---
 title = "first"
-tags = ["programming", "test"]
+tags = ["programming", "test", "bas"]
 
 [series]
 part=1

@@ -3,10 +3,10 @@
 
 mod summary;
 
-use std::fmt::Debug;
 use std::path::Path;
+use std::{fmt::Debug, hash::Hash};
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use color_eyre::Result;
 use comrak::{
     format_html_with_plugins,
@@ -30,6 +30,7 @@ pub struct Frontmatter {
     pub tags: Vec<String>,
     pub template: Option<String>,
     pub completed: Option<bool>,
+    pub date: Option<String>,
     pub series: Option<SeriesInfo>,
 }
 
@@ -92,8 +93,14 @@ impl MarkdownRenderer {
 
         let string_html = String::from_utf8(html)?;
 
+        let date = if let Some(d) = &frontmatter.date {
+            Utc.from_utc_datetime(&d.parse::<NaiveDateTime>()?)
+        } else {
+            Utc::now()
+        };
+
         Ok(Document {
-            date: Utc::now(),
+            date,
             summary: summary::get_summary(&string_html)?,
             content: string_html,
             frontmatter,
