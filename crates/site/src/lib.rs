@@ -154,7 +154,9 @@ impl Site {
         let mut index_pages = Vec::new();
         let mut posts = Vec::new();
 
-        for page in pages {
+        for page in pages.into_iter().filter(|p| {
+            p.frontmatter.as_ref().is_some_and(|f| !f.draft) || self.ctx.config.development
+        }) {
             if page.index {
                 index_pages.push(page);
             } else {

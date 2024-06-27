@@ -32,6 +32,8 @@ pub struct Frontmatter {
     pub completed: Option<bool>,
     pub date: Option<String>,
     pub series: Option<SeriesInfo>,
+    #[serde(default)]
+    pub draft: bool,
 }
 
 /// Renders some content to markdown

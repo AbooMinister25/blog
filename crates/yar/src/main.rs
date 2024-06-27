@@ -26,6 +26,10 @@ struct Args {
     /// Whether to run a clean build
     #[clap(long, action)]
     clean: bool,
+
+    /// Whether or not to run a development build. In development builds, drafts are rendered.
+    #[clap(long, action)]
+    dev: bool,
 }
 
 #[tracing::instrument]
@@ -35,8 +39,11 @@ fn main() -> Result<()> {
     // Install panic and error report handlers
     color_eyre::install()?;
 
+    let args = Args::parse();
+
     let config: Config = Figment::from(Serialized::defaults(Config::default()))
         .merge(Toml::file("Config.toml"))
+        .join(("development", args.dev))
         .extract()?;
 
     let file_appender = tracing_appender::rolling::hourly(&config.log_folder, "ssg.log");
@@ -53,8 +60,6 @@ fn main() -> Result<()> {
 
     subscriber::set_global_default(subscriber)?;
     info!("Set up subscribers");
-
-    let args = Args::parse();
 
     // Clean build
     if args.clean {

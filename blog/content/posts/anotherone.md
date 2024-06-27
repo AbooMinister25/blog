@@ -1,7 +1,9 @@
 ---
 title = "anotherone"
 tags = ["programming", "test"]
+draft = true
 ---
+
 notagain
 adfkja;dfja;lkdf dddd dd d
 test postxcddd

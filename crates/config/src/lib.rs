@@ -8,6 +8,7 @@ pub struct Config {
     pub root: PathBuf,
     pub output_path: PathBuf,
     pub log_folder: PathBuf,
+    pub development: bool,
 }
 
 impl Default for Config {
@@ -17,6 +18,7 @@ impl Default for Config {
             root: Path::new("blog/").to_owned(),
             output_path: Path::new("public/").to_owned(),
             log_folder: Path::new("log/").to_owned(),
+            development: false,
         }
     }
 }
