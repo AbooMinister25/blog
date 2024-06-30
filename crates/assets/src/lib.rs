@@ -6,6 +6,7 @@
 )]
 
 mod embed_fonts;
+mod esbuild;
 
 use std::{
     ffi::OsStr,
@@ -17,6 +18,7 @@ use std::{
 use color_eyre::{eyre::ContextCompat, Result};
 use embed_fonts::embed_font;
 use entry::Entry;
+use esbuild::bundle_js;
 use rsass::{compile_scss_path, output};
 use tracing::trace;
 use utils::fs::ensure_directory;
@@ -65,7 +67,7 @@ impl Asset {
         filename: &str,
     ) -> Result<PathBuf> {
         Ok(match self.path.extension().and_then(OsStr::to_str) {
-            Some(ext @ "scss") => {
+            Some("scss") => {
                 let out_path = out_dir.as_ref().join(format!("{filename}.css"));
 
                 let format = output::Format {
@@ -79,7 +81,10 @@ impl Asset {
                 out_path
             }
             Some(ext @ "js") => {
-                todo!()
+                let out_path = out_dir.as_ref().join(format!("{filename}.{ext}"));
+                bundle_js(&self.path, &out_path)?;
+
+                out_path
             }
             Some(ext) => {
                 let out_path = out_dir.as_ref().join(format!("{filename}.{ext}"));
