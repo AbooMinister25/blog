@@ -114,6 +114,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bddcadddf5e9015d310179a59bb28c4d4b9920ad0f11e8e14dbadf654890c9a6"
 
 [[package]]
+name = "assets"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "color-eyre",
+ "entry",
+ "esbuild-rs",
+ "lazy_static",
+ "regex",
+ "reqwest",
+ "rsass",
+ "tracing",
+ "utils",
+ "xmltree",
+]
+
+[[package]]
 name = "atomic"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -584,6 +601,17 @@ checksum = "a258e46cdc063eb8519c00b9fc845fc47bcfca4130e2f08e88665ceda8474245"
 dependencies = [
  "libc",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "esbuild-rs"
+version = "0.13.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "516a2353dabd00559c2f874993ad4fce114beefb27c2482643e2888888d99b93"
+dependencies = [
+ "lazy_static",
+ "libc",
+ "memorymodule-rs",
 ]
 
 [[package]]
@@ -1229,6 +1257,16 @@ name = "memchr"
 version = "2.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f232d6ef707e1956a43342693d2a31e72989554d58299d7a88738cc95b0d35c"
+
+[[package]]
+name = "memorymodule-rs"
+version = "0.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c4ead5a227d30610a2dee54d4121a79184072f94865506420e535a778b8a681"
+dependencies = [
+ "cc",
+ "libc",
+]
 
 [[package]]
 name = "mime"
@@ -1968,17 +2006,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sass"
-version = "0.1.0"
-dependencies = [
- "color-eyre",
- "entry",
- "rsass",
- "tracing",
- "utils",
-]
-
-[[package]]
 name = "schannel"
 version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2140,17 +2167,17 @@ checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 name = "site"
 version = "0.1.0"
 dependencies = [
+ "assets",
  "color-eyre",
  "config",
  "content",
  "entry",
  "markdown",
  "rusqlite",
- "sass",
  "serde",
  "serde_json",
  "sql",
- "static_assets",
+ "static_files",
  "tera",
  "tracing",
 ]
@@ -2207,15 +2234,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
-name = "static_assets"
+name = "static_files"
 version = "0.1.0"
 dependencies = [
  "base64",
  "color-eyre",
  "entry",
+ "esbuild-rs",
  "lazy_static",
  "regex",
  "reqwest",
+ "rsass",
  "tracing",
  "utils",
  "xmltree",

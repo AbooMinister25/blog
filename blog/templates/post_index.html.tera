@@ -3,7 +3,7 @@
 <title>Posts</title>
 <meta name="og:title" property="og:title" content="Posts" />
 <meta name="twitter:title" content="Posts" />
-<link rel="stylesheet" href="/styles/home.css" />
+<link rel="stylesheet" href="/assets/styles/home.css" />
 <meta name="description" content="Rayyan Cyclegar's Blog - Posts" />
 <meta
     name="og:description"

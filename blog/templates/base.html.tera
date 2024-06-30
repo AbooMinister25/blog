@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         {% block head %}{% endblock head %}
-        <link rel="stylesheet" href="/styles/base.css" />
+        <link rel="stylesheet" href="/assets/styles/base.css" />
         <link
             rel="apple-touch-icon"
             sizes="180x180"

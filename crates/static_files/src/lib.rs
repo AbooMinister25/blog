@@ -1,7 +1,5 @@
 #![warn(clippy::pedantic, clippy::nursery)]
 
-mod embed_fonts;
-
 use std::{
     fmt::Debug,
     fs,
@@ -9,7 +7,6 @@ use std::{
 };
 
 use color_eyre::{eyre::ContextCompat, Result};
-use embed_fonts::embed_font;
 use entry::Entry;
 use tracing::trace;
 use utils::fs::ensure_directory;
@@ -19,11 +16,11 @@ use utils::fs::ensure_directory;
 /// the database so that existing and unchanged files aren't repeatedly
 /// copied over - the same as all other entries.
 #[derive(Debug)]
-pub struct StaticAsset {
+pub struct StaticFile {
     pub path: PathBuf,
 }
 
-impl StaticAsset {
+impl StaticFile {
     #[tracing::instrument]
     pub fn new(path: PathBuf) -> Self {
         Self { path }
@@ -38,7 +35,7 @@ impl StaticAsset {
                 .join(self.directory()?),
         )?;
 
-        trace!("Rendering static asset at {:?}", self.path);
+        trace!("Rendering static file at {:?}", self.path);
 
         let filename = self
             .path
@@ -54,33 +51,30 @@ impl StaticAsset {
 
         fs::copy(&self.path, &out_path)?;
 
-        if let Some(e) = self.path.extension() {
-            if e == "svg" {
-                embed_font(&out_path)?;
-            }
-        }
-
-        trace!("Rendered static asset at {:?}", out_path);
+        trace!("Rendered static file to {:?}", out_path);
 
         Ok(())
     }
 
     #[tracing::instrument]
-    fn directory(&self) -> Result<&str> {
+    fn directory(&self) -> Result<PathBuf> {
         let parent = self.path.parent().unwrap(); // All static entries will have a parent
-        Ok(if parent == Path::new("/static") {
-            "."
+        Ok(if parent.ends_with("static") {
+            PathBuf::from(".")
         } else {
             parent
-                .file_name()
-                .context("Path should have a filename")?
-                .to_str()
-                .context("Path should be valid UTF-8")?
+                .components()
+                .skip_while(|c| {
+                    let p = AsRef::<Path>::as_ref(c);
+                    !p.ends_with("static")
+                })
+                .skip(1)
+                .collect::<PathBuf>()
         })
     }
 }
 
-impl From<Entry> for StaticAsset {
+impl From<Entry> for StaticFile {
     fn from(value: Entry) -> Self {
         Self::new(value.path)
     }

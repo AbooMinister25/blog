@@ -1,5 +1,5 @@
 [package]
-name = "static_assets"
+name = "static_files"
 version = "0.1.0"
 edition = "2021"
 
@@ -11,8 +11,10 @@ entry = { path = "../entry" }
 
 color-eyre = "0.6.2"
 tracing = "0.1.37"
+rsass = "0.28.2"
 regex = "1.10.2"
 lazy_static = "1.4.0"
 reqwest = { version = "0.11.23", features = ["blocking"] }
 base64 = "0.21.6"
 xmltree = "0.10.3"
+esbuild-rs = "0.13.8"

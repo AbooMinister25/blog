@@ -11,8 +11,8 @@ config = { path = "../config" }
 markdown = { path = "../markdown" }
 entry = { path = "../entry" }
 sql = { path = "../sql" }
-sass = { path = "../sass" }
-static_assets = { path = "../static_assets" }
+static_files = { path = "../static_files" }
+assets = { path = "../assets" }
 
 color-eyre = "0.6.2"
 rusqlite = "0.31.0"

@@ -1,8 +1,10 @@
 #![warn(clippy::pedantic, clippy::nursery)]
 #![allow(clippy::missing_errors_doc)]
 
-use std::fmt::Debug;
+use std::path::Component;
+use std::{ffi::OsStr, fmt::Debug};
 
+use assets::Asset;
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
 use config::Config;
@@ -10,9 +12,8 @@ use content::page::{render_page, write_index_to_disk, write_page_to_disk, Page};
 use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
 use rusqlite::Connection;
-use sass::Stylesheet;
 use sql::{get_posts, insert_post, update_post, PostSQL};
-use static_assets::StaticAsset;
+use static_files::StaticFile;
 use std::collections::HashSet;
 use tera::Tera;
 use tracing::info;
@@ -52,8 +53,8 @@ pub struct Site {
     ctx: Context,
     discovered_posts: Vec<Entry>,
     pub working_index: Index,
-    pub stylesheets: Vec<Stylesheet>,
-    pub static_assets: Vec<StaticAsset>,
+    pub static_files: Vec<StaticFile>,
+    pub assets: Vec<Asset>,
 }
 
 impl Site {
@@ -76,8 +77,8 @@ impl Site {
         Ok(Self {
             ctx,
             discovered_posts: Vec::new(),
-            stylesheets: Vec::new(),
-            static_assets: Vec::new(),
+            static_files: Vec::new(),
+            assets: Vec::new(),
             working_index: Index::default(),
         })
     }
@@ -117,15 +118,15 @@ impl Site {
         let entries = discover_entries(&self.ctx.conn, &self.ctx.config.root)?;
 
         for entry in entries {
-            match entry.path.extension() {
-                Some(e) => match e.to_string_lossy().as_ref() {
-                    "md" => self.discovered_posts.push(entry),
-                    "scss" | "sass" => self.stylesheets.push(Stylesheet::from(entry)),
-                    "png" | "jpg" | "ico" | "webmanifest" | "svg" | "woff2" | "ttf" => {
-                        self.static_assets.push(StaticAsset::from(entry));
-                    }
-                    _ => continue,
-                },
+            match entry.path.parent().and_then(|p| {
+                p.components()
+                    .nth(1)
+                    .map(Component::as_os_str)
+                    .and_then(OsStr::to_str)
+            }) {
+                Some("content") => self.discovered_posts.push(entry),
+                Some("assets") => self.assets.push(Asset::from(entry)),
+                Some("static") => self.static_files.push(StaticFile::from(entry)),
                 _ => continue,
             }
         }
@@ -171,14 +172,20 @@ impl Site {
 
         self.working_index = Index::from(written_posts);
 
+        // let _ = self
+        //     .stylesheets
+        //     .iter_mut()
+        //     .map(|s| s.render(&self.ctx.config.output_path))
+        //     .collect::<Result<Vec<()>>>()?;
+
         let _ = self
-            .stylesheets
+            .assets
             .iter_mut()
             .map(|s| s.render(&self.ctx.config.output_path))
             .collect::<Result<Vec<()>>>()?;
 
         let _ = self
-            .static_assets
+            .static_files
             .iter_mut()
             .map(|a| a.render(&self.ctx.config.output_path))
             .collect::<Result<Vec<()>>>()?;
