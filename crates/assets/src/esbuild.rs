@@ -22,19 +22,19 @@ pub fn bundle_js<T: AsRef<Path> + Debug>(path: T, out_path: T) -> Result<()> {
     options_builder.engines = vec![
         Engine {
             name: EngineName::Chrome,
-            version: "58".to_string(),
+            version: "89".to_string(),
         },
         Engine {
             name: EngineName::Firefox,
-            version: "57".to_string(),
+            version: "89".to_string(),
         },
         Engine {
             name: EngineName::Safari,
-            version: "11".to_string(),
+            version: "15".to_string(),
         },
         Engine {
             name: EngineName::Edge,
-            version: "16".to_string(),
+            version: "89".to_string(),
         },
     ];
     options_builder.write = true;
