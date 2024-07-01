@@ -32,7 +32,11 @@ impl Entry {
 /// filter out only the ones that have changed or have been newly created since the last
 /// run of the program.
 #[tracing::instrument]
-pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> Result<Vec<Entry>> {
+pub fn discover_entries<T: AsRef<Path> + Debug>(
+    conn: &Connection,
+    path: T,
+    special_pages: &[String],
+) -> Result<Vec<Entry>> {
     let mut ret = Vec::new();
 
     trace!("Discovering entries at {:?}", path);
@@ -57,7 +61,7 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(conn: &Connection, path: T) -> R
             // Existing file was changed.
             update_entry_hash(conn, &path, &hash)?;
             ret.push(Entry::new(path, content, hash, false));
-        } else if path.ends_with("index.md") {
+        } else if special_pages.iter().any(|ending| path.ends_with(ending)) {
             ret.push(Entry::new(path, content, hash, false));
         }
     }

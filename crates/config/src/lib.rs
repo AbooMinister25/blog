@@ -9,6 +9,7 @@ pub struct Config {
     pub output_path: PathBuf,
     pub log_folder: PathBuf,
     pub development: bool,
+    pub special_pages: Vec<String>,
 }
 
 impl Default for Config {
@@ -19,6 +20,11 @@ impl Default for Config {
             output_path: Path::new("public/").to_owned(),
             log_folder: Path::new("log/").to_owned(),
             development: false,
+            special_pages: vec![
+                "index.md".to_string(),
+                "search.md".to_string(),
+                "about.md".to_string(),
+            ],
         }
     }
 }

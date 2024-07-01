@@ -115,7 +115,11 @@ impl Site {
     #[tracing::instrument(skip(self))]
     fn discover(&mut self) -> Result<()> {
         info!("Discovering entries");
-        let entries = discover_entries(&self.ctx.conn, &self.ctx.config.root)?;
+        let entries = discover_entries(
+            &self.ctx.conn,
+            &self.ctx.config.root,
+            &self.ctx.config.special_pages,
+        )?;
 
         for entry in entries {
             match entry.path.parent().and_then(|p| {
@@ -148,6 +152,7 @@ impl Site {
                     String::from_utf8_lossy(&p.raw_content).to_string(),
                     &p.hash,
                     p.new,
+                    &self.ctx.config.special_pages,
                 )
             })
             .collect::<Result<HashSet<Page>>>()?;
