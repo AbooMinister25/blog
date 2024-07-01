@@ -15,7 +15,7 @@
 <meta name="twitter:description" content="Rayyan Cyclegar's Blog - Search" />
 {% endblock head %} {% block content %}
 
-<div class="search-container">
+<div class="posts-view">
     <input id="search" type="search" placeholder="Search..." />
 
     <div class="search-results">
