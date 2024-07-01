@@ -68,6 +68,13 @@ impl PartialEq for Page {
     }
 }
 
+fn is_special_page<T: AsRef<Path>>(path: T) -> bool {
+    let special_pages = ["index.md", "about.md", "search.md"];
+    special_pages
+        .iter()
+        .any(|ending| path.as_ref().ends_with(ending))
+}
+
 impl Page {
     #[tracing::instrument]
     pub fn new(
@@ -145,7 +152,7 @@ pub fn render_page<T: AsRef<Path> + Debug>(
         hash.to_owned(),
         document.date,
         new,
-        path.as_ref().ends_with("index.md"),
+        is_special_page(path),
     ))
 }
 

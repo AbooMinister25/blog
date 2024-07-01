@@ -172,12 +172,6 @@ impl Site {
 
         self.working_index = Index::from(written_posts);
 
-        // let _ = self
-        //     .stylesheets
-        //     .iter_mut()
-        //     .map(|s| s.render(&self.ctx.config.output_path))
-        //     .collect::<Result<Vec<()>>>()?;
-
         let _ = self
             .assets
             .iter_mut()
