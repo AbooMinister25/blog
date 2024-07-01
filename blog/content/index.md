@@ -1,6 +1,6 @@
 ---
 title = ""
-tags = ["programming", "test"]
+tags = []
 template = "home.html.tera"
 ---
 

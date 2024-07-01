@@ -123,8 +123,10 @@ function makeTeaser(body, terms) {
 
 function initSearch() {
     let searchInput = document.getElementById("search");
-    let searchResults = document.querySelector(".search-results");
+    let searchResults = document.querySelector(".post-list");
     let searchResultsItems = document.querySelector(".search-results-items");
+
+    searchResults.style.display = "none";
 
     var minisearch;
 
