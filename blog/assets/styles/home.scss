@@ -11,6 +11,7 @@
     @media screen and (min-width: 1000px) {
         border: none;
         padding: 1rem;
+        margin-top: 2rem;
     }
 }
 
@@ -98,6 +99,7 @@
     background-color: latte.$mantle;
     border: 2px solid latte.$overlay1;
     color: latte.$text;
+    margin-bottom: 1rem;
 
     &:hover {
         border: 2px solid latte.$yellow;
