@@ -14,7 +14,7 @@
 {% endblock head %} {% block content %}
 
 <div class="sidebar">
-    <img class="pfp" src="/static/assets/gojo.jpg" />
+    <img class="pfp" src="/assets/images/gojo.jpg" />
     <p>
         {{ markup | safe }}
     </p>

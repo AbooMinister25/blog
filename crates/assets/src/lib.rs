@@ -55,6 +55,8 @@ impl Asset {
         let out_dir = output_directory.as_ref().join("assets/").join(directory);
         let out_path = self.preprocess_and_write(out_dir, filename)?;
 
+        self.postprocess(&out_path)?;
+
         trace!("Rendered asset file to {:?}", out_path);
 
         Ok(())
