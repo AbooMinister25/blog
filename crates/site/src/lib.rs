@@ -95,13 +95,15 @@ impl Site {
             .build_index(&self.ctx.config.output_path)?;
         self.update_db()?;
 
-        let index = self.load_index()?;
+        let mut index = self.load_index()?;
         index_pages
             .iter()
             .map(|p| write_index_to_disk(&self.ctx.tera, p, &index, &index_pages))
             .collect::<Result<Vec<()>>>()?;
 
-        self.build_atom_feed(index)?;
+        self.build_atom_feed(&index)?;
+        index.append(&mut index_pages);
+        self.build_sitemap(index)?;
 
         Ok(())
     }
@@ -205,6 +207,7 @@ impl Site {
                 &page.title,
                 &page.tags,
                 &page.date,
+                &page.updated,
                 &page.summary,
                 &page.hash,
                 page.new,
@@ -221,7 +224,7 @@ impl Site {
     }
 
     #[tracing::instrument(skip(self))]
-    fn build_atom_feed(&mut self, pages: Vec<Page>) -> Result<()> {
+    fn build_atom_feed(&mut self, pages: &[Page]) -> Result<()> {
         trace!("Generating Atom feed");
         let template = "atom.xml.tera";
         let out_path = self.ctx.config.output_path.join("atom.xml");
@@ -237,6 +240,23 @@ impl Site {
         fs::write(out_path, rendered)?;
 
         trace!("Generated Atom feed.");
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    fn build_sitemap(&mut self, pages: Vec<Page>) -> Result<()> {
+        trace!("Generating sitemap");
+
+        let template = "sitemap.xml.tera";
+        let out_path = self.ctx.config.output_path.join("sitemap.xml");
+        let mut context = TeraContext::new();
+        context.insert("pages", &pages);
+
+        let rendered = self.ctx.tera.render(template, &context)?;
+        fs::write(out_path, rendered)?;
+
+        trace!("Generated sitemap");
 
         Ok(())
     }

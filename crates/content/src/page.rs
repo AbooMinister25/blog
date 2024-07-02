@@ -31,6 +31,7 @@ pub struct Page {
     pub summary: String,
     pub hash: String,
     pub date: DateTime<Utc>,
+    pub updated: DateTime<Utc>,
     #[serde(skip)]
     pub new: bool,
     pub index: bool,
@@ -50,6 +51,7 @@ impl From<RetPostSQL> for Page {
             value.summary,
             value.hash,
             value.date,
+            value.updated,
             value.new,
             false,
         )
@@ -88,6 +90,7 @@ impl Page {
         summary: String,
         hash: String,
         date: DateTime<Utc>,
+        updated: DateTime<Utc>,
         new: bool,
         index: bool,
     ) -> Self {
@@ -103,6 +106,7 @@ impl Page {
             summary,
             hash,
             date,
+            updated,
             new,
             index,
         }
@@ -151,6 +155,7 @@ pub fn render_page<T: AsRef<Path> + Debug>(
         document.summary,
         hash.to_owned(),
         document.date,
+        document.updated,
         new,
         is_special_page(path, special_pages),
     ))

@@ -31,6 +31,7 @@ pub struct Frontmatter {
     pub template: Option<String>,
     pub completed: Option<bool>,
     pub date: Option<String>,
+    pub updated: Option<String>,
     pub series: Option<SeriesInfo>,
     #[serde(default)]
     pub draft: bool,
@@ -46,6 +47,7 @@ pub struct MarkdownRenderer {
 /// Represent a parsed markdown document
 pub struct Document {
     pub date: DateTime<Utc>,
+    pub updated: DateTime<Utc>,
     pub content: String,
     pub frontmatter: Frontmatter,
     pub toc: Vec<String>,
@@ -101,8 +103,15 @@ impl MarkdownRenderer {
             Utc::now()
         };
 
+        let updated = if let Some(d) = &frontmatter.updated {
+            Utc.from_utc_datetime(&d.parse::<NaiveDateTime>()?)
+        } else {
+            date
+        };
+
         Ok(Document {
             date,
+            updated,
             summary: summary::get_summary(&string_html)?,
             content: string_html,
             frontmatter,

@@ -15,6 +15,7 @@ pub struct PostSQL<'a> {
     title: &'a str,
     tags: &'a Vec<String>,
     date: &'a DateTime<Utc>,
+    updated: &'a DateTime<Utc>,
     summary: &'a str,
     hash: &'a str,
     new: bool,
@@ -27,6 +28,7 @@ impl<'a> PostSQL<'a> {
         title: &'a str,
         tags: &'a Vec<String>,
         date: &'a DateTime<Utc>,
+        updated: &'a DateTime<Utc>,
         summary: &'a str,
         hash: &'a str,
         new: bool,
@@ -37,6 +39,7 @@ impl<'a> PostSQL<'a> {
             title,
             tags,
             date,
+            updated,
             summary,
             hash,
             new,
@@ -51,6 +54,7 @@ pub struct RetPostSQL {
     pub title: String,
     pub tags: Vec<String>,
     pub date: DateTime<Utc>,
+    pub updated: DateTime<Utc>,
     pub summary: String,
     pub hash: String,
     pub new: bool,
@@ -63,6 +67,7 @@ impl RetPostSQL {
         title: String,
         tags: Vec<String>,
         date: DateTime<Utc>,
+        updated: DateTime<Utc>,
         summary: String,
         hash: String,
         new: bool,
@@ -74,6 +79,7 @@ impl RetPostSQL {
             tags,
             date,
             summary,
+            updated,
             hash,
             new,
         }
@@ -106,6 +112,7 @@ pub fn setup_sql() -> Result<Connection> {
             title TEXT NOT NULL,
             tags JSON NOT NULL,
             date TEXT NOT NULL,
+            updated TEXT NOT NULL,
             summary TEXT NOT NULL,
             hash TEXT NOT NULL,
             new INTEGER NOT NULL
@@ -181,8 +188,8 @@ pub fn update_entry_hash<P: AsRef<Path> + Debug>(
 pub fn insert_post(conn: &Connection, post: PostSQL) -> Result<()> {
     conn.execute(
         "
-    INSERT INTO posts (path, permalink, title, tags, date, summary, hash, new)
-    VALUES (?1, ?2, ?3, json(?4), datetime(?5), ?6, ?7, ?8)
+    INSERT INTO posts (path, permalink, title, tags, date, updated, summary, hash, new)
+    VALUES (?1, ?2, ?3, json(?4), datetime(?5), datetime(?6), ?7, ?8, ?9)
     ",
         (
             &post.path.to_str().context("Path should be valid unicode")?,
@@ -190,6 +197,7 @@ pub fn insert_post(conn: &Connection, post: PostSQL) -> Result<()> {
             &post.title,
             &serde_json::to_string(&post.tags)?,
             &post.date,
+            &post.updated,
             &post.summary,
             &post.hash,
             &post.new,
@@ -209,16 +217,18 @@ pub fn update_post(conn: &Connection, post: PostSQL) -> Result<()> {
         title = ?2,
         tags = json(?3),
         date = datetime(?4),
-        summary = ?5,
-        hash = ?6,
-        new = ?7
-    WHERE path = (?8)
+        updated = datetime(?5),
+        summary = ?6,
+        hash = ?7,
+        new = ?8
+    WHERE path = (?9)
     ",
         (
             &post.permalink,
             &post.title,
             &serde_json::to_string(&post.tags)?,
             &post.date,
+            &post.updated,
             &post.summary,
             &post.hash,
             &post.new,
@@ -234,7 +244,7 @@ pub fn update_post(conn: &Connection, post: PostSQL) -> Result<()> {
 pub fn get_posts(conn: &Connection) -> Result<Vec<RetPostSQL>> {
     let mut stmt = conn.prepare(
         "
-    SELECT path, permalink, title, tags, date, summary, hash, new
+    SELECT path, permalink, title, tags, date, updated, summary, hash, new
     FROM posts
     ORDER BY datetime(date) DESC
     ",
@@ -254,6 +264,7 @@ pub fn get_posts(conn: &Connection) -> Result<Vec<RetPostSQL>> {
             row.get(5)?,
             row.get(6)?,
             row.get(7)?,
+            row.get(8)?,
         ))
     })?;
 
