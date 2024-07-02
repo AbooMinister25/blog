@@ -34,10 +34,16 @@ impl Index {
 
         Ok(())
     }
+
+    pub fn clear(&mut self) {
+        self.working_pages.clear();
+    }
 }
 
 impl From<HashSet<Page>> for Index {
     fn from(value: HashSet<Page>) -> Self {
-        Self { working_pages: value }
+        Self {
+            working_pages: value,
+        }
     }
 }

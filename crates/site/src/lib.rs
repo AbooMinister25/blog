@@ -52,7 +52,7 @@ impl Context {
 /// Represents the static site, and hold all its pages.
 #[derive(Debug)]
 pub struct Site {
-    ctx: Context,
+    pub ctx: Context,
     discovered_posts: Vec<Entry>,
     pub working_index: Index,
     pub static_files: Vec<StaticFile>,
@@ -104,6 +104,8 @@ impl Site {
         self.build_atom_feed(&index)?;
         index.append(&mut index_pages);
         self.build_sitemap(index)?;
+
+        self.reset();
 
         Ok(())
     }
@@ -259,5 +261,13 @@ impl Site {
         trace!("Generated sitemap");
 
         Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    fn reset(&mut self) {
+        self.discovered_posts.clear();
+        self.static_files.clear();
+        self.assets.clear();
+        self.working_index.clear();
     }
 }

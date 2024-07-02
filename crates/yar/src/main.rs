@@ -9,6 +9,7 @@ use figment::{
     providers::{Format, Serialized, Toml},
     Figment,
 };
+use notify::{Config as NotifyConfig, Error, Event, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::Serialize;
 use site::Site;
 use sql::setup_sql;
@@ -78,6 +79,26 @@ fn main() -> Result<()> {
 
     let elapsed = now.elapsed();
     info!("Built in {:.2?} seconds", elapsed);
+
+    if args.dev {
+        let (tx, rx) = std::sync::mpsc::channel();
+
+        info!("Development mode enabled, hot reloading on file system changes.");
+        let mut watcher = RecommendedWatcher::new(tx, NotifyConfig::default())?;
+        watcher.watch(&site.ctx.config.root, RecursiveMode::Recursive)?;
+
+        for res in rx {
+            if res.is_ok_and(|e| e.kind.is_modify() || e.kind.is_create()) {
+                info!("Building site");
+                let now = Instant::now();
+                site.build()?;
+                let elapsed = now.elapsed();
+
+                info!("Built site.");
+                info!("Built in {:.2?} seconds", elapsed);
+            }
+        }
+    }
 
     Ok(())
 }
