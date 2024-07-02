@@ -1,10 +1,12 @@
 #![warn(clippy::pedantic, clippy::nursery)]
 #![allow(clippy::missing_errors_doc)]
 
+use std::fs;
 use std::path::Component;
 use std::{ffi::OsStr, fmt::Debug};
 
 use assets::Asset;
+use chrono::Utc;
 use color_eyre::eyre::ContextCompat;
 use color_eyre::Result;
 use config::Config;
@@ -15,8 +17,8 @@ use rusqlite::Connection;
 use sql::{get_posts, insert_post, update_post, PostSQL};
 use static_files::StaticFile;
 use std::collections::HashSet;
-use tera::Tera;
-use tracing::info;
+use tera::{Context as TeraContext, Tera};
+use tracing::{info, trace};
 
 pub mod index;
 mod tera_functions;
@@ -98,6 +100,8 @@ impl Site {
             .iter()
             .map(|p| write_index_to_disk(&self.ctx.tera, p, &index, &index_pages))
             .collect::<Result<Vec<()>>>()?;
+
+        self.build_atom_feed(index)?;
 
         Ok(())
     }
@@ -212,6 +216,27 @@ impl Site {
                 update_post(&self.ctx.conn, post_sql)?;
             }
         }
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    fn build_atom_feed(&mut self, pages: Vec<Page>) -> Result<()> {
+        trace!("Generating Atom feed");
+        let template = "atom.xml.tera";
+        let out_path = self.ctx.config.output_path.join("atom.xml");
+        let last_updated = Utc::now();
+        let mut context = TeraContext::new();
+
+        context.insert("feed_url", &format!("{}atom.xml", self.ctx.config.url));
+        context.insert("base_url", &self.ctx.config.url);
+        context.insert("last_updated", &last_updated);
+        context.insert("pages", &pages);
+
+        let rendered = self.ctx.tera.render(template, &context)?;
+        fs::write(out_path, rendered)?;
+
+        trace!("Generated Atom feed.");
 
         Ok(())
     }

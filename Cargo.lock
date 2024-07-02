@@ -2490,6 +2490,7 @@ name = "site"
 version = "0.1.0"
 dependencies = [
  "assets",
+ "chrono",
  "color-eyre",
  "config",
  "content",
