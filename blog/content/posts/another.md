@@ -3,7 +3,7 @@ title = "another"
 tags = ["programming", "test"]
 ---
 
-not ok yay
+alright then 
 adfkja;dfja;lkdf dddd dd d
 test postxcddd
 hi this is a test post. It consists of _both_ tests and `tests`. Can't believe it, right?
@@ -21,7 +21,7 @@ dd
 **_bolt_italic_**
 
 -   yeah this is a thingdafadf
--   b
+-   b 
 -   c d
 
 ## Header 1

@@ -6,6 +6,8 @@ use std::{fmt::Debug, path::PathBuf};
 
 use chrono::{DateTime, Utc};
 use color_eyre::{eyre::ContextCompat, Result};
+use r2d2::Pool;
+use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::Connection;
 
 #[derive(Debug)]
@@ -88,9 +90,11 @@ impl RetPostSQL {
 
 /// Sets up the SQLite database, creating the initial tables if they don't exist, and acquiring the connection.
 #[tracing::instrument]
-pub fn setup_sql() -> Result<Connection> {
+pub fn setup_sql() -> Result<Pool<SqliteConnectionManager>> {
     // Establish connection to the database
-    let conn = Connection::open("blog.db")?;
+    let manager = SqliteConnectionManager::file("blog.db");
+    let pool = Pool::new(manager)?;
+    let conn = pool.get()?;
 
     conn.execute(
         "
@@ -121,7 +125,7 @@ pub fn setup_sql() -> Result<Connection> {
         (),
     )?;
 
-    Ok(conn)
+    Ok(pool)
 }
 
 /// Fetch hash from database

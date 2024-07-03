@@ -1,18 +1,22 @@
 #![warn(clippy::pedantic, clippy::nursery)]
 
+mod server;
+
 use std::time::Instant;
 
 use clap::Parser;
-use color_eyre::Result;
+use color_eyre::{eyre::bail, Result};
 use config::Config;
 use figment::{
     providers::{Format, Serialized, Toml},
     Figment,
 };
-use notify::{Config as NotifyConfig, Error, Event, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::{Config as NotifyConfig, RecommendedWatcher, RecursiveMode, Watcher};
 use serde::Serialize;
 use site::Site;
 use sql::setup_sql;
+use tokio::sync::mpsc;
+use tower_livereload::LiveReloadLayer;
 use tracing::{info, metadata::LevelFilter, subscriber};
 use tracing_subscriber::fmt;
 use tracing_subscriber::prelude::*;
@@ -34,7 +38,8 @@ struct Args {
 }
 
 #[tracing::instrument]
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     let now = Instant::now();
 
     // Install panic and error report handlers
@@ -69,11 +74,12 @@ fn main() -> Result<()> {
         ensure_removed(&config.output_path)?;
     }
 
-    let conn = setup_sql()?;
+    let pool = setup_sql()?;
     info!("Connected to database, created tables");
 
-    let mut site = Site::new(conn, config)?;
-    site.build()?;
+    let mut site = Site::new(pool.get()?, config.clone())?;
+
+    tokio::task::spawn_blocking(move || site.build()).await??;
 
     info!("Built site");
 
@@ -81,23 +87,48 @@ fn main() -> Result<()> {
     info!("Built in {:.2?} seconds", elapsed);
 
     if args.dev {
-        let (tx, rx) = std::sync::mpsc::channel();
-
         info!("Development mode enabled, hot reloading on file system changes.");
-        let mut watcher = RecommendedWatcher::new(tx, NotifyConfig::default())?;
-        watcher.watch(&site.ctx.config.root, RecursiveMode::Recursive)?;
 
-        for res in rx {
-            if res.is_ok_and(|e| e.kind.is_modify() || e.kind.is_create()) {
-                info!("Building site");
-                let now = Instant::now();
-                site.build()?;
-                let elapsed = now.elapsed();
+        let livereload = LiveReloadLayer::new();
+        let reloader = livereload.reloader();
 
-                info!("Built site.");
-                info!("Built in {:.2?} seconds", elapsed);
+        let (tx, mut rx) = mpsc::channel(32);
+        let mut watcher = RecommendedWatcher::new(
+            move |res| {
+                tx.blocking_send(res)
+                    .expect("Problem while sending message.");
+            },
+            NotifyConfig::default(),
+        )?;
+        watcher.watch(&config.root, RecursiveMode::Recursive)?;
+
+        let t1 = tokio::spawn(async move {
+            while let Some(res) = rx.recv().await {
+                let pool = pool.clone();
+                let config = config.clone();
+                if res.is_ok_and(|e| e.kind.is_modify() || e.kind.is_create()) {
+                    info!("Building site");
+                    let now = Instant::now();
+                    tokio::task::spawn_blocking(move || {
+                        let mut site = Site::new(pool.get()?, config)?;
+                        site.build()
+                    });
+
+                    let elapsed = now.elapsed();
+
+                    info!("Built site.");
+                    info!("Built in {:.2?} seconds", elapsed);
+
+                    reloader.reload();
+                }
             }
-        }
+            Ok::<(), color_eyre::Report>(())
+        });
+
+        let t2 = tokio::spawn(async move { server::serve(livereload).await });
+
+        t1.await??;
+        t2.await??;
     }
 
     Ok(())

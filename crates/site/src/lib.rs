@@ -13,7 +13,8 @@ use config::Config;
 use content::page::{render_page, write_index_to_disk, write_page_to_disk, Page};
 use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
-use rusqlite::Connection;
+use r2d2::PooledConnection;
+use r2d2_sqlite::SqliteConnectionManager;
 use sql::{get_posts, insert_post, update_post, PostSQL};
 use static_files::StaticFile;
 use std::collections::HashSet;
@@ -27,7 +28,7 @@ use crate::index::Index;
 
 #[derive(Debug)]
 pub struct Context {
-    pub conn: Connection,
+    pub conn: PooledConnection<SqliteConnectionManager>,
     pub markdown_renderer: MarkdownRenderer,
     pub tera: Tera,
     pub config: Config,
@@ -35,7 +36,7 @@ pub struct Context {
 
 impl Context {
     pub fn new(
-        conn: Connection,
+        conn: PooledConnection<SqliteConnectionManager>,
         markdown_renderer: MarkdownRenderer,
         tera: Tera,
         config: Config,
@@ -61,7 +62,7 @@ pub struct Site {
 
 impl Site {
     #[tracing::instrument]
-    pub fn new(conn: Connection, config: Config) -> Result<Self> {
+    pub fn new(conn: PooledConnection<SqliteConnectionManager>, config: Config) -> Result<Self> {
         let renderer = MarkdownRenderer::new(&config.root)?;
 
         info!("Loaded templates");
