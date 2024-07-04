@@ -24,6 +24,8 @@ impl Default for Config {
                 "index.md".to_string(),
                 "search.md".to_string(),
                 "about.md".to_string(),
+                "500.md".to_string(),
+                "404.md".to_string(),
             ],
         }
     }

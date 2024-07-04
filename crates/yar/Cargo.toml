@@ -25,5 +25,4 @@ hyper-util = { version = "0.1.6", features = ["full"] }
 hyper-staticfile = "0.10.1"
 tower = "0.4"
 tower-livereload = "0.9.3"
-r2d2 = "0.8.10"
-r2d2_sqlite = "0.24.0"
+

@@ -3751,8 +3751,6 @@ dependencies = [
  "hyper-staticfile",
  "hyper-util",
  "notify",
- "r2d2",
- "r2d2_sqlite",
  "serde",
  "site",
  "sql",

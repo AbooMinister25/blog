@@ -5,7 +5,7 @@ mod server;
 use std::time::Instant;
 
 use clap::Parser;
-use color_eyre::{eyre::bail, Result};
+use color_eyre::Result;
 use config::Config;
 use figment::{
     providers::{Format, Serialized, Toml},
@@ -102,10 +102,11 @@ async fn main() -> Result<()> {
         )?;
         watcher.watch(&config.root, RecursiveMode::Recursive)?;
 
+        let c2 = config.clone();
         let t1 = tokio::spawn(async move {
             while let Some(res) = rx.recv().await {
                 let pool = pool.clone();
-                let config = config.clone();
+                let config = c2.clone();
                 if res.is_ok_and(|e| e.kind.is_modify() || e.kind.is_create()) {
                     info!("Building site");
                     let now = Instant::now();
@@ -125,7 +126,7 @@ async fn main() -> Result<()> {
             Ok::<(), color_eyre::Report>(())
         });
 
-        let t2 = tokio::spawn(async move { server::serve(livereload).await });
+        let t2 = tokio::spawn(async move { server::serve(livereload, config).await });
 
         t1.await??;
         t2.await??;
