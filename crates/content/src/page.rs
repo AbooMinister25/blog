@@ -132,16 +132,13 @@ pub fn render_page<T: AsRef<Path> + Debug>(
 
     let permalink = {
         let mut components = out_path.components();
-        let out = output_directory.as_ref().as_os_str();
         for c in components.by_ref() {
-            println!("{:?}", out);
             if let Component::Normal(o) = c {
                 if output_directory.as_ref().starts_with(o) {
                     break;
                 }
             }
         }
-        println!("{:?}", components);
         components.next_back();
         format!(
             "{url}{}",
