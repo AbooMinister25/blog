@@ -73,8 +73,14 @@ impl Site {
                 .to_str()
                 .context("Filename should be valid UTF-8")?,
         )?;
-        tera.register_function("posts_in_series", tera_functions::posts_in_series);
-        tera.register_function("get_series_indexes", tera_functions::get_series_indexes);
+        tera.register_function(
+            "posts_in_series",
+            tera_functions::make_posts_in_series(config.output_path.clone()),
+        );
+        tera.register_function(
+            "get_series_indexes",
+            tera_functions::make_get_series_indexes(config.output_path.clone()),
+        );
         let ctx = Context::new(conn, renderer, tera, config);
 
         Ok(Self {
