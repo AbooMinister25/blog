@@ -132,9 +132,14 @@ pub fn render_page<T: AsRef<Path> + Debug>(
 
     let permalink = {
         let mut components = out_path.components();
+        let out = output_directory
+            .as_ref()
+            .file_name()
+            .context("Output directory shouldn't terminate in ..")?;
+
         for c in components.by_ref() {
             if let Component::Normal(o) = c {
-                if output_directory.as_ref().starts_with(o) {
+                if o == out {
                     break;
                 }
             }
