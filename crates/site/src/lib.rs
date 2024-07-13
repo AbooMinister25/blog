@@ -54,6 +54,7 @@ impl Context {
 #[derive(Debug)]
 pub struct Site {
     pub ctx: Context,
+    entries: Vec<Entry>,
     discovered_posts: Vec<Entry>,
     pub working_index: Index,
     pub static_files: Vec<StaticFile>,
@@ -85,6 +86,7 @@ impl Site {
 
         Ok(Self {
             ctx,
+            entries: Vec::new(),
             discovered_posts: Vec::new(),
             static_files: Vec::new(),
             assets: Vec::new(),
@@ -95,21 +97,11 @@ impl Site {
     #[tracing::instrument(skip(self))]
     pub fn build(&mut self) -> Result<()> {
         self.discover()?;
-        let mut index_pages = self.render()?;
-        index_pages.sort_by(|a, b| b.date.cmp(&a.date));
 
-        self.working_index
-            .build_index(&self.ctx.config.output_path)?;
-        self.update_db()?;
-
-        let mut index = self.load_index()?;
-        index_pages
-            .iter()
-            .map(|p| write_index_to_disk(&self.ctx.tera, p, &index, &index_pages))
-            .collect::<Result<Vec<()>>>()?;
+        let (special_pages, posts) = self.build_entries()?;
+        let index = self.render(posts, special_pages)?;
 
         self.build_atom_feed(&index)?;
-        index.append(&mut index_pages);
         self.build_sitemap(index)?;
 
         self.reset();
@@ -130,6 +122,7 @@ impl Site {
     #[tracing::instrument(skip(self))]
     fn discover(&mut self) -> Result<()> {
         info!("Discovering entries");
+
         let entries = discover_entries(
             &self.ctx.conn,
             &self.ctx.config.root,
@@ -154,7 +147,8 @@ impl Site {
     }
 
     #[tracing::instrument(skip(self))]
-    pub fn render(&mut self) -> Result<Vec<Page>> {
+    fn build_entries(&mut self) -> Result<(Vec<Page>, Vec<Page>)> {
+        // Render all pages and separate them into either special pages or normal posts.
         let pages = self
             .discovered_posts
             .iter_mut()
@@ -172,39 +166,56 @@ impl Site {
             })
             .collect::<Result<HashSet<Page>>>()?;
 
-        let mut index_pages = Vec::new();
+        let mut special_pages = Vec::new();
         let mut posts = Vec::new();
 
         for page in pages.into_iter().filter(|p| {
             p.frontmatter.as_ref().is_some_and(|f| !f.draft) || self.ctx.config.development
         }) {
             if page.index {
-                index_pages.push(page);
+                special_pages.push(page);
             } else {
                 posts.push(page);
             }
         }
 
+        Ok((special_pages, posts))
+    }
+
+    #[tracing::instrument(skip(self))]
+    fn render(&mut self, posts: Vec<Page>, mut special_pages: Vec<Page>) -> Result<Vec<Page>> {
         let written_posts = posts
             .into_iter()
             .map(|p| write_page_to_disk(&self.ctx.tera, p))
             .collect::<Result<HashSet<Page>>>()?;
 
         self.working_index = Index::from(written_posts);
+        self.working_index
+            .build_index(&self.ctx.config.output_path)?;
+        self.update_db()?;
 
-        let _ = self
-            .assets
+        // TODO: Have a separate building step for assets and static files too, so that errors are
+        // TODO: caught before writing anything to disk.
+        self.assets
             .iter_mut()
             .map(|s| s.render(&self.ctx.config.output_path))
             .collect::<Result<Vec<()>>>()?;
 
-        let _ = self
-            .static_files
+        self.static_files
             .iter_mut()
             .map(|a| a.render(&self.ctx.config.output_path))
             .collect::<Result<Vec<()>>>()?;
 
-        Ok(index_pages)
+        // Build index pages.
+        special_pages.sort_by(|a, b| b.date.cmp(&a.date));
+        let mut index = self.load_index()?;
+        special_pages
+            .iter()
+            .map(|p| write_index_to_disk(&self.ctx.tera, p, &index, &special_pages))
+            .collect::<Result<Vec<()>>>()?;
+        index.append(&mut special_pages);
+
+        Ok(index)
     }
 
     #[tracing::instrument(skip(self))]
