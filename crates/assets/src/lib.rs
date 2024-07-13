@@ -27,14 +27,21 @@ use utils::fs::ensure_directory;
 /// This can include images, stylesheets, or javascript.
 #[derive(Debug)]
 pub struct Asset {
-    path: PathBuf,
+    pub path: PathBuf,
     raw_content: Vec<u8>,
+    pub hash: String,
+    pub new: bool,
 }
 
 impl Asset {
     #[tracing::instrument]
-    pub fn new(path: PathBuf, raw_content: Vec<u8>) -> Self {
-        Self { path, raw_content }
+    pub fn new(path: PathBuf, raw_content: Vec<u8>, hash: String, new: bool) -> Self {
+        Self {
+            path,
+            raw_content,
+            hash,
+            new,
+        }
     }
 
     #[tracing::instrument]
@@ -134,6 +141,6 @@ impl Asset {
 
 impl From<Entry> for Asset {
     fn from(value: Entry) -> Self {
-        Self::new(value.path, value.raw_content)
+        Self::new(value.path, value.raw_content, value.hash, value.new)
     }
 }

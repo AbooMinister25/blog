@@ -18,12 +18,14 @@ use utils::fs::ensure_directory;
 #[derive(Debug)]
 pub struct StaticFile {
     pub path: PathBuf,
+    pub hash: String,
+    pub new: bool,
 }
 
 impl StaticFile {
     #[tracing::instrument]
-    pub fn new(path: PathBuf) -> Self {
-        Self { path }
+    pub fn new(path: PathBuf, hash: String, new: bool) -> Self {
+        Self { path, hash, new }
     }
 
     #[tracing::instrument]
@@ -76,6 +78,6 @@ impl StaticFile {
 
 impl From<Entry> for StaticFile {
     fn from(value: Entry) -> Self {
-        Self::new(value.path)
+        Self::new(value.path, value.hash, value.new)
     }
 }

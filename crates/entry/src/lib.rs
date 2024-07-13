@@ -42,7 +42,7 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(
     trace!("Discovering entries at {:?}", path);
 
     // TODO: Refactor this when introducing parallel stuff, it aint ideal right now
-    let entries = read_entries(conn, &path)?;
+    let entries = read_entries(&path)?;
     info!("Discovered {:?} entries", entries.len());
 
     let hashes = entries
@@ -55,11 +55,9 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(
 
         if hashes.is_empty() {
             // A new file was created.
-            insert_entry(conn, &path, &hash)?;
             ret.push(Entry::new(path, content, hash, true));
         } else if hashes[0] != hash {
             // Existing file was changed.
-            update_entry_hash(conn, &path, &hash)?;
             ret.push(Entry::new(path, content, hash, false));
         } else if special_pages.iter().any(|ending| path.ends_with(ending)) {
             ret.push(Entry::new(path, content, hash, false));
@@ -72,10 +70,7 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(
 }
 
 #[tracing::instrument]
-fn read_entries<T: AsRef<Path> + Debug>(
-    conn: &Connection,
-    path: T,
-) -> Result<Vec<(PathBuf, Vec<u8>)>> {
+fn read_entries<T: AsRef<Path> + Debug>(path: T) -> Result<Vec<(PathBuf, Vec<u8>)>> {
     let mut ret = Vec::new();
 
     for entry in Walk::new(path.as_ref())

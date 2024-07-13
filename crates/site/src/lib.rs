@@ -15,7 +15,7 @@ use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
 use r2d2::PooledConnection;
 use r2d2_sqlite::SqliteConnectionManager;
-use sql::{get_posts, insert_post, update_post, PostSQL};
+use sql::{get_posts, insert_entry, insert_post, update_entry_hash, update_post, PostSQL};
 use static_files::StaticFile;
 use std::collections::HashSet;
 use tera::{Context as TeraContext, Tera};
@@ -54,7 +54,6 @@ impl Context {
 #[derive(Debug)]
 pub struct Site {
     pub ctx: Context,
-    entries: Vec<Entry>,
     discovered_posts: Vec<Entry>,
     pub working_index: Index,
     pub static_files: Vec<StaticFile>,
@@ -86,7 +85,6 @@ impl Site {
 
         Ok(Self {
             ctx,
-            entries: Vec::new(),
             discovered_posts: Vec::new(),
             static_files: Vec::new(),
             assets: Vec::new(),
@@ -192,7 +190,6 @@ impl Site {
         self.working_index = Index::from(written_posts);
         self.working_index
             .build_index(&self.ctx.config.output_path)?;
-        self.update_db()?;
 
         // TODO: Have a separate building step for assets and static files too, so that errors are
         // TODO: caught before writing anything to disk.
@@ -207,6 +204,7 @@ impl Site {
             .collect::<Result<Vec<()>>>()?;
 
         // Build index pages.
+        self.update_db()?;
         special_pages.sort_by(|a, b| b.date.cmp(&a.date));
         let mut index = self.load_index()?;
         special_pages
@@ -220,6 +218,31 @@ impl Site {
 
     #[tracing::instrument(skip(self))]
     fn update_db(&mut self) -> Result<()> {
+        // Update entries in DB.
+        for post in &self.discovered_posts {
+            if post.new {
+                insert_entry(&self.ctx.conn, &post.path, &post.hash)?;
+            } else {
+                update_entry_hash(&self.ctx.conn, &post.path, &post.hash)?;
+            }
+        }
+
+        for sf in &self.static_files {
+            if sf.new {
+                insert_entry(&self.ctx.conn, &sf.path, &sf.hash)?;
+            } else {
+                update_entry_hash(&self.ctx.conn, &sf.path, &sf.hash)?;
+            }
+        }
+
+        for asset in &self.assets {
+            if asset.new {
+                insert_entry(&self.ctx.conn, &asset.path, &asset.hash)?;
+            } else {
+                update_entry_hash(&self.ctx.conn, &asset.path, &asset.hash)?;
+            }
+        }
+
         for page in self.working_index.working_pages.iter().filter(|p| !p.index) {
             let post_sql = PostSQL::new(
                 &page.path,
