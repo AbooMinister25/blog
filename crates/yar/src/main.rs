@@ -1,4 +1,5 @@
 #![warn(clippy::pedantic, clippy::nursery)]
+#![allow(clippy::redundant_pub_crate)]
 
 mod server;
 
@@ -18,6 +19,7 @@ use serde::Serialize;
 use site::Site;
 use sql::setup_sql;
 use tempfile::Builder;
+use tokio::signal::ctrl_c;
 use tokio::sync::mpsc;
 use tower_livereload::LiveReloadLayer;
 use tracing::{info, metadata::LevelFilter, subscriber};
@@ -114,37 +116,58 @@ async fn main() -> Result<()> {
         watcher.watch(&config.root, RecursiveMode::Recursive)?;
 
         let c2 = config.clone();
+        let op = original_output_path.clone();
+        let tp = tmp_dir.path().join("public");
         let t1 = tokio::spawn(async move {
-            while let Some(res) = rx.recv().await {
-                let pool = pool.clone();
-                let config = c2.clone();
-                if res.is_ok_and(|e| e.kind.is_modify() || e.kind.is_create()) {
-                    info!("Building site");
-                    let now = Instant::now();
-                    tokio::task::spawn_blocking(move || {
-                        let mut site = Site::new(pool.get()?, config)?;
-                        site.build()
-                    });
+            loop {
+                tokio::select! {
+                    Some(res) = rx.recv() => {
+                        let pool = pool.clone();
+                        let config = c2.clone();
+                        if res.is_ok_and(|e| e.kind.is_modify() || e.kind.is_create()) {
+                            info!("Building site");
+                            let now = Instant::now();
+                            tokio::task::spawn_blocking(move || {
+                                let mut site = Site::new(pool.get()?, config)?;
+                                site.build()
+                            })
+                            .await??;
 
-                    let elapsed = now.elapsed();
+                            let elapsed = now.elapsed();
 
-                    info!("Built site.");
-                    info!("Built in {:.2?} seconds", elapsed);
+                            info!("Built site.");
+                            info!("Built in {:.2?} seconds", elapsed);
 
-                    reloader.reload();
+                            info!("Build successful, copying files to final destination.");
+                            copy_dir_all(&tp, &op)?;
+
+                            reloader.reload();
+                        }
+                    },
+                    _ = tokio::signal::ctrl_c() => {
+                        break;
+                    }
                 }
             }
             Ok::<(), color_eyre::Report>(())
         });
 
-        let t2 = tokio::spawn(async move { server::serve(livereload, config).await });
+        let op = original_output_path.clone();
+        let t2 = tokio::spawn(async move { server::serve(livereload, op).await });
+        let t3 = tokio::spawn(async move {
+            ctrl_c().await?;
+            tmp_dir.close()?;
+
+            Ok::<(), color_eyre::Report>(())
+        });
 
         t1.await??;
         t2.await??;
+        t3.await??;
+    } else {
+        info!("Build successful, copying files to final destination.");
+        copy_dir_all(tmp_dir.path().join("public"), original_output_path)?;
     }
-
-    info!("Build successful, copying files to final destination.");
-    copy_dir_all(tmp_dir.path().join("public"), original_output_path)?;
 
     Ok(())
 }

@@ -1,8 +1,7 @@
 use std::net::SocketAddr;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use color_eyre::Result as EResult;
-use config::Config;
 use hyper::server::conn::http1;
 use hyper::StatusCode;
 use hyper::{body::Incoming, service::Service};
@@ -76,8 +75,8 @@ async fn handle_request<T: AsRef<Path> + Send>(
     Ok(response)
 }
 
-pub async fn serve(livereload: LiveReloadLayer, config: Config) -> EResult<()> {
-    let static_ = Static::new(&config.output_path);
+pub async fn serve(livereload: LiveReloadLayer, output_dir: PathBuf) -> EResult<()> {
+    let static_ = Static::new(&output_dir);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8000));
     let listener = TcpListener::bind(addr).await?;
@@ -85,22 +84,30 @@ pub async fn serve(livereload: LiveReloadLayer, config: Config) -> EResult<()> {
     println!("Server running on http://{addr}/");
 
     loop {
-        let (stream, _) = listener.accept().await?;
-        let io = TokioIo::new(stream);
-        let reload = livereload.clone();
+        tokio::select! {
+            Ok((stream, _)) = listener.accept() => {
+                let io = TokioIo::new(stream);
+                let reload = livereload.clone();
 
-        let static_ = static_.clone();
-        let config = config.clone();
-        tokio::task::spawn(async move {
-            let svc = tower::service_fn(move |req| {
-                handle_request(req, static_.clone(), config.output_path.clone())
-            });
-            let svc = ServiceBuilder::new().layer(reload).service(svc);
-            let svc = TowerToHyperService::new(svc);
-            let svc = ServiceBuilder::new().layer_fn(Logger::new).service(svc);
-            if let Err(err) = http1::Builder::new().serve_connection(io, svc).await {
-                eprintln!("Error serving connection: {err:?}");
+                let static_ = static_.clone();
+                let op = output_dir.clone();
+                tokio::task::spawn(async move {
+                    let svc =
+                        tower::service_fn(move |req| handle_request(req, static_.clone(), op.clone()));
+                    let svc = ServiceBuilder::new().layer(reload).service(svc);
+                    let svc = TowerToHyperService::new(svc);
+                    let svc = ServiceBuilder::new().layer_fn(Logger::new).service(svc);
+                    if let Err(err) = http1::Builder::new().serve_connection(io, svc).await {
+                        eprintln!("Error serving connection: {err:?}");
+                    }
+                });
+            },
+            _ = tokio::signal::ctrl_c() => {
+                eprintln!("Shutting down server");
+                break;
             }
-        });
+        }
     }
+
+    Ok(())
 }
