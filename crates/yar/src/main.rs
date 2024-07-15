@@ -2,6 +2,8 @@
 
 mod server;
 
+use std::fs;
+use std::path::Path;
 use std::time::Instant;
 
 use clap::Parser;
@@ -15,6 +17,7 @@ use notify::{Config as NotifyConfig, RecommendedWatcher, RecursiveMode, Watcher}
 use serde::Serialize;
 use site::Site;
 use sql::setup_sql;
+use tempfile::Builder;
 use tokio::sync::mpsc;
 use tower_livereload::LiveReloadLayer;
 use tracing::{info, metadata::LevelFilter, subscriber};
@@ -47,10 +50,18 @@ async fn main() -> Result<()> {
 
     let args = Args::parse();
 
-    let config: Config = Figment::from(Serialized::defaults(Config::default()))
+    let tmp_dir = Builder::new()
+        .prefix("temp")
+        .rand_bytes(0)
+        .tempdir_in(".")?;
+
+    let mut config: Config = Figment::from(Serialized::defaults(Config::default()))
         .merge(Toml::file("Config.toml"))
         .join(("development", args.dev))
         .extract()?;
+
+    let original_output_path = config.output_path;
+    config.output_path = tmp_dir.path().join("public");
 
     let file_appender = tracing_appender::rolling::hourly(&config.log_folder, "ssg.log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
@@ -132,5 +143,21 @@ async fn main() -> Result<()> {
         t2.await??;
     }
 
+    info!("Build successful, copying files to final destination.");
+    copy_dir_all(tmp_dir.path().join("public"), original_output_path)?;
+
+    Ok(())
+}
+
+fn copy_dir_all<T: AsRef<Path>, Z: AsRef<Path>>(src: T, out: Z) -> Result<()> {
+    fs::create_dir_all(&out)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        if entry.file_type()?.is_file() {
+            fs::copy(entry.path(), out.as_ref().join(entry.file_name()))?;
+        } else {
+            copy_dir_all(entry.path(), out.as_ref().join(entry.file_name()))?;
+        }
+    }
     Ok(())
 }

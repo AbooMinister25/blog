@@ -180,7 +180,7 @@ impl Site {
         Ok((special_pages, posts))
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip_all)]
     fn render(&mut self, posts: Vec<Page>, mut special_pages: Vec<Page>) -> Result<Vec<Page>> {
         let written_posts = posts
             .into_iter()
@@ -207,6 +207,7 @@ impl Site {
         self.update_db()?;
         special_pages.sort_by(|a, b| b.date.cmp(&a.date));
         let mut index = self.load_index()?;
+
         special_pages
             .iter()
             .map(|p| write_index_to_disk(&self.ctx.tera, p, &index, &special_pages))
@@ -266,7 +267,7 @@ impl Site {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip_all)]
     fn build_atom_feed(&mut self, pages: &[Page]) -> Result<()> {
         trace!("Generating Atom feed");
         let template = "atom.xml.tera";
@@ -287,7 +288,7 @@ impl Site {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(skip_all)]
     fn build_sitemap(&mut self, pages: Vec<Page>) -> Result<()> {
         trace!("Generating sitemap");
 

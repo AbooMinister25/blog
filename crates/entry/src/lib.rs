@@ -41,7 +41,7 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(
 
     trace!("Discovering entries at {:?}", path);
 
-    // TODO: Refactor this when introducing parallel stuff, it aint ideal right now
+    // TODO: Refactor this when introducing parallel stuff, it isn't ideal right now
     let entries = read_entries(&path)?;
     info!("Discovered {:?} entries", entries.len());
 

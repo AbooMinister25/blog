@@ -25,4 +25,5 @@ hyper-util = { version = "0.1.6", features = ["full"] }
 hyper-staticfile = "0.10.1"
 tower = "0.4"
 tower-livereload = "0.9.3"
+tempfile = "3.10.1"
 

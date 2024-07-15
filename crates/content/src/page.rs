@@ -77,7 +77,6 @@ fn is_special_page<T: AsRef<Path>>(path: T, special_pages: &[String]) -> bool {
 }
 
 impl Page {
-    #[tracing::instrument]
     pub fn new(
         path: PathBuf,
         title: String,
@@ -113,7 +112,7 @@ impl Page {
     }
 }
 
-#[tracing::instrument(skip(renderer))]
+#[tracing::instrument(skip(renderer, raw_content))]
 pub fn render_page<T: AsRef<Path> + Debug>(
     renderer: &MarkdownRenderer,
     url: &str,
@@ -172,7 +171,7 @@ pub fn render_page<T: AsRef<Path> + Debug>(
     ))
 }
 
-#[tracing::instrument(skip(tera))]
+#[tracing::instrument(skip_all)]
 pub fn write_page_to_disk(tera: &Tera, page: Page) -> Result<Page> {
     trace!("Rendering template for post at {:?}", page.path);
 
@@ -206,7 +205,7 @@ pub fn write_page_to_disk(tera: &Tera, page: Page) -> Result<Page> {
     Ok(page)
 }
 
-#[tracing::instrument(skip(tera))]
+#[tracing::instrument(skip_all)]
 pub fn write_index_to_disk(
     tera: &Tera,
     page: &Page,
