@@ -35,16 +35,6 @@
     list-style: square;
 }
 
-.post-content > ul > li {
-    font-size: 1.2rem;
-    line-height: 1.8rem;
-
-    @media (min-width: 600px) {
-        font-size: 1.3rem;
-        line-height: 2rem;
-    }
-}
-
 .post-content .details {
     color: latte.$overlay1;
     font-size: 0.8rem;

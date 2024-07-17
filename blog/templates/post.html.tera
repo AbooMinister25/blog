@@ -14,10 +14,13 @@
 {% block content %}
     <div class="post-content">
         <h1 class="post-title">{{ title }}</h1>
-        <p class="details"> {{ date }} * {{ tags }} * 
+        <p class="details"> {{ date }} * {{ tags }}
+            {% if frontmatter.series.part %} 
+            *
             <span class="status">
-                {% if frontmatter.series.part %} part {{ frontmatter.series.part }} {% endif %}
+                part {{ frontmatter.series.part }} 
             </span>
+            {% endif %}
         </p>
         {% if toc %}
         <h2 class="toc-header">Contents</h2>
