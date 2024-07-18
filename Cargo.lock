@@ -1627,10 +1627,12 @@ checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 name = "site"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "color-eyre",
  "markdown",
  "r2d2",
  "r2d2_sqlite",
+ "rusqlite",
  "serde",
  "tera",
  "tracing",

@@ -17,6 +17,8 @@ r2d2_sqlite = "0.24.0"
 tera = "1.20.0"
 
 markdown = { path = "../markdown" }
+rusqlite = "0.31.0"
+chrono = { version = "0.4.38", features = ["serde"] }
 
 [lints]
 workspace = true
