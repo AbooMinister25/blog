@@ -19,6 +19,7 @@ toml = "0.8.15"
 syntect = { version = "5.2.0", default-features = false, features = [
     "default-fancy",
 ] }
+tempfile = "3.10.1"
 
 
 [lints]
