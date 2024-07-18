@@ -1,14 +1,9 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+use context::Context;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+mod config;
+mod context;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+/// Represents a site, and holds all the pages that are currently being worked on.
+pub struct Site {
+    ctx: Context,
 }

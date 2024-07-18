@@ -11,5 +11,10 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 color-eyre.workspace = true
 
+serde = { version = "1.0.204", features = ["derive"] }
+r2d2 = "0.8.10"
+r2d2_sqlite = "0.24.0"
+tera = "1.20.0"
+
 [lints]
 workspace = true
