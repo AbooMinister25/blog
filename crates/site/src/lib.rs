@@ -1,6 +1,7 @@
 mod config;
 mod context;
 mod entry;
+mod output;
 pub mod sql;
 
 use color_eyre::{eyre::ContextCompat, Result};
