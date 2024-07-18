@@ -10,7 +10,7 @@ use tracing::{info, trace};
 use crate::sql::get_hashes;
 
 /// Represent an entry - any item that is to be processed by the static site generator.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Entry {
     pub path: PathBuf,
     pub raw_content: Vec<u8>,
@@ -84,4 +84,134 @@ fn read_entries<T: AsRef<Path> + Debug>(path: T) -> Result<Vec<(PathBuf, Vec<u8>
     }
 
     Ok(ret)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::sql;
+
+    use super::*;
+    use std::fs;
+    use tempfile::tempdir;
+
+    fn setup_db() -> Result<rusqlite::Connection> {
+        let conn = rusqlite::Connection::open_in_memory()?;
+        conn.execute(
+            "
+            CREATE TABLE IF NOT EXISTS entries (
+                entry_id INTEGER PRIMARY KEY,
+                path VARCHAR NOT NULL,
+                hash TEXT NOT NULL
+            )
+        ",
+            (),
+        )?;
+
+        Ok(conn)
+    }
+
+    #[test]
+    fn test_read_entries() -> Result<()> {
+        let tmp_dir = tempdir()?;
+
+        for i in 1..=4 {
+            let file_path = tmp_dir.path().join(format!("{i}.md"));
+            fs::write(file_path, format!("Post {i}"))?;
+        }
+
+        let entries = read_entries(tmp_dir.path())?
+            .into_iter()
+            .map(|(p, c)| (p, String::from_utf8(c).unwrap()))
+            .collect::<Vec<(PathBuf, String)>>();
+
+        assert_eq!(
+            entries,
+            vec![
+                (tmp_dir.path().join("4.md"), "Post 4".to_string()),
+                (tmp_dir.path().join("3.md"), "Post 3".to_string()),
+                (tmp_dir.path().join("2.md"), "Post 2".to_string()),
+                (tmp_dir.path().join("1.md"), "Post 1".to_string()),
+            ]
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_discover_entries() -> Result<()> {
+        let conn = setup_db()?;
+        let tmp_dir = tempdir()?;
+
+        for i in 1..=4 {
+            let file_path = tmp_dir.path().join(format!("{i}.md"));
+            fs::write(file_path, format!("Post {i}"))?;
+        }
+
+        let entries = discover_entries(
+            &conn,
+            tmp_dir.path(),
+            &["index.md".to_string(), "about.md".to_string()],
+        )?;
+
+        assert_eq!(
+            entries,
+            vec![
+                Entry::new(
+                    tmp_dir.path().join("4.md"),
+                    b"Post 4".to_vec(),
+                    format!("{:016x}", seahash::hash(b"Post 4".as_ref())),
+                    true
+                ),
+                Entry::new(
+                    tmp_dir.path().join("3.md"),
+                    b"Post 3".to_vec(),
+                    format!("{:016x}", seahash::hash(b"Post 3".as_ref())),
+                    true
+                ),
+                Entry::new(
+                    tmp_dir.path().join("2.md"),
+                    b"Post 2".to_vec(),
+                    format!("{:016x}", seahash::hash(b"Post 2".as_ref())),
+                    true
+                ),
+                Entry::new(
+                    tmp_dir.path().join("1.md"),
+                    b"Post 1".to_vec(),
+                    format!("{:016x}", seahash::hash(b"Post 1".as_ref())),
+                    true
+                ),
+            ]
+        );
+
+        for entry in entries {
+            sql::insert_entry(&conn, &entry.path, &entry.hash)?;
+        }
+
+        let entries = discover_entries(
+            &conn,
+            tmp_dir.path(),
+            &["index.md".to_string(), "about.md".to_string()],
+        )?;
+
+        assert!(entries.is_empty());
+
+        fs::write(tmp_dir.path().join("4.md"), "changed")?;
+        let entries = discover_entries(
+            &conn,
+            tmp_dir.path(),
+            &["index.md".to_string(), "about.md".to_string()],
+        )?;
+
+        assert_eq!(
+            entries,
+            vec![Entry::new(
+                tmp_dir.path().join("4.md"),
+                b"changed".to_vec(),
+                format!("{:016x}", seahash::hash(b"changed".as_ref())),
+                false
+            )]
+        );
+
+        Ok(())
+    }
 }

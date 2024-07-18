@@ -1649,6 +1649,7 @@ dependencies = [
  "rusqlite",
  "seahash",
  "serde",
+ "tempfile",
  "tera",
  "tracing",
  "tracing-subscriber",
