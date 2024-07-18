@@ -2,7 +2,9 @@ mod config;
 mod context;
 mod entry;
 mod output;
+mod page;
 pub mod sql;
+mod utils;
 
 use color_eyre::{eyre::ContextCompat, Result};
 use config::Config;
@@ -13,6 +15,8 @@ use r2d2::PooledConnection;
 use r2d2_sqlite::SqliteConnectionManager;
 use tera::Tera;
 use tracing::info;
+
+pub const DATE_FORMAT: &str = "%b %e, %Y";
 
 /// Represents a site, and holds all the pages that are currently being worked on.
 pub struct Site<'c> {
