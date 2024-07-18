@@ -19,6 +19,8 @@ tera = "1.20.0"
 markdown = { path = "../markdown" }
 rusqlite = "0.31.0"
 chrono = { version = "0.4.38", features = ["serde"] }
+ignore = "0.4.22"
+seahash = "4.1.0"
 
 [lints]
 workspace = true
