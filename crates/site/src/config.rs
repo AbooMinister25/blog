@@ -11,6 +11,7 @@ pub struct Config {
     pub log_path: PathBuf,
     pub development: bool,
     pub special_pages: Vec<String>,
+    pub theme: String,
 }
 
 impl Default for Config {
@@ -28,6 +29,7 @@ impl Default for Config {
                 "500.md".to_string(),
                 "404.md".to_string(),
             ],
+            theme: String::from("Catpuccin-frappe"),
         }
     }
 }
