@@ -6,6 +6,7 @@ pub mod sql;
 use color_eyre::{eyre::ContextCompat, Result};
 use config::Config;
 use context::Context;
+use entry::{discover_entries, Entry};
 use markdown::MarkdownRenderer;
 use r2d2::PooledConnection;
 use r2d2_sqlite::SqliteConnectionManager;
@@ -15,6 +16,7 @@ use tracing::info;
 /// Represents a site, and holds all the pages that are currently being worked on.
 pub struct Site<'c> {
     ctx: Context<'c>,
+    entries: Vec<Entry>,
 }
 
 impl<'c> Site<'c> {
@@ -33,6 +35,18 @@ impl<'c> Site<'c> {
 
         let ctx = Context::new(conn, tera, renderer, config);
 
-        Ok(Self { ctx })
+        Ok(Self {
+            ctx,
+            entries: Vec::new(),
+        })
+    }
+
+    /// Build the site.
+    #[tracing::instrument(skip(self))]
+    pub fn build(&mut self) -> Result<()> {
+        info!("Discovering entries");
+        self.entries = discover_entries(&self.ctx)?;
+
+        Ok(())
     }
 }

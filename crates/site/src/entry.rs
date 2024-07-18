@@ -4,9 +4,9 @@ use std::path::{Path, PathBuf};
 
 use color_eyre::Result;
 use ignore::Walk;
-use rusqlite::Connection;
 use tracing::{info, trace};
 
+use crate::context::Context;
 use crate::sql::get_hashes;
 
 /// Represent an entry - any item that is to be processed by the static site generator.
@@ -33,17 +33,13 @@ impl Entry {
 /// filter out only the ones that have changed or have been newly created since the last
 /// run of the program.
 #[tracing::instrument]
-pub fn discover_entries<T: AsRef<Path> + Debug>(
-    conn: &Connection,
-    path: T,
-    special_pages: &[String],
-) -> Result<Vec<Entry>> {
+pub fn discover_entries(ctx: &Context) -> Result<Vec<Entry>> {
     let mut ret = Vec::new();
 
-    trace!("Discovering entries at {:?}", path);
+    trace!("Discovering entries at {:?}", ctx.config.root);
 
     // TODO: Refactor this when introducing parallel processing, it isn't ideal right now
-    let entries = read_entries(&path)?;
+    let entries = read_entries(&ctx.config.root)?;
     info!("Discovered {:?} entries", entries.len());
 
     let hashes = entries
@@ -52,7 +48,7 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(
         .collect::<Vec<String>>();
 
     for ((path, content), hash) in entries.into_iter().zip(hashes) {
-        let hashes = get_hashes(conn, &path)?;
+        let hashes = get_hashes(&ctx.conn, &path)?;
 
         if hashes.is_empty() {
             // A new file was created.
@@ -60,7 +56,12 @@ pub fn discover_entries<T: AsRef<Path> + Debug>(
         } else if hashes[0] != hash {
             // Existing file was changed.
             ret.push(Entry::new(path, content, hash, false));
-        } else if special_pages.iter().any(|ending| path.ends_with(ending)) {
+        } else if ctx
+            .config
+            .special_pages
+            .iter()
+            .any(|ending| path.ends_with(ending))
+        {
             ret.push(Entry::new(path, content, hash, false));
         }
     }
@@ -88,14 +89,21 @@ fn read_entries<T: AsRef<Path> + Debug>(path: T) -> Result<Vec<(PathBuf, Vec<u8>
 
 #[cfg(test)]
 mod tests {
-    use crate::sql;
+    use crate::{config::Config, sql};
 
     use super::*;
+    use markdown::MarkdownRenderer;
+    use r2d2::{Pool, PooledConnection};
+    use r2d2_sqlite::SqliteConnectionManager;
     use std::fs;
     use tempfile::tempdir;
+    use tera::Tera;
 
-    fn setup_db() -> Result<rusqlite::Connection> {
-        let conn = rusqlite::Connection::open_in_memory()?;
+    fn setup_db() -> Result<PooledConnection<SqliteConnectionManager>> {
+        let manager = SqliteConnectionManager::memory();
+        let pool = Pool::new(manager)?;
+        let conn = pool.get()?;
+
         conn.execute(
             "
             CREATE TABLE IF NOT EXISTS entries (
@@ -141,17 +149,23 @@ mod tests {
     fn test_discover_entries() -> Result<()> {
         let conn = setup_db()?;
         let tmp_dir = tempdir()?;
+        std::fs::create_dir(tmp_dir.path().join("themes/"))?;
 
         for i in 1..=4 {
             let file_path = tmp_dir.path().join(format!("{i}.md"));
             fs::write(file_path, format!("Post {i}"))?;
         }
 
-        let entries = discover_entries(
-            &conn,
-            tmp_dir.path(),
-            &["index.md".to_string(), "about.md".to_string()],
-        )?;
+        let context = Context::new(
+            conn,
+            Tera::default(),
+            MarkdownRenderer::new(tmp_dir.path(), "Solarized (light)")?,
+            Config {
+                root: tmp_dir.path().to_owned(),
+                ..Default::default()
+            },
+        );
+        let entries = discover_entries(&context)?;
 
         assert_eq!(
             entries,
@@ -184,24 +198,15 @@ mod tests {
         );
 
         for entry in entries {
-            sql::insert_entry(&conn, &entry.path, &entry.hash)?;
+            sql::insert_entry(&context.conn, &entry.path, &entry.hash)?;
         }
 
-        let entries = discover_entries(
-            &conn,
-            tmp_dir.path(),
-            &["index.md".to_string(), "about.md".to_string()],
-        )?;
+        let entries = discover_entries(&context)?;
 
         assert!(entries.is_empty());
 
         fs::write(tmp_dir.path().join("4.md"), "changed")?;
-        let entries = discover_entries(
-            &conn,
-            tmp_dir.path(),
-            &["index.md".to_string(), "about.md".to_string()],
-        )?;
-
+        let entries = discover_entries(&context)?;
         assert_eq!(
             entries,
             vec![Entry::new(
