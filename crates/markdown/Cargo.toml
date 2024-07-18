@@ -1,0 +1,25 @@
+[package]
+name = "markdown"
+version = "0.1.0"
+repository.workspace = true
+edition.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tracing.workspace = true
+tracing-subscriber.workspace = true
+color-eyre.workspace = true
+
+serde = { version = "1.0.204", features = ["derive"] }
+chrono = { version = "0.4.38", features = ["serde"] }
+comrak = "0.26.0"
+lol_html = "1.2.1"
+toml = "0.8.15"
+syntect = { version = "5.2.0", default-features = false, features = [
+    "default-fancy",
+] }
+
+
+[lints]
+workspace = true
