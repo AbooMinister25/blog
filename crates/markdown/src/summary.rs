@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use color_eyre::Result;
 use lol_html::{element, html_content::TextType, rewrite_str, text, RewriteStrSettings};
 
+#[allow(clippy::module_name_repetitions)]
 // Truncate the first part of a post's content for it's summary.
 pub fn get_summary(content: &str) -> Result<String> {
     let character_count = RefCell::new(0);
