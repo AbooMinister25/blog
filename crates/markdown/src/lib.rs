@@ -41,6 +41,7 @@ pub struct MarkdownRenderer<'c> {
 }
 
 /// Represents a parsed markdown document
+#[derive(Debug)]
 pub struct Document {
     pub date: DateTime<Utc>,
     pub updated: DateTime<Utc>,
