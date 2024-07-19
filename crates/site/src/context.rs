@@ -3,7 +3,7 @@ use r2d2::PooledConnection;
 use r2d2_sqlite::SqliteConnectionManager;
 use tera::Tera;
 
-use crate::config::Config;
+use crate::{config::Config, page::Page};
 
 /// Shared context for the site.
 #[derive(Debug)]
@@ -12,6 +12,8 @@ pub struct Context<'c> {
     pub tera: Tera,
     pub markdown_renderer: MarkdownRenderer<'c>,
     pub config: Config,
+    pub pages: Option<Vec<Page>>,
+    pub index_pages: Option<Vec<Page>>,
 }
 
 impl<'c> Context<'c> {
@@ -26,6 +28,8 @@ impl<'c> Context<'c> {
             tera,
             markdown_renderer,
             config,
+            pages: None,
+            index_pages: None,
         }
     }
 }

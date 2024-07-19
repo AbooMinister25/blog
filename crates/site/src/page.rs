@@ -4,17 +4,16 @@ use std::{
     path::{Component, Path, PathBuf},
 };
 
-use chrono::{DateTime, Utc};
 use color_eyre::{eyre::ContextCompat, Result};
-use markdown::{Document, Frontmatter, MarkdownRenderer};
-use serde::{Deserialize, Serialize};
-use tera::{Context as TeraContext, Tera};
+use markdown::Document;
+use serde::Serialize;
+use tera::Context as TeraContext;
 use tracing::trace;
 
 use crate::{context::Context, output::Output, utils::fs::ensure_directory, DATE_FORMAT};
 
 /// Represents a single markdown page.
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Page {
     pub path: PathBuf,
     pub out_path: PathBuf,
@@ -103,6 +102,8 @@ impl Output for Page {
         context.insert("markup", &self.document.content);
         context.insert("summary", &self.document.summary);
         context.insert("frontmatter", &frontmatter);
+        context.insert("pages", &ctx.pages);
+        context.insert("index_pages", &ctx.index_pages);
 
         let template = frontmatter
             .template
