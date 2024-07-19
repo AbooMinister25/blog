@@ -11,12 +11,13 @@ use serde::{Deserialize, Serialize};
 use tera::{Context as TeraContext, Tera};
 use tracing::trace;
 
-use crate::{context::Context, utils::fs::ensure_directory, DATE_FORMAT};
+use crate::{context::Context, output::Output, utils::fs::ensure_directory, DATE_FORMAT};
 
 /// Represents a single markdown page.
 #[derive(Debug)]
 pub struct Page {
     pub path: PathBuf,
+    pub out_path: PathBuf,
     pub permalink: String,
     pub raw_content: String,
     pub hash: String,
@@ -71,8 +72,11 @@ impl Page {
             )
         };
 
+        trace!("Finished processing page at {path:?}");
+
         Ok(Self {
-            path: out_path,
+            path: path.as_ref().to_owned(),
+            out_path,
             permalink,
             raw_content,
             hash,
@@ -80,6 +84,45 @@ impl Page {
             special: is_special_page(path, &ctx.config.special_pages),
             document,
         })
+    }
+}
+
+impl Output for Page {
+    fn write(&self, ctx: &Context) -> Result<()> {
+        trace!("Writing page to disk at {:?}", self.out_path);
+
+        let frontmatter = &self.document.frontmatter;
+
+        // Insert template context
+        let mut context = TeraContext::new();
+        context.insert("title", &frontmatter.title);
+        context.insert("tags", &frontmatter.tags.join(", "));
+        context.insert("series", &frontmatter.series);
+        context.insert("date", &self.document.date.format(DATE_FORMAT).to_string());
+        context.insert("toc", &self.document.toc);
+        context.insert("markup", &self.document.content);
+        context.insert("summary", &self.document.summary);
+        context.insert("frontmatter", &frontmatter);
+
+        let template = frontmatter
+            .template
+            .as_ref()
+            .map_or("post.html.tera", |s| s);
+        let rendered_html = ctx.tera.render(template, &context)?;
+
+        trace!(
+            "Rendered template for page at {:?}, now writing to {:?}",
+            self.path,
+            self.out_path
+        );
+        fs::write(&self.out_path, rendered_html)?;
+        trace!(
+            "Wrote page at {:?} to disk at {:?}",
+            self.path,
+            self.out_path
+        );
+
+        Ok(())
     }
 }
 
