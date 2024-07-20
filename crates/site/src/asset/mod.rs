@@ -1,3 +1,6 @@
+mod embed_fonts;
+mod esbuild;
+
 use std::{
     ffi::OsStr,
     fmt::Debug,
@@ -10,7 +13,7 @@ use rsass::{compile_scss_path, output};
 use tracing::trace;
 
 use crate::{
-    context::Context, embed_fonts::embed_font, esbuild::bundle_js, output::Output,
+    asset::embed_fonts::embed_font, asset::esbuild::bundle_js, context::Context, output::Output,
     utils::fs::ensure_directory,
 };
 

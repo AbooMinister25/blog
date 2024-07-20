@@ -1,9 +1,7 @@
 mod asset;
 mod config;
 mod context;
-mod embed_fonts;
 mod entry;
-mod esbuild;
 mod output;
 mod page;
 pub mod sql;
