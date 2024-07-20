@@ -92,7 +92,7 @@ impl Output for Asset {
 }
 
 fn out_path<P: AsRef<Path>, T: AsRef<Path>>(path: P, output_path: T) -> Result<PathBuf> {
-    let parent = path.as_ref().parent().unwrap();
+    let parent = path.as_ref().parent().unwrap(); // All assets will have a parent.
     let directory = if parent.ends_with("assets") {
         PathBuf::from(".")
     } else {

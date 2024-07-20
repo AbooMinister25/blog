@@ -5,6 +5,7 @@ mod entry;
 mod output;
 mod page;
 pub mod sql;
+mod static_file;
 mod utils;
 
 use color_eyre::{eyre::ContextCompat, Result};
