@@ -8,7 +8,7 @@ use color_eyre::{eyre::ContextCompat, Result};
 use tracing::trace;
 
 use crate::utils::fs::ensure_directory;
-use crate::{context::Context, entry::Entry};
+use crate::{context::Context, output::Output};
 
 /// Represents a static asset. For the most part, they're copied over
 /// to the resulting static site as-is. Their hashes are stored in
@@ -17,6 +17,7 @@ use crate::{context::Context, entry::Entry};
 #[derive(Debug)]
 pub struct StaticFile {
     pub path: PathBuf,
+    pub out_path: PathBuf,
     pub hash: String,
     pub new: bool,
 }
@@ -37,9 +38,28 @@ impl StaticFile {
 
         Ok(Self {
             path: path.as_ref().to_owned(),
+            out_path,
             hash,
             new,
         })
+    }
+}
+
+impl Output for StaticFile {
+    fn write(&self, _: &Context) -> Result<()> {
+        trace!(
+            "Writing static file at {:?} to disk at {:?}",
+            self.path,
+            self.out_path
+        );
+        fs::copy(&self.path, &self.out_path)?;
+        trace!(
+            "Wrote static file at {:?} to disk at {:?}",
+            self.path,
+            self.out_path
+        );
+
+        Ok(())
     }
 }
 
