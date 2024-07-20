@@ -1,6 +1,8 @@
+mod asset;
 mod config;
 mod context;
 mod entry;
+mod esbuild;
 mod output;
 mod page;
 pub mod sql;

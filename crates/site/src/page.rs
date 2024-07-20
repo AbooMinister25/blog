@@ -87,6 +87,7 @@ impl Page {
 }
 
 impl Output for Page {
+    #[tracing::instrument]
     fn write(&self, ctx: &Context) -> Result<()> {
         trace!("Writing page to disk at {:?}", self.out_path);
 
