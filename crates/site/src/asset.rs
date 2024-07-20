@@ -9,7 +9,10 @@ use color_eyre::{eyre::ContextCompat, Result};
 use rsass::{compile_scss_path, output};
 use tracing::trace;
 
-use crate::{context::Context, esbuild::bundle_js, output::Output, utils::fs::ensure_directory};
+use crate::{
+    context::Context, embed_fonts::embed_font, esbuild::bundle_js, output::Output,
+    utils::fs::ensure_directory,
+};
 
 // Represents a resource that is typically passed through an asset pipeline.
 /// This can include images, stylesheets, or javascript.
@@ -49,6 +52,17 @@ impl Asset {
             new,
         })
     }
+
+    #[tracing::instrument]
+    fn postprocess(&self) -> Result<()> {
+        if let Some(e) = self.path.extension() {
+            if e == "svg" {
+                embed_font(&self.out_path)?;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl Output for Asset {
@@ -65,6 +79,10 @@ impl Output for Asset {
             self.path,
             self.out_path
         );
+
+        trace!("Postprocessing asset at {:?}", self.out_path);
+        self.postprocess()?;
+        trace!("Postprocessed asset at {:?}", self.out_path);
 
         Ok(())
     }
