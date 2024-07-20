@@ -1,5 +1,4 @@
 use std::{
-    collections::btree_map::Keys,
     ffi::OsStr,
     fmt::Debug,
     fs,
@@ -49,6 +48,25 @@ impl Asset {
             hash,
             new,
         })
+    }
+}
+
+impl Output for Asset {
+    #[tracing::instrument]
+    fn write(&self, ctx: &Context) -> Result<()> {
+        trace!(
+            "Writing asset at {:?} to disk at {:?}",
+            self.path,
+            self.out_path
+        );
+        fs::write(&self.out_path, &self.content)?;
+        trace!(
+            "Wrote asset at {:?} to disk at {:?}",
+            self.path,
+            self.out_path
+        );
+
+        Ok(())
     }
 }
 

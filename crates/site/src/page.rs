@@ -89,7 +89,11 @@ impl Page {
 impl Output for Page {
     #[tracing::instrument]
     fn write(&self, ctx: &Context) -> Result<()> {
-        trace!("Writing page to disk at {:?}", self.out_path);
+        trace!(
+            "Writing page at {:?} to disk at {:?}",
+            self.path,
+            self.out_path
+        );
 
         let frontmatter = &self.document.frontmatter;
 
