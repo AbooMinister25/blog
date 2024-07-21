@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use color_eyre::Result;
 
 use crate::context::Context;
@@ -7,4 +9,7 @@ use crate::context::Context;
 /// of the static site generator.
 pub trait Output {
     fn write(&self, ctx: &Context) -> Result<()>;
+    fn path(&self) -> &Path;
+    fn hash(&self) -> &str;
+    fn fresh(&self) -> bool;
 }

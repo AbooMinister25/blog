@@ -130,6 +130,18 @@ impl Output for Page {
 
         Ok(())
     }
+
+    fn path(&self) -> &Path {
+        &self.path
+    }
+
+    fn hash(&self) -> &str {
+        &self.hash
+    }
+
+    fn fresh(&self) -> bool {
+        self.fresh
+    }
 }
 
 fn out_path<P: AsRef<Path>, T: AsRef<Path>>(

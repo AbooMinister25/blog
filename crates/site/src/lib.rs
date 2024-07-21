@@ -20,6 +20,7 @@ use output::Output;
 use page::Page;
 use r2d2::PooledConnection;
 use r2d2_sqlite::SqliteConnectionManager;
+use sql::{insert_entry, insert_post, update_entry_hash, update_post};
 use static_file::StaticFile;
 use tera::Tera;
 use tracing::info;
@@ -114,6 +115,35 @@ impl<'c> Site<'c> {
             .chain(self.static_files.iter().map(|s| s as &dyn Output))
         {
             output.write(&self.ctx)?;
+        }
+
+        self.update_db()?;
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    fn update_db(&mut self) -> Result<()> {
+        for output in self
+            .pages
+            .iter()
+            .map(|p| p as &dyn Output)
+            .chain(self.assets.iter().map(|a| a as &dyn Output))
+            .chain(self.static_files.iter().map(|s| s as &dyn Output))
+        {
+            if output.fresh() {
+                insert_entry(&self.ctx.conn, output.path(), output.hash())?;
+            } else {
+                update_entry_hash(&self.ctx.conn, output.path(), output.hash())?;
+            }
+        }
+
+        for page in self.pages.iter().filter(|p| !p.is_special) {
+            if page.fresh {
+                insert_post(&self.ctx.conn, page)?;
+            } else {
+                update_post(&self.ctx.conn, page)?;
+            }
         }
 
         Ok(())

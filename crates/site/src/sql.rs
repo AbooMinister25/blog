@@ -108,7 +108,7 @@ pub fn update_entry_hash<P: AsRef<Path> + Debug>(
 
 /// Insert a post into the database.
 #[tracing::instrument]
-pub fn insert_post(conn: &Connection, post: Page) -> Result<()> {
+pub fn insert_post(conn: &Connection, post: &Page) -> Result<()> {
     conn.execute(
         "
     INSERT INTO posts (path, permalink, title, tags, date, updated, summary)
@@ -130,7 +130,7 @@ pub fn insert_post(conn: &Connection, post: Page) -> Result<()> {
 
 /// Update an existing post in the database.
 #[tracing::instrument]
-pub fn update_post(conn: &Connection, post: Page) -> Result<()> {
+pub fn update_post(conn: &Connection, post: &Page) -> Result<()> {
     conn.execute(
         "
     UPDATE posts 
