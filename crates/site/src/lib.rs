@@ -58,15 +58,16 @@ impl<'c> Site<'c> {
     #[tracing::instrument(skip(self))]
     pub fn build(&mut self) -> Result<()> {
         info!("Discovering entries");
-        self.discover()?;
+        self.discover_and_process()?;
 
         Ok(())
     }
 
     #[tracing::instrument(skip(self))]
-    fn discover(&mut self) -> Result<()> {
+    fn discover_and_process(&mut self) -> Result<()> {
         let entries = discover_entries(&self.ctx)?;
 
+        info!("Processing entries");
         for entry in entries {
             let content = String::from_utf8(entry.raw_content)?;
             match entry.path.parent().and_then(|p| {
@@ -92,6 +93,7 @@ impl<'c> Site<'c> {
                 _ => continue,
             }
         }
+        info!("Processed entries");
 
         Ok(())
     }
