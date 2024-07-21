@@ -20,7 +20,7 @@ pub struct Page {
     pub permalink: String,
     pub raw_content: String,
     pub hash: String,
-    pub new: bool,
+    pub fresh: bool,
     pub special: bool,
     pub document: Document,
 }
@@ -32,7 +32,7 @@ impl Page {
         path: P,
         raw_content: String,
         hash: String,
-        new: bool,
+        fresh: bool,
     ) -> Result<Self> {
         trace!("Processing page at {path:?}");
 
@@ -79,7 +79,7 @@ impl Page {
             permalink,
             raw_content,
             hash,
-            new,
+            fresh,
             special: is_special_page(path, &ctx.config.special_pages),
             document,
         })

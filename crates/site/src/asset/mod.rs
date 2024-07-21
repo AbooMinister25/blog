@@ -26,7 +26,7 @@ pub struct Asset {
     raw_content: String,
     content: String,
     hash: String,
-    new: bool,
+    fresh: bool,
 }
 
 impl Asset {
@@ -36,7 +36,7 @@ impl Asset {
         path: P,
         raw_content: String,
         hash: String,
-        new: bool,
+        fresh: bool,
     ) -> Result<Self> {
         trace!("Processing asset at {path:?}");
 
@@ -52,7 +52,7 @@ impl Asset {
             raw_content,
             content,
             hash,
-            new,
+            fresh,
         })
     }
 

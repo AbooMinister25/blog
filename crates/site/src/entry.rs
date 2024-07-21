@@ -15,16 +15,16 @@ pub struct Entry {
     pub path: PathBuf,
     pub raw_content: Vec<u8>,
     pub hash: String,
-    pub new: bool,
+    pub fresh: bool,
 }
 
 impl Entry {
-    pub fn new(path: PathBuf, raw_content: Vec<u8>, hash: String, new: bool) -> Self {
+    pub fn new(path: PathBuf, raw_content: Vec<u8>, hash: String, fresh: bool) -> Self {
         Self {
             path,
             raw_content,
             hash,
-            new,
+            fresh,
         }
     }
 }

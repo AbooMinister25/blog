@@ -19,7 +19,7 @@ pub struct StaticFile {
     pub path: PathBuf,
     pub out_path: PathBuf,
     pub hash: String,
-    pub new: bool,
+    pub fresh: bool,
 }
 
 impl StaticFile {
@@ -28,7 +28,7 @@ impl StaticFile {
         ctx: &Context,
         path: P,
         hash: String,
-        new: bool,
+        fresh: bool,
     ) -> Result<Self> {
         trace!("Processing static asset at {path:?}");
 
@@ -40,7 +40,7 @@ impl StaticFile {
             path: path.as_ref().to_owned(),
             out_path,
             hash,
-            new,
+            fresh,
         })
     }
 }
