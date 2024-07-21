@@ -8,13 +8,19 @@ pub mod sql;
 mod static_file;
 mod utils;
 
+use std::{ffi::OsStr, path::Component};
+
+use asset::Asset;
 use color_eyre::{eyre::ContextCompat, Result};
 use config::Config;
 use context::Context;
-use entry::{discover_entries, Entry};
+use entry::discover_entries;
 use markdown::MarkdownRenderer;
+use output::Output;
+use page::Page;
 use r2d2::PooledConnection;
 use r2d2_sqlite::SqliteConnectionManager;
+use static_file::StaticFile;
 use tera::Tera;
 use tracing::info;
 
@@ -23,7 +29,7 @@ pub const DATE_FORMAT: &str = "%b %e, %Y";
 /// Represents a site, and holds all the pages that are currently being worked on.
 pub struct Site<'c> {
     ctx: Context<'c>,
-    entries: Vec<Entry>,
+    outputs: Vec<Box<dyn Output>>,
 }
 
 impl<'c> Site<'c> {
@@ -44,7 +50,7 @@ impl<'c> Site<'c> {
 
         Ok(Self {
             ctx,
-            entries: Vec::new(),
+            outputs: Vec::new(),
         })
     }
 
@@ -52,7 +58,40 @@ impl<'c> Site<'c> {
     #[tracing::instrument(skip(self))]
     pub fn build(&mut self) -> Result<()> {
         info!("Discovering entries");
-        self.entries = discover_entries(&self.ctx)?;
+        self.discover()?;
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    fn discover(&mut self) -> Result<()> {
+        let entries = discover_entries(&self.ctx)?;
+
+        for entry in entries {
+            let content = String::from_utf8(entry.raw_content)?;
+            match entry.path.parent().and_then(|p| {
+                p.components()
+                    .nth(1)
+                    .map(Component::as_os_str)
+                    .and_then(OsStr::to_str)
+            }) {
+                Some("content") => {
+                    let page = Page::new(&self.ctx, entry.path, content, entry.hash, entry.fresh)?;
+                    self.outputs.push(Box::new(page));
+                }
+                Some("assets") => {
+                    let asset =
+                        Asset::new(&self.ctx, entry.path, content, entry.hash, entry.fresh)?;
+                    self.outputs.push(Box::new(asset));
+                }
+                Some("static") => {
+                    let static_file =
+                        StaticFile::new(&self.ctx, entry.path, entry.hash, entry.fresh)?;
+                    self.outputs.push(Box::new(static_file));
+                }
+                _ => continue,
+            }
+        }
 
         Ok(())
     }
