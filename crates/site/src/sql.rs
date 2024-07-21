@@ -7,6 +7,8 @@ use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::Connection;
 
+use crate::page::Page;
+
 /// Sets up the SQLite database, creating the initial tables if they don't exist, and acquiring the connection.
 #[tracing::instrument]
 pub fn setup_sql() -> Result<Pool<SqliteConnectionManager>> {
@@ -21,6 +23,22 @@ pub fn setup_sql() -> Result<Pool<SqliteConnectionManager>> {
             entry_id INTEGER PRIMARY KEY,
             path VARCHAR NOT NULL,
             hash TEXT NOT NULL
+        )
+    ",
+        (),
+    )?;
+
+    conn.execute(
+        "
+        CREATE TABLE IF NOT EXISTS posts (
+            post_id INTEGER PRIMARY KEY,
+            path VARCHAR NOT NULL,
+            permalink TEXT NOT NULL,
+            title TEXT NOT NULL,
+            tags JSON NOT NULL,
+            date TEXT NOT NULL,
+            updated TEXT NOT NULL,
+            summary TEXT NOT NULL,
         )
     ",
         (),
@@ -84,6 +102,56 @@ pub fn update_entry_hash<P: AsRef<Path> + Debug>(
                 .context("Path should be valid unicode")?,
         ),
     ])?;
+
+    Ok(())
+}
+
+/// Insert a post into the database.
+#[tracing::instrument]
+pub fn insert_post(conn: &Connection, post: Page) -> Result<()> {
+    conn.execute(
+        "
+    INSERT INTO posts (path, permalink, title, tags, date, updated, summary)
+    VALUES (?1, ?2, ?3, json(?4), datetime(?5), datetime(?6), ?7)
+    ",
+        (
+            &post.path.to_str().context("Path should be valid unicode")?,
+            &post.permalink,
+            &post.document.frontmatter.title,
+            &serde_json::to_string(&post.document.frontmatter.tags)?,
+            &post.document.date,
+            &post.document.updated,
+            &post.document.summary,
+        ),
+    )?;
+
+    Ok(())
+}
+
+/// Update an existing post in the database.
+#[tracing::instrument]
+pub fn update_post(conn: &Connection, post: Page) -> Result<()> {
+    conn.execute(
+        "
+    UPDATE posts 
+    SET permalink = ?1,
+        title = ?2,
+        tags = json(?3),
+        date = datetime(?4),
+        updated = datetime(?5),
+        summary = ?6,
+    WHERE path = (?7)
+    ",
+        (
+            &post.permalink,
+            &post.document.frontmatter.title,
+            &serde_json::to_string(&post.document.frontmatter.tags)?,
+            &post.document.date,
+            &post.document.updated,
+            &post.document.summary,
+            &post.path.to_str().context("Path should be valid unicode")?,
+        ),
+    )?;
 
     Ok(())
 }

@@ -17,7 +17,7 @@ r2d2_sqlite = "0.24.0"
 tera = "1.20.0"
 
 markdown = { path = "../markdown" }
-rusqlite = "0.31.0"
+rusqlite = { version = "0.31.0", features = ["chrono", "array", "bundled"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 ignore = "0.4.22"
 seahash = "4.1.0"
@@ -30,6 +30,7 @@ lazy_static = "1.5.0"
 base64 = "0.22.1"
 regex = "1.10.5"
 reqwest = { version = "0.12.5", features = ["blocking"] }
+serde_json = "1.0.120"
 
 [lints]
 workspace = true

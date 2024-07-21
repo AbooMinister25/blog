@@ -29,7 +29,9 @@ pub const DATE_FORMAT: &str = "%b %e, %Y";
 /// Represents a site, and holds all the pages that are currently being worked on.
 pub struct Site<'c> {
     ctx: Context<'c>,
-    outputs: Vec<Box<dyn Output>>,
+    pages: Vec<Page>,
+    assets: Vec<Asset>,
+    static_files: Vec<StaticFile>,
 }
 
 impl<'c> Site<'c> {
@@ -50,7 +52,9 @@ impl<'c> Site<'c> {
 
         Ok(Self {
             ctx,
-            outputs: Vec::new(),
+            pages: Vec::new(),
+            assets: Vec::new(),
+            static_files: Vec::new(),
         })
     }
 
@@ -78,22 +82,39 @@ impl<'c> Site<'c> {
             }) {
                 Some("content") => {
                     let page = Page::new(&self.ctx, entry.path, content, entry.hash, entry.fresh)?;
-                    self.outputs.push(Box::new(page));
+                    self.pages.push(page);
                 }
                 Some("assets") => {
                     let asset =
                         Asset::new(&self.ctx, entry.path, content, entry.hash, entry.fresh)?;
-                    self.outputs.push(Box::new(asset));
+                    self.assets.push(asset);
                 }
                 Some("static") => {
                     let static_file =
                         StaticFile::new(&self.ctx, entry.path, entry.hash, entry.fresh)?;
-                    self.outputs.push(Box::new(static_file));
+                    self.static_files.push(static_file);
                 }
                 _ => continue,
             }
         }
         info!("Processed entries");
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    fn render(&mut self) -> Result<()> {
+        let (special_pages, posts): (Vec<_>, Vec<_>) =
+            self.pages.iter().partition(|p| p.is_special);
+
+        for output in posts
+            .iter()
+            .map(|p| *p as &dyn Output)
+            .chain(self.assets.iter().map(|a| a as &dyn Output))
+            .chain(self.static_files.iter().map(|s| s as &dyn Output))
+        {
+            output.write(&self.ctx)?;
+        }
 
         Ok(())
     }

@@ -21,7 +21,7 @@ pub struct Page {
     pub raw_content: String,
     pub hash: String,
     pub fresh: bool,
-    pub special: bool,
+    pub is_special: bool,
     pub document: Document,
 }
 
@@ -80,7 +80,7 @@ impl Page {
             raw_content,
             hash,
             fresh,
-            special: is_special_page(path, &ctx.config.special_pages),
+            is_special: is_special_page(path, &ctx.config.special_pages),
             document,
         })
     }
