@@ -20,7 +20,7 @@ use output::Output;
 use page::Page;
 use r2d2::PooledConnection;
 use r2d2_sqlite::SqliteConnectionManager;
-use sql::{insert_entry, insert_post, update_entry_hash, update_post};
+use sql::{get_posts, insert_entry, insert_post, update_entry_hash, update_post};
 use static_file::StaticFile;
 use tera::Tera;
 use tracing::info;
@@ -30,7 +30,7 @@ pub const DATE_FORMAT: &str = "%b %e, %Y";
 /// Represents a site, and holds all the pages that are currently being worked on.
 pub struct Site<'c> {
     ctx: Context<'c>,
-    pages: Vec<Page>,
+    posts: Vec<Page>,
     assets: Vec<Asset>,
     static_files: Vec<StaticFile>,
 }
@@ -53,7 +53,7 @@ impl<'c> Site<'c> {
 
         Ok(Self {
             ctx,
-            pages: Vec::new(),
+            posts: Vec::new(),
             assets: Vec::new(),
             static_files: Vec::new(),
         })
@@ -63,14 +63,18 @@ impl<'c> Site<'c> {
     #[tracing::instrument(skip(self))]
     pub fn build(&mut self) -> Result<()> {
         info!("Discovering entries");
-        self.discover_and_process()?;
+        let pages = self.discover_and_process()?;
+
+        info!("Rendering entries");
+        self.render(pages)?;
 
         Ok(())
     }
 
     #[tracing::instrument(skip(self))]
-    fn discover_and_process(&mut self) -> Result<()> {
+    fn discover_and_process(&mut self) -> Result<Vec<Page>> {
         let entries = discover_entries(&self.ctx)?;
+        let mut pages = Vec::new();
 
         info!("Processing entries");
         for entry in entries {
@@ -83,7 +87,7 @@ impl<'c> Site<'c> {
             }) {
                 Some("content") => {
                     let page = Page::new(&self.ctx, entry.path, content, entry.hash, entry.fresh)?;
-                    self.pages.push(page);
+                    pages.push(page);
                 }
                 Some("assets") => {
                     let asset =
@@ -100,24 +104,35 @@ impl<'c> Site<'c> {
         }
         info!("Processed entries");
 
-        Ok(())
+        Ok(pages)
     }
 
     #[tracing::instrument(skip(self))]
-    fn render(&mut self) -> Result<()> {
-        let (special_pages, posts): (Vec<_>, Vec<_>) =
-            self.pages.iter().partition(|p| p.is_special);
+    fn render(&mut self, pages: Vec<Page>) -> Result<()> {
+        let (mut special_pages, posts): (Vec<_>, Vec<_>) =
+            pages.into_iter().partition(|p| p.is_special);
+        special_pages.sort_by(|a, b| b.document.date.cmp(&a.document.date));
 
         for output in posts
             .iter()
-            .map(|p| *p as &dyn Output)
+            .map(|p| p as &dyn Output)
             .chain(self.assets.iter().map(|a| a as &dyn Output))
             .chain(self.static_files.iter().map(|s| s as &dyn Output))
         {
             output.write(&self.ctx)?;
         }
 
+        self.posts = posts;
+
         self.update_db()?;
+        let posts_in_index = get_posts(&self.ctx.conn)?;
+        self.ctx.posts = Some(posts_in_index);
+
+        self.ctx.special_pages = Some(special_pages.clone());
+
+        for page in special_pages {
+            page.write(&self.ctx)?;
+        }
 
         Ok(())
     }
@@ -125,11 +140,19 @@ impl<'c> Site<'c> {
     #[tracing::instrument(skip(self))]
     fn update_db(&mut self) -> Result<()> {
         for output in self
-            .pages
+            .posts
             .iter()
             .map(|p| p as &dyn Output)
             .chain(self.assets.iter().map(|a| a as &dyn Output))
             .chain(self.static_files.iter().map(|s| s as &dyn Output))
+            .chain(
+                self.ctx
+                    .special_pages
+                    .as_ref()
+                    .unwrap_or(&Vec::new())
+                    .iter()
+                    .map(|p| p as &dyn Output),
+            )
         {
             if output.fresh() {
                 insert_entry(&self.ctx.conn, output.path(), output.hash())?;
@@ -138,7 +161,7 @@ impl<'c> Site<'c> {
             }
         }
 
-        for page in self.pages.iter().filter(|p| !p.is_special) {
+        for page in self.posts.iter().filter(|p| !p.is_special) {
             if page.fresh {
                 insert_post(&self.ctx.conn, page)?;
             } else {

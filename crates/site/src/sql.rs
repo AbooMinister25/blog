@@ -6,8 +6,43 @@ use color_eyre::{eyre::ContextCompat, Result};
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::Connection;
+use serde::Serialize;
 
 use crate::page::Page;
+
+/// Represents a post stored in the database
+#[derive(Debug, Serialize)]
+pub struct PostInIndex {
+    path: PathBuf,
+    permalink: String,
+    title: String,
+    tags: Vec<String>,
+    date: DateTime<Utc>,
+    updated: DateTime<Utc>,
+    summary: String,
+}
+
+impl PostInIndex {
+    pub fn new(
+        path: PathBuf,
+        permalink: String,
+        title: String,
+        tags: Vec<String>,
+        date: DateTime<Utc>,
+        updated: DateTime<Utc>,
+        summary: String,
+    ) -> Self {
+        Self {
+            path,
+            permalink,
+            title,
+            tags,
+            date,
+            updated,
+            summary,
+        }
+    }
+}
 
 /// Sets up the SQLite database, creating the initial tables if they don't exist, and acquiring the connection.
 #[tracing::instrument]
@@ -154,4 +189,39 @@ pub fn update_post(conn: &Connection, post: &Page) -> Result<()> {
     )?;
 
     Ok(())
+}
+
+/// Fetch posts from database
+#[tracing::instrument]
+pub fn get_posts(conn: &Connection) -> Result<Vec<PostInIndex>> {
+    let mut stmt = conn.prepare(
+        "
+    SELECT path, permalink, title, tags, date, updated, summary
+    FROM posts
+    ORDER BY datetime(date) DESC
+    ",
+    )?;
+
+    let posts_iter = stmt.query_map([], |row| {
+        let path: String = row.get(0)?;
+        let tags: String = row.get(3)?;
+        let parsed_tags: Vec<String> = serde_json::from_str(&tags).expect("JSON should be valid.");
+
+        Ok(PostInIndex::new(
+            PathBuf::from(&path),
+            row.get(1)?,
+            row.get(2)?,
+            parsed_tags,
+            row.get(4)?,
+            row.get(5)?,
+            row.get(6)?,
+        ))
+    })?;
+
+    let mut posts = Vec::new();
+    for post in posts_iter {
+        posts.push(post?);
+    }
+
+    Ok(posts)
 }

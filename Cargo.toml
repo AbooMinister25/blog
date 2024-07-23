@@ -31,6 +31,7 @@ edition = "2021"
 [workspace.lints.clippy]
 pedantic = "warn"
 nursery = "warn"
+must_use_candidate = "allow"
 
 [lints]
 workspace = true

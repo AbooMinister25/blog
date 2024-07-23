@@ -13,7 +13,7 @@ use tracing::trace;
 use crate::{context::Context, output::Output, utils::fs::ensure_directory, DATE_FORMAT};
 
 /// Represents a single markdown page.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Page {
     pub path: PathBuf,
     pub out_path: PathBuf,
@@ -107,8 +107,8 @@ impl Output for Page {
         context.insert("markup", &self.document.content);
         context.insert("summary", &self.document.summary);
         context.insert("frontmatter", &frontmatter);
-        context.insert("pages", &ctx.pages);
-        context.insert("index_pages", &ctx.index_pages);
+        context.insert("pages", &ctx.posts);
+        context.insert("index_pages", &ctx.special_pages);
 
         let template = frontmatter
             .template
