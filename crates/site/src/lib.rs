@@ -8,9 +8,10 @@ pub mod sql;
 mod static_file;
 mod utils;
 
-use std::{ffi::OsStr, path::Component};
+use std::{ffi::OsStr, fs, path::Component};
 
 use asset::Asset;
+use chrono::Utc;
 use color_eyre::{eyre::ContextCompat, Result};
 use config::Config;
 use context::Context;
@@ -22,8 +23,8 @@ use r2d2::PooledConnection;
 use r2d2_sqlite::SqliteConnectionManager;
 use sql::{get_posts, insert_entry, insert_post, update_entry_hash, update_post};
 use static_file::StaticFile;
-use tera::Tera;
-use tracing::info;
+use tera::{Context as TeraContext, Tera};
+use tracing::{info, trace};
 
 pub const DATE_FORMAT: &str = "%b %e, %Y";
 
@@ -67,6 +68,11 @@ impl<'c> Site<'c> {
 
         info!("Rendering entries");
         self.render(pages)?;
+        info!("Rendered entries");
+
+        info!("Generating atom feed");
+        self.generate_atom_feed()?;
+        info!("Generated atom feed");
 
         Ok(())
     }
@@ -168,6 +174,26 @@ impl<'c> Site<'c> {
                 update_post(&self.ctx.conn, page)?;
             }
         }
+
+        Ok(())
+    }
+
+    #[tracing::instrument(skip(self))]
+    fn generate_atom_feed(&mut self) -> Result<()> {
+        let template = "atom.xml.tera";
+        let out_path = self.ctx.config.output_path.join("atom.xml");
+        let last_updated = Utc::now();
+        let mut context = TeraContext::new();
+
+        context.insert("feed_url", &format!("{}atom.xml", self.ctx.config.url));
+        context.insert("base_url", &self.ctx.config.url);
+        context.insert("last_updated", &last_updated);
+        context.insert("pages", &self.posts);
+
+        let rendered = self.ctx.tera.render(template, &context)?;
+        fs::write(out_path, rendered)?;
+
+        trace!("Generated Atom feed.");
 
         Ok(())
     }
