@@ -74,6 +74,10 @@ impl<'c> Site<'c> {
         self.generate_atom_feed()?;
         info!("Generated atom feed");
 
+        info!("Generating sitemap");
+        self.generate_sitemap()?;
+        info!("Generated sitemap");
+
         Ok(())
     }
 
@@ -192,8 +196,25 @@ impl<'c> Site<'c> {
 
         let rendered = self.ctx.tera.render(template, &context)?;
         fs::write(out_path, rendered)?;
+        Ok(())
+    }
 
-        trace!("Generated Atom feed.");
+    #[tracing::instrument(skip(self))]
+    fn generate_sitemap(&mut self) -> Result<()> {
+        let sp = Vec::new();
+        let pages = self
+            .posts
+            .iter()
+            .chain(self.ctx.special_pages.as_ref().unwrap_or(&sp))
+            .collect::<Vec<&Page>>();
+
+        let template = "sitemap.xml.tera";
+        let out_path = self.ctx.config.output_path.join("sitemap.xml");
+        let mut context = TeraContext::new();
+        context.insert("pages", &pages);
+
+        let rendered = self.ctx.tera.render(template, &context)?;
+        fs::write(out_path, rendered)?;
 
         Ok(())
     }
