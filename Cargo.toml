@@ -17,9 +17,12 @@ clap = { version = "4.5.9", features = ["derive"] }
 tempfile = "3.10.1"
 
 site = { path = "crates/site" }
+server = { path = "crates/server" }
 serde = { version = "1.0.204", features = ["derive"] }
 figment = { version = "0.10.19", features = ["toml"] }
 tracing-appender = "0.2.3"
+notify = "6.1.1"
+tokio = "1.39.1"
 
 [workspace]
 members = ["crates/*"]
@@ -38,6 +41,7 @@ edition = "2021"
 pedantic = "warn"
 nursery = "warn"
 must_use_candidate = "allow"
+missing-const-for-fn = "allow"
 
 [lints]
 workspace = true

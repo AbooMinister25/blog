@@ -20,6 +20,10 @@ struct Args {
     /// Whether or not to run a development build. In development builds, drafts are rendered.
     #[clap(long, action)]
     dev: bool,
+
+    /// Run a web server and hot reload on file changes.
+    #[clap(long, action)]
+    watch: bool,
 }
 
 fn main() -> Result<()> {
@@ -83,6 +87,10 @@ fn main() -> Result<()> {
 
     info!("Build successful, copying files to final destination.");
     copy_dir_all(tmp_dir.path().join("public"), &config.original_output_path)?;
+
+    if args.watch {
+        info!("Watch mode enabled, running web server and hot reloading on file system changes.");
+    }
 
     Ok(())
 }
