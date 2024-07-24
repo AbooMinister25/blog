@@ -139,8 +139,10 @@ impl<'c> Site<'c> {
 
     #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn render(&mut self, pages: Vec<Page>) -> Result<()> {
-        let (mut special_pages, posts): (Vec<_>, Vec<_>) =
-            pages.into_iter().partition(|p| p.is_special);
+        let (mut special_pages, posts): (Vec<_>, Vec<_>) = pages
+            .into_iter()
+            .filter(|p| !p.document.frontmatter.draft || self.ctx.config.development)
+            .partition(|p| p.is_special);
         special_pages.sort_by(|a, b| b.document.date.cmp(&a.document.date));
 
         for output in posts
@@ -152,7 +154,6 @@ impl<'c> Site<'c> {
             output.write(&self.ctx)?;
         }
 
-        // self.posts = posts;
         self.incremental_index = IncrementalIndex::from(posts);
 
         self.update_db()?;
