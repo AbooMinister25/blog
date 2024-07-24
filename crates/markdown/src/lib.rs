@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
 
 /// The frontmatter for a parsed document
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Frontmatter {
     pub title: String,
     pub tags: Vec<String>,
@@ -28,7 +28,7 @@ pub struct Frontmatter {
     pub draft: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct SeriesInfo {
     pub part: Option<i32>,
 }
@@ -41,7 +41,7 @@ pub struct MarkdownRenderer<'c> {
 }
 
 /// Represents a parsed markdown document
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Document {
     pub date: DateTime<Utc>,
     pub updated: DateTime<Utc>,

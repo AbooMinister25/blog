@@ -1,4 +1,5 @@
 use std::{
+    hash::Hash,
     fmt::Debug,
     fs,
     path::{Component, Path, PathBuf},
@@ -13,7 +14,7 @@ use tracing::trace;
 use crate::{context::Context, output::Output, utils::fs::ensure_directory, DATE_FORMAT};
 
 /// Represents a single markdown page.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Eq)]
 pub struct Page {
     pub path: PathBuf,
     pub out_path: PathBuf,
@@ -23,6 +24,18 @@ pub struct Page {
     pub fresh: bool,
     pub is_special: bool,
     pub document: Document,
+}
+
+impl Hash for Page {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.path.hash(state);
+    }
+}
+
+impl PartialEq for Page {
+    fn eq(&self, other: &Self) -> bool {
+        self.path == other.path
+    }
 }
 
 impl Page {

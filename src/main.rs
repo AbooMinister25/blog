@@ -40,12 +40,13 @@ fn main() -> Result<()> {
 
     let original_output_path = config.output_path;
     config.output_path = tmp_dir.path().join("public");
+    config.original_output_path = original_output_path;
 
     let file_appender = tracing_appender::rolling::hourly(&config.log_path, "ssg.log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
 
-    let subscriber = tracing_subscriber::registry()
-        .with(fmt::layer().compact().with_filter(LevelFilter::INFO));
+    let subscriber =
+        tracing_subscriber::registry().with(fmt::layer().compact().with_filter(LevelFilter::INFO));
 
     let file_log = if cfg!(debug_assertions) {
         Some(
@@ -67,21 +68,21 @@ fn main() -> Result<()> {
     if args.clean {
         info!("Clean build, making sure existing database removed.");
         ensure_removed("blog.db")?;
-        ensure_removed(&original_output_path)?;
+        ensure_removed(&config.original_output_path)?;
     }
 
     let pool = setup_sql()?;
     info!("Connected to database, created connection pool, created tables.");
 
     let now = Instant::now();
-    let mut site = Site::new(pool.get()?, config)?;
+    let mut site = Site::new(pool.get()?, config.clone())?;
     site.build()?;
     let elapsed = now.elapsed();
 
     info!("Built site in {:.2?} seconds", elapsed);
 
     info!("Build successful, copying files to final destination.");
-    copy_dir_all(tmp_dir.path().join("public"), original_output_path)?;
+    copy_dir_all(tmp_dir.path().join("public"), &config.original_output_path)?;
 
     Ok(())
 }

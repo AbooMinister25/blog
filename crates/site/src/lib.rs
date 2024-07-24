@@ -2,6 +2,7 @@ mod asset;
 pub mod config;
 mod context;
 mod entry;
+mod incremental_index;
 mod output;
 mod page;
 pub mod sql;
@@ -17,6 +18,7 @@ use color_eyre::{eyre::ContextCompat, Result};
 use config::Config;
 use context::Context;
 use entry::discover_entries;
+use incremental_index::IncrementalIndex;
 use markdown::MarkdownRenderer;
 use output::Output;
 use page::Page;
@@ -32,9 +34,9 @@ pub const DATE_FORMAT: &str = "%b %e, %Y";
 /// Represents a site, and holds all the pages that are currently being worked on.
 pub struct Site<'c> {
     ctx: Context<'c>,
-    posts: Vec<Page>,
     assets: Vec<Asset>,
     static_files: Vec<StaticFile>,
+    incremental_index: IncrementalIndex,
 }
 
 impl<'c> Site<'c> {
@@ -63,9 +65,9 @@ impl<'c> Site<'c> {
 
         Ok(Self {
             ctx,
-            posts: Vec::new(),
             assets: Vec::new(),
             static_files: Vec::new(),
+            incremental_index: IncrementalIndex::default(),
         })
     }
 
@@ -78,6 +80,10 @@ impl<'c> Site<'c> {
         info!("Rendering entries");
         self.render(pages)?;
         info!("Rendered entries");
+
+        info!("Building search index");
+        self.incremental_index.build_index(&self.ctx)?;
+        info!("Built search index");
 
         info!("Generating atom feed");
         self.generate_atom_feed()?;
@@ -146,7 +152,8 @@ impl<'c> Site<'c> {
             output.write(&self.ctx)?;
         }
 
-        self.posts = posts;
+        // self.posts = posts;
+        self.incremental_index = IncrementalIndex::from(posts);
 
         self.update_db()?;
         let posts_in_index = get_posts(&self.ctx.conn)?;
@@ -164,6 +171,7 @@ impl<'c> Site<'c> {
     #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn update_db(&mut self) -> Result<()> {
         for output in self
+            .incremental_index
             .posts
             .iter()
             .map(|p| p as &dyn Output)
@@ -185,7 +193,12 @@ impl<'c> Site<'c> {
             }
         }
 
-        for page in self.posts.iter().filter(|p| !p.is_special) {
+        for page in self
+            .incremental_index
+            .posts
+            .iter()
+            .filter(|p| !p.is_special)
+        {
             if page.fresh {
                 insert_post(&self.ctx.conn, page)?;
             } else {
@@ -206,7 +219,7 @@ impl<'c> Site<'c> {
         context.insert("feed_url", &format!("{}atom.xml", self.ctx.config.url));
         context.insert("base_url", &self.ctx.config.url);
         context.insert("last_updated", &last_updated);
-        context.insert("pages", &self.posts);
+        context.insert("pages", &self.incremental_index.posts);
 
         let rendered = self.ctx.tera.render(template, &context)?;
         fs::write(out_path, rendered)?;
@@ -217,6 +230,7 @@ impl<'c> Site<'c> {
     fn generate_sitemap(&mut self) -> Result<()> {
         let sp = Vec::new();
         let pages = self
+            .incremental_index
             .posts
             .iter()
             .chain(self.ctx.special_pages.as_ref().unwrap_or(&sp))

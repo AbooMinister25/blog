@@ -8,6 +8,7 @@ pub struct Config {
     pub url: String,
     pub root: PathBuf,
     pub output_path: PathBuf,
+    pub original_output_path: PathBuf,
     pub log_path: PathBuf,
     pub development: bool,
     pub special_pages: Vec<String>,
@@ -20,6 +21,7 @@ impl Default for Config {
             url: String::from("http://0.0.0.0:8000/"),
             root: Path::new("blog/").to_owned(),
             output_path: Path::new("public/").to_owned(),
+            original_output_path: Path::new("public").to_owned(),
             log_path: Path::new("log/").to_owned(),
             development: false,
             special_pages: vec![
