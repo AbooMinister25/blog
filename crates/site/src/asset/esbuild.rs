@@ -6,10 +6,8 @@ use color_eyre::{
 use esbuild_rs::{build, BuildOptionsBuilder, Engine, EngineName, SourceMap};
 use std::{fmt::Debug, path::Path};
 
-#[tracing::instrument]
-pub fn bundle_js<P: AsRef<Path> + Debug>(
-    path: P,
-) -> Result<String> {
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn bundle_js<P: AsRef<Path> + Debug>(path: P) -> Result<Vec<u8>> {
     let mut options_builder = BuildOptionsBuilder::new();
     options_builder.entry_points.push(
         path.as_ref()
@@ -21,7 +19,7 @@ pub fn bundle_js<P: AsRef<Path> + Debug>(
     options_builder.minify_syntax = true;
     options_builder.minify_identifiers = true;
     options_builder.minify_whitespace = true;
-    options_builder.source_map = SourceMap::Linked;
+    // options_builder.source_map = SourceMap::Linked;
     options_builder.engines = vec![
         Engine {
             name: EngineName::Chrome,
@@ -70,5 +68,5 @@ pub fn bundle_js<P: AsRef<Path> + Debug>(
         .context("No output file.")?;
     let data = output_file.data.as_ref();
 
-    Ok(data.to_string())
+    Ok(data.as_bytes().to_owned())
 }

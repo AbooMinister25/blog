@@ -23,7 +23,7 @@ pub struct StaticFile {
 }
 
 impl StaticFile {
-    #[tracing::instrument]
+    #[tracing::instrument(level = tracing::Level::DEBUG)]
     pub fn new<P: AsRef<Path> + Debug>(
         ctx: &Context,
         path: P,

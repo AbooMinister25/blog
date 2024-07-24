@@ -37,7 +37,7 @@ lazy_static! {
     static ref CACHE: Mutex<Cacher> = Mutex::new(Cacher::new());
 }
 
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn embed_font<P: AsRef<Path> + Debug>(path: P) -> Result<()> {
     let mut file = File::open(&path)?;
 

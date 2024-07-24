@@ -23,18 +23,18 @@ use crate::{
 pub struct Asset {
     pub path: PathBuf,
     pub out_path: PathBuf,
-    raw_content: String,
-    content: String,
+    raw_content: Vec<u8>,
+    content: Vec<u8>,
     hash: String,
     fresh: bool,
 }
 
 impl Asset {
-    #[tracing::instrument]
+    #[tracing::instrument(level = tracing::Level::DEBUG)]
     pub fn new<P: AsRef<Path> + Debug>(
         ctx: &Context,
         path: P,
-        raw_content: String,
+        raw_content: Vec<u8>,
         hash: String,
         fresh: bool,
     ) -> Result<Self> {
@@ -56,7 +56,7 @@ impl Asset {
         })
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(level = tracing::Level::DEBUG)]
     fn postprocess(&self) -> Result<()> {
         if let Some(e) = self.path.extension() {
             if e == "svg" {
@@ -69,7 +69,7 @@ impl Asset {
 }
 
 impl Output for Asset {
-    #[tracing::instrument]
+    #[tracing::instrument(level = tracing::Level::DEBUG)]
     fn write(&self, ctx: &Context) -> Result<()> {
         trace!(
             "Writing asset at {:?} to disk at {:?}",
@@ -127,11 +127,11 @@ fn out_path<P: AsRef<Path>, T: AsRef<Path>>(path: P, output_path: T) -> Result<P
     Ok(out_dir.join(filename))
 }
 
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 fn preprocess<P: AsRef<Path> + Debug, T: AsRef<Path> + Debug>(
     path: P,
     output_path: T,
-) -> Result<(String, PathBuf)> {
+) -> Result<(Vec<u8>, PathBuf)> {
     let mut op = output_path.as_ref().to_owned();
 
     Ok((
@@ -143,8 +143,7 @@ fn preprocess<P: AsRef<Path> + Debug, T: AsRef<Path> + Debug>(
                     ..Default::default()
                 };
 
-                let css = compile_scss_path(path.as_ref(), format)?;
-                String::from_utf8(css)?
+                compile_scss_path(path.as_ref(), format)?
             }
             Some("js") => {
                 op.set_extension("js");
@@ -152,10 +151,9 @@ fn preprocess<P: AsRef<Path> + Debug, T: AsRef<Path> + Debug>(
             }
             Some(ext) => {
                 op.set_extension(ext);
-                fs::read_to_string(&op)?
+                fs::read(path)?
             }
-            None => fs::read_to_string(&op)?,
-            _ => todo!(),
+            None => fs::read(path)?,
         },
         op,
     ))

@@ -41,7 +41,7 @@ pub struct MarkdownRenderer<'c> {
 }
 
 /// Represents a parsed markdown document
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Document {
     pub date: DateTime<Utc>,
     pub updated: DateTime<Utc>,
@@ -52,7 +52,7 @@ pub struct Document {
 }
 
 impl<'c> MarkdownRenderer<'c> {
-    #[tracing::instrument]
+    #[tracing::instrument(level = tracing::Level::DEBUG)]
     pub fn new<P: AsRef<Path> + Debug>(path: P, theme: &str) -> Result<Self> {
         // Load the theme set
         let ss = SyntaxSet::load_defaults_newlines();
@@ -78,7 +78,7 @@ impl<'c> MarkdownRenderer<'c> {
         Ok(Self { adapter, options })
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     pub fn render(&self, content: &str) -> Result<Document> {
         let arena = Arena::new();
         let root = parse_document(&arena, content, &self.options);
@@ -121,7 +121,7 @@ impl<'c> MarkdownRenderer<'c> {
         })
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn parse_toc<'a>(&self, root: &'a AstNode<'a>) -> Vec<String> {
         let mut toc_headers = Vec::new();
 
@@ -144,7 +144,7 @@ impl<'c> MarkdownRenderer<'c> {
         toc_headers
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn collect_text<'a>(&self, node: &'a AstNode<'a>, output: &mut Vec<u8>) {
         match node.data.borrow().value {
             NodeValue::Text(ref literal) | NodeValue::Code(NodeCode { ref literal, .. }) => {
@@ -157,7 +157,7 @@ impl<'c> MarkdownRenderer<'c> {
         }
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn parse_frontmatter(&self, content: &str) -> Result<Frontmatter> {
         let mut opening_delim = false;
         let mut frontmatter_content = String::new();

@@ -32,7 +32,7 @@ impl Entry {
 /// Recursively traverse the files in the given path, read them, hash them, and then
 /// filter out only the ones that have changed or have been newly created since the last
 /// run of the program.
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG, skip(ctx))]
 pub fn discover_entries(ctx: &Context) -> Result<Vec<Entry>> {
     let mut ret = Vec::new();
 
@@ -71,7 +71,7 @@ pub fn discover_entries(ctx: &Context) -> Result<Vec<Entry>> {
     Ok(ret)
 }
 
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 fn read_entries<T: AsRef<Path> + Debug>(path: T) -> Result<Vec<(PathBuf, Vec<u8>)>> {
     let mut ret = Vec::new();
 

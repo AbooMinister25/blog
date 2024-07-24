@@ -45,7 +45,7 @@ impl PostInIndex {
 }
 
 /// Sets up the SQLite database, creating the initial tables if they don't exist, and acquiring the connection.
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn setup_sql() -> Result<Pool<SqliteConnectionManager>> {
     // Establish connection to the database
     let manager = SqliteConnectionManager::file("blog.db");
@@ -73,7 +73,7 @@ pub fn setup_sql() -> Result<Pool<SqliteConnectionManager>> {
             tags JSON NOT NULL,
             date TEXT NOT NULL,
             updated TEXT NOT NULL,
-            summary TEXT NOT NULL,
+            summary TEXT NOT NULL
         )
     ",
         (),
@@ -83,7 +83,7 @@ pub fn setup_sql() -> Result<Pool<SqliteConnectionManager>> {
 }
 
 /// Fetch hashes for a given path from the database
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn get_hashes<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<Vec<String>> {
     let mut stmt = conn.prepare("SELECT hash FROM entries WHERE path = :path")?;
     let path_str = path
@@ -103,7 +103,7 @@ pub fn get_hashes<P: AsRef<Path> + Debug>(conn: &Connection, path: P) -> Result<
 }
 
 /// Insert an entry into the database
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn insert_entry<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &str) -> Result<()> {
     conn.execute(
         "INSERT INTO entries (path, hash) VALUES (?1, ?2)",
@@ -120,7 +120,7 @@ pub fn insert_entry<P: AsRef<Path> + Debug>(conn: &Connection, path: P, hash: &s
 }
 
 /// Update an existing entry in the database with a new hash
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn update_entry_hash<P: AsRef<Path> + Debug>(
     conn: &Connection,
     path: P,
@@ -142,7 +142,7 @@ pub fn update_entry_hash<P: AsRef<Path> + Debug>(
 }
 
 /// Insert a post into the database.
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn insert_post(conn: &Connection, post: &Page) -> Result<()> {
     conn.execute(
         "
@@ -164,7 +164,7 @@ pub fn insert_post(conn: &Connection, post: &Page) -> Result<()> {
 }
 
 /// Update an existing post in the database.
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn update_post(conn: &Connection, post: &Page) -> Result<()> {
     conn.execute(
         "
@@ -192,7 +192,7 @@ pub fn update_post(conn: &Connection, post: &Page) -> Result<()> {
 }
 
 /// Fetch posts from database
-#[tracing::instrument]
+#[tracing::instrument(level = tracing::Level::DEBUG)]
 pub fn get_posts(conn: &Connection) -> Result<Vec<PostInIndex>> {
     let mut stmt = conn.prepare(
         "

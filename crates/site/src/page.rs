@@ -6,14 +6,14 @@ use std::{
 
 use color_eyre::{eyre::ContextCompat, Result};
 use markdown::Document;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tera::Context as TeraContext;
 use tracing::trace;
 
 use crate::{context::Context, output::Output, utils::fs::ensure_directory, DATE_FORMAT};
 
 /// Represents a single markdown page.
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Page {
     pub path: PathBuf,
     pub out_path: PathBuf,
@@ -26,7 +26,7 @@ pub struct Page {
 }
 
 impl Page {
-    #[tracing::instrument]
+    #[tracing::instrument(level = tracing::Level::DEBUG)]
     pub fn new<P: AsRef<Path> + Debug>(
         ctx: &Context,
         path: P,
@@ -87,7 +87,7 @@ impl Page {
 }
 
 impl Output for Page {
-    #[tracing::instrument]
+    #[tracing::instrument(level = tracing::Level::DEBUG)]
     fn write(&self, ctx: &Context) -> Result<()> {
         trace!(
             "Writing page at {:?} to disk at {:?}",
@@ -107,7 +107,7 @@ impl Output for Page {
         context.insert("markup", &self.document.content);
         context.insert("summary", &self.document.summary);
         context.insert("frontmatter", &frontmatter);
-        context.insert("pages", &ctx.posts);
+        context.insert("posts", &ctx.posts);
         context.insert("index_pages", &ctx.special_pages);
 
         let template = frontmatter

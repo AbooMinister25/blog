@@ -1,12 +1,13 @@
 mod asset;
-mod config;
+pub mod config;
 mod context;
 mod entry;
 mod output;
 mod page;
 pub mod sql;
 mod static_file;
-mod utils;
+mod tera_functions;
+pub mod utils;
 
 use std::{ffi::OsStr, fs, path::Component};
 
@@ -24,7 +25,7 @@ use r2d2_sqlite::SqliteConnectionManager;
 use sql::{get_posts, insert_entry, insert_post, update_entry_hash, update_post};
 use static_file::StaticFile;
 use tera::{Context as TeraContext, Tera};
-use tracing::{info, trace};
+use tracing::info;
 
 pub const DATE_FORMAT: &str = "%b %e, %Y";
 
@@ -37,17 +38,25 @@ pub struct Site<'c> {
 }
 
 impl<'c> Site<'c> {
-    #[tracing::instrument]
+    #[tracing::instrument(level = tracing::Level::DEBUG)]
     pub fn new(conn: PooledConnection<SqliteConnectionManager>, config: Config) -> Result<Self> {
         let renderer = MarkdownRenderer::new(&config.root, &config.theme)?;
 
-        let tera = Tera::new(
+        let mut tera = Tera::new(
             config
                 .root
                 .join("templates/**/*.tera")
                 .to_str()
                 .context("Filename should be valid UTF-8")?,
         )?;
+        tera.register_function(
+            "posts_in_series",
+            tera_functions::make_posts_in_series(config.output_path.clone()),
+        );
+        tera.register_function(
+            "get_series_indexes",
+            tera_functions::make_get_series_indexes(config.output_path.clone()),
+        );
         info!("Loaded templates");
 
         let ctx = Context::new(conn, tera, renderer, config);
@@ -61,7 +70,7 @@ impl<'c> Site<'c> {
     }
 
     /// Build the site.
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     pub fn build(&mut self) -> Result<()> {
         info!("Discovering entries");
         let pages = self.discover_and_process()?;
@@ -81,14 +90,13 @@ impl<'c> Site<'c> {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn discover_and_process(&mut self) -> Result<Vec<Page>> {
         let entries = discover_entries(&self.ctx)?;
         let mut pages = Vec::new();
 
         info!("Processing entries");
         for entry in entries {
-            let content = String::from_utf8(entry.raw_content)?;
             match entry.path.parent().and_then(|p| {
                 p.components()
                     .nth(1)
@@ -96,12 +104,18 @@ impl<'c> Site<'c> {
                     .and_then(OsStr::to_str)
             }) {
                 Some("content") => {
+                    let content = String::from_utf8(entry.raw_content)?;
                     let page = Page::new(&self.ctx, entry.path, content, entry.hash, entry.fresh)?;
                     pages.push(page);
                 }
                 Some("assets") => {
-                    let asset =
-                        Asset::new(&self.ctx, entry.path, content, entry.hash, entry.fresh)?;
+                    let asset = Asset::new(
+                        &self.ctx,
+                        entry.path,
+                        entry.raw_content,
+                        entry.hash,
+                        entry.fresh,
+                    )?;
                     self.assets.push(asset);
                 }
                 Some("static") => {
@@ -117,7 +131,7 @@ impl<'c> Site<'c> {
         Ok(pages)
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn render(&mut self, pages: Vec<Page>) -> Result<()> {
         let (mut special_pages, posts): (Vec<_>, Vec<_>) =
             pages.into_iter().partition(|p| p.is_special);
@@ -147,7 +161,7 @@ impl<'c> Site<'c> {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn update_db(&mut self) -> Result<()> {
         for output in self
             .posts
@@ -182,7 +196,7 @@ impl<'c> Site<'c> {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn generate_atom_feed(&mut self) -> Result<()> {
         let template = "atom.xml.tera";
         let out_path = self.ctx.config.output_path.join("atom.xml");
@@ -199,7 +213,7 @@ impl<'c> Site<'c> {
         Ok(())
     }
 
-    #[tracing::instrument(skip(self))]
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
     fn generate_sitemap(&mut self) -> Result<()> {
         let sp = Vec::new();
         let pages = self
