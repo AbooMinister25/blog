@@ -3,7 +3,7 @@ use color_eyre::{
     eyre::{bail, ContextCompat},
     Result,
 };
-use esbuild_rs::{build, BuildOptionsBuilder, Engine, EngineName, SourceMap};
+use esbuild_rs::{build, BuildOptionsBuilder, Engine, EngineName};
 use std::{fmt::Debug, path::Path};
 
 #[tracing::instrument(level = tracing::Level::DEBUG)]

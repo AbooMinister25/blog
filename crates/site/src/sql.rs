@@ -174,7 +174,7 @@ pub fn update_post(conn: &Connection, post: &Page) -> Result<()> {
         tags = json(?3),
         date = datetime(?4),
         updated = datetime(?5),
-        summary = ?6,
+        summary = ?6
     WHERE path = (?7)
     ",
         (

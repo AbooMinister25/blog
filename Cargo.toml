@@ -23,6 +23,9 @@ figment = { version = "0.10.19", features = ["toml"] }
 tracing-appender = "0.2.3"
 notify = "6.1.1"
 tokio = "1.39.1"
+tower-livereload = "0.9.3"
+r2d2 = "0.8.10"
+r2d2_sqlite = "0.24.0"
 
 [workspace]
 members = ["crates/*"]
