@@ -1,0 +1,117 @@
+@use "themes/latte";
+@use "fonts";
+
+.sidebar {
+    background-color: latte.$mantle;
+    height: max-content;
+    margin: 3rem 1rem 0;
+    padding: 2rem 1rem;
+    grid-area: sidebar;
+
+    @media screen and (min-width: 1000px) {
+        border: none;
+        padding: 1rem;
+        margin-top: 6rem;
+    }
+}
+
+.pfp {
+    display: inline-block;
+    object-fit: cover;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 2px solid latte.$overlay2;
+}
+
+.posts-view {
+    grid-area: posts;
+    margin: 0 2rem;
+
+    @media screen and (min-width: 1000px) {
+        width: 100%;
+        margin-left: 3rem;
+    }
+}
+
+.posts-header {
+    text-align: center;
+
+    @media screen and (min-width: 1000px) {
+        text-align: left;
+    }
+}
+
+.inline-link {
+    font-size: 1.2rem;
+    text-decoration: none;
+    color: latte.$subtext1;
+
+    &:hover {
+        opacity: 75%;
+    }
+
+    &:visited {
+        color: latte.$subtext1;
+    }
+}
+
+.posts-header {
+    max-width: fit-content;
+    border-bottom: 3px solid latte.$yellow;
+    padding-bottom: 1rem;
+}
+
+.post-list {
+    padding: 1rem;
+    background-color: latte.$mantle;
+}
+
+.post-card {
+    padding-bottom: 2rem;
+    border-bottom: 1px dashed latte.$overlay2;
+}
+
+.post-header a {
+    color: latte.$subtext1;
+    text-decoration: none;
+
+    &:visited {
+        color: latte.$subtext1;
+    }
+}
+
+.post-details {
+    color: latte.$subtext0;
+    font-size: 0.8rem;
+    font-family: fonts.$monospace;
+    margin: 0;
+    padding: 0;
+}
+
+.search-container {
+    @media screen and (min-width: 600px) {
+        width: 100%;
+    }
+}
+
+.search {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: none;
+    box-shadow: none;
+    background-color: latte.$mantle;
+    border: 2px solid latte.$overlay1;
+    color: latte.$text;
+    margin-bottom: 1rem;
+
+    &:hover {
+        border: 2px solid latte.$yellow;
+    }
+
+    &:focus {
+        outline: none;
+        border: 2px solid latte.$yellow;
+    }
+}

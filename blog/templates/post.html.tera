@@ -1,0 +1,37 @@
+{% extends "base.html.tera" %}
+
+{% block head %}
+    {{ super() }}
+    <title> {{ title }} </title>
+    <meta name="og:title" property="og:title" content="{{ title }}" />
+    <meta name="twitter:title" content="{{ title }}" />
+    <link rel="stylesheet" href="/assets/styles/post.css" />
+    <meta name="description" content="{{ summary | escape }}"/>
+    <meta name="og:description" property="og:description" content="{{ summary | escape }}" />
+    <meta name="twitter:description" content="{{ summary | escape }}" />
+{% endblock head %}
+
+{% block content %}
+    <div class="post-content">
+        <h1 class="post-title">{{ title }}</h1>
+        <p class="details"> {{ date }} * {{ tags }}
+            {% if frontmatter.series.part %} 
+            *
+            <span class="status">
+                part {{ frontmatter.series.part }} 
+            </span>
+            {% endif %}
+        </p>
+        {% if toc %}
+        <h2 class="toc-header">Contents</h2>
+        <ul class="table-of-contents">
+            {% for header in toc %}
+                <li class="toc-item">
+                    <a href={{ '#' ~ header | lower | replace(from=' ', to='-') }}>{{ header }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {{ markup | safe }}
+    </div>
+{% endblock content %}

@@ -1,0 +1,93 @@
+@use "themes/latte";
+@use "fonts";
+
+.post-content {
+    padding: 1rem;
+    grid-area: posts;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    font-size: 1.2rem;
+    max-width: 750px;
+    line-height: 1.8rem;
+    @media screen and (min-width: 600px) {
+        width: 100%;
+    }
+}
+
+.post-content h1 {
+    font-size: 2rem;
+
+    @media screen and (min-width: 1000px) {
+        font-size: 2.2rem;
+    }
+}
+
+.post-content h2 {
+    font-size: 1.8rem;
+
+    @media (min-width: 600px) {
+        font-size: 2rem;
+    }
+}
+
+.post-content > ul {
+    padding-left: 1.5rem;
+    list-style: square;
+}
+
+.post-content .details {
+    color: latte.$overlay1;
+    font-size: 0.8rem;
+    font-family: fonts.$monospace;
+    margin: 0;
+    padding: 0;
+}
+
+.post-content .blog-note {
+    color: latte.$subtext0;
+    padding: 1rem;
+    border-top: 1px dashed;
+    border-bottom: 1px dashed;
+}
+
+.table-of-contents {
+    list-style: none;
+    margin-top: 1rem;
+    background-color: latte.$mantle;
+    padding: 1rem;
+}
+
+.table-of-contents > .toc-item {
+    font-size: 1.2rem;
+    line-height: 1.8rem;
+    color: latte.$subtext1;
+    list-style: none;
+
+    &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    &:before {
+        content: "#";
+    }
+
+    @media (min-width: 600px) {
+        font-size: 1.3rem;
+        line-height: 2rem;
+    }
+}
+
+.table-of-contents > .toc-item > a {
+    all: unset;
+
+    &:visited {
+        color: inherit;
+    }
+}
+
+.status {
+    background-color: latte.$mantle;
+    padding: 0.2rem;
+    border-radius: 5px;
+}

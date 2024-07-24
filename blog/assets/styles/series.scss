@@ -1,0 +1,30 @@
+@use "themes/latte";
+@use "fonts";
+
+.series-content {
+    padding: 1rem;
+    grid-area: posts;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    font-size: 1.2rem;
+    max-width: 750px;
+    line-height: 1.8rem;
+
+    @media screen and (min-width: 600px) {
+        width: 100%;
+    }
+}
+
+.details {
+    color: latte.$overlay1;
+    font-size: 0.8rem;
+    font-family: fonts.$monospace;
+    margin: 0;
+    padding: 0;
+}
+
+.status {
+    background-color: latte.$mantle;
+    padding: 0.2rem;
+    border-radius: 5px;
+}

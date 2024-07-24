@@ -1,0 +1,102 @@
+@use "fonts";
+@use "themes/latte";
+
+body {
+    font-family: fonts.$sans-serif;
+    color: latte.$text;
+}
+
+a {
+    color: latte.$rosewater;
+
+    &:visited {
+        color: latte.$rosewater;
+    }
+}
+
+code {
+    font-family: fonts.$monospace;
+    font-size: 0.9rem;
+}
+
+pre code {
+    font-size: inherit;
+    font-family: fonts.$monospace;
+}
+
+pre {
+    overflow: auto;
+    font-size: 0.8rem;
+    line-height: 1.25rem;
+    border-radius: 5px;
+    padding: 1rem;
+    margin: 1rem 0 1rem;
+    font-family: fonts.$monospace;
+
+    @media screen and (min-width: 600px) {
+        font-size: 0.9rem;
+    }
+}
+
+.wrapper {
+    margin: auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas:
+        "navbar"
+        "posts"
+        "sidebar"
+        "footer";
+    max-width: 900px;
+    @media screen and (min-width: 1000px) {
+        grid-template-columns: 1fr 3fr;
+        grid-template-rows: auto;
+        grid-template-areas:
+            "navbar navbar"
+            "sidebar posts"
+            "footer footer";
+    }
+    @media screen and (min-width: 600px) {
+        justify-items: center;
+    }
+}
+
+.navbar {
+    text-align: center;
+    border-bottom: 1px solid latte.$overlay2;
+    grid-area: navbar;
+    margin: 1rem 0;
+    padding: 0 1rem 1rem;
+
+    @media screen and (min-width: 1000px) {
+        font-size: 1.3rem;
+        margin: 2rem;
+    }
+}
+
+.nav-link {
+    margin: 1rem;
+    text-decoration: none;
+    color: latte.$text;
+
+    &:hover {
+        opacity: 75%;
+        border-bottom: 1px solid latte.$overlay2;
+    }
+
+    &:visited {
+        color: latte.$text;
+    }
+}
+
+.footer {
+    margin: 2rem;
+    text-align: center;
+    grid-area: footer;
+
+    @media screen and (min-width: 1000px) {
+        width: 100%;
+        border-top: 1px solid latte.$yellow;
+    }
+}

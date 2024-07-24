@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% block head %}{% endblock head %}
+        <link rel="stylesheet" href="/assets/styles/base.css" />
+        <link
+            rel="apple-touch-icon"
+            sizes="180x180"
+            href="/static/icons/apple-touch-icon.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="/static/icons/favicon-32x32.png"
+        />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="/static/icons/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/static/icons/site.webmanifest" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charset="utf-8" />
+        <meta name="author" content="Rayyan Cyclegar" />
+    </head>
+    <body>
+        <div class="wrapper">
+            <nav class="navbar">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/posts">Posts</a>
+                <a class="nav-link" href="/series">Series</a>
+                <a class="nav-link" href="/search">Search</a>
+            </nav>
+            {% block content %} {% endblock content %}
+            <footer class="footer">
+                <p>aboominister@gmail.com</p>
+            </footer>
+        </div>
+    </body>
+</html>
