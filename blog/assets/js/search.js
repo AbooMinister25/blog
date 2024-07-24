@@ -139,20 +139,29 @@ function initSearch() {
 
                 var ms = new MiniSearch({
                     idField: "hash",
-                    fields: ["title", "body", "tags"],
+                    fields: [
+                        "document.frontmatter.title",
+                        "raw_content",
+                        "document.frontmatter.tags",
+                    ],
                     storeFields: [
-                        "title",
-                        "date",
-                        "tags",
-                        "summary",
+                        "document.frontmatter.title",
+                        "document.frontmatter.date",
+                        "document.frontmatter.tags",
+                        "document.summary",
                         "permalink",
-                        "content",
+                        "document.content",
                     ],
                     searchOptions: {
                         boost: { title: 2 },
                         fuzzy: 0.2,
                         prefix: true,
                         combineWith: "AND",
+                    },
+                    extractField: (document, fieldName) => {
+                        return fieldName
+                            .split(".")
+                            .reduce((doc, key) => doc && doc[key], document);
                     },
                 });
                 ms.addAll(json);
@@ -194,18 +203,27 @@ function initSearch() {
         }
 
         for (const result of results) {
-            let text = extractTextNodes(result.content);
+            let text = extractTextNodes(result["document.content"]);
             let teaser = makeTeaser(text, result.terms);
-            let tags_teaser = makeTeaser(result.tags.join(", "), result.terms);
+            let tags_teaser = makeTeaser(
+                result["document.frontmatter.tags"].join(", "),
+                result.terms
+            );
 
-            let date = new Date(result.date);
+            let date = new Date(result["document.frontmatter.date"]);
             let item = document.createElement("div");
             item.innerHTML = `
             <h1 class="post-header">
-                <a href="${result.permalink}">${result.title}</a>
+                <a href="${result.permalink}">${
+                result["document.frontmatter.title"]
+            }</a>
             </h1>
             <div>
-            ${teaser.includes("<b>") ? teaser + "..." : result.summary}
+            ${
+                teaser.includes("<b>")
+                    ? teaser + "..."
+                    : result["document.summary"]
+            }
             </div>
             <p class="post-details" style="b { font-size: 5rem; }">
                 ${date.toLocaleDateString("en-US", options)} *

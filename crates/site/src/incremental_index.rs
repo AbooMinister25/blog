@@ -2,7 +2,6 @@ use std::{collections::HashSet, default::Default, fs};
 
 use color_eyre::Result;
 use serde::{Deserialize, Serialize};
-use tracing::info;
 
 use crate::{context::Context, page::Page};
 
@@ -23,7 +22,6 @@ impl IncrementalIndex {
             let mut old_index = Self {
                 posts: serde_json::from_str(&content)?,
             };
-            info!("{:?}", old_index);
 
             for page in &self.posts {
                 old_index.posts.replace(page.clone());
@@ -37,7 +35,7 @@ impl IncrementalIndex {
             serde_json::to_string(&self.posts)?
         };
 
-        fs::write(&out_path, serialized)?;
+        fs::write(out_path, serialized)?;
 
         Ok(())
     }
