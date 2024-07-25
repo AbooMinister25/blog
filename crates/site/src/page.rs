@@ -1,12 +1,13 @@
 use std::{
-    hash::Hash,
     fmt::Debug,
     fs,
+    hash::Hash,
     path::{Component, Path, PathBuf},
 };
 
 use color_eyre::{eyre::ContextCompat, Result};
 use markdown::Document;
+use minify_html::{minify, Cfg};
 use serde::{Deserialize, Serialize};
 use tera::Context as TeraContext;
 use tracing::trace;
@@ -129,12 +130,15 @@ impl Output for Page {
             .map_or("post.html.tera", |s| s);
         let rendered_html = ctx.tera.render(template, &context)?;
 
+        let cfg = Cfg::new();
+        let minified = minify(rendered_html.as_bytes(), &cfg);
+
         trace!(
             "Rendered template for page at {:?}, now writing to {:?}",
             self.path,
             self.out_path
         );
-        fs::write(&self.out_path, rendered_html)?;
+        fs::write(&self.out_path, minified)?;
         trace!(
             "Wrote page at {:?} to disk at {:?}",
             self.path,
