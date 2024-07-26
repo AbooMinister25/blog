@@ -5,6 +5,7 @@ mod entry;
 mod incremental_index;
 mod output;
 mod page;
+mod shortcodes;
 pub mod sql;
 mod static_file;
 mod tera_functions;
