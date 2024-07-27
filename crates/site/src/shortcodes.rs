@@ -39,7 +39,23 @@ pub enum Value {
 }
 
 #[tracing::instrument(level = tracing::Level::DEBUG)]
-pub fn evaluate_shortcode(ctx: &Context, shortcode: &Shortcode) -> Result<String> {
+pub fn evaluate_shortcodes(ctx: &Context, input: &'static str) -> Result<String> {
+    let mut ret = Vec::new();
+    let (_, items) = parse(input)?;
+
+    for item in items {
+        let parsed = match item {
+            Item::Shortcode(s) => evaluate_shortcode(ctx, &s)?,
+            Item::Text(s) => s,
+        };
+
+        ret.push(parsed);
+    }
+
+    Ok(ret.join(""))
+}
+
+fn evaluate_shortcode(ctx: &Context, shortcode: &Shortcode) -> Result<String> {
     let mut context = TeraContext::from_serialize(&shortcode.arguments)?;
     context.insert("body", &shortcode.body);
 
@@ -49,8 +65,7 @@ pub fn evaluate_shortcode(ctx: &Context, shortcode: &Shortcode) -> Result<String
     Ok(rendered)
 }
 
-#[tracing::instrument(level = tracing::Level::DEBUG)]
-pub fn parse(input: &str) -> IResult<&str, Vec<Item>> {
+fn parse(input: &str) -> IResult<&str, Vec<Item>> {
     let (input, mut items) = many0(alt((
         map(shortcode, Item::Shortcode),
         map(text, Item::Text),
@@ -391,6 +406,53 @@ hello world
         assert_eq!(
             evaluated,
             "<div class=\"blog-note\">\n<h1>testing</h1>\nthis is a note!\n        \n</div>"
+        );
+    }
+
+    #[test]
+    fn test_evaluate_shortcodes() {
+        let mut ctx = build_dummy_ctx();
+        let template_str = r#"<div class="blog-note">
+<h1>{{title}}</h1>
+{{ body }}
+</div>"#;
+        ctx.tera
+            .add_raw_template("note.html.tera", template_str)
+            .unwrap();
+
+        let test_input = r#"# Hello World
+
+this is a thing
+
+## this is another thing
+
+**hi**
+
+{{! note(title="testing") !}}
+this is a note!
+{{! end !}}
+
+**more**"#;
+
+        let evaluated = evaluate_shortcodes(&ctx, test_input).unwrap();
+
+        assert_eq!(
+            evaluated,
+            r#"# Hello World
+
+this is a thing
+
+## this is another thing
+
+**hi**
+
+<div class="blog-note">
+<h1>testing</h1>
+this is a note!
+
+</div>
+
+**more**"#
         );
     }
 }
