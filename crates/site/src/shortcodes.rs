@@ -177,6 +177,55 @@ hello world
     }
 
     #[test]
+    fn test_parse_no_shortcodes() {
+        let test_input = "# Hello World
+
+this is a thing
+
+## this is another thing
+
+**hi**
+
+**more**";
+
+        let items = parse(test_input).unwrap().1;
+        assert_eq!(
+            items,
+            vec![
+                Item::Text(
+                    "# Hello World\n\nthis is a thing\n\n## this is another thing\n\n**hi**\n\n**more**"
+                        .to_string()
+                ),
+            ]
+        );
+    }
+
+    #[test]
+    fn test_parse_only_shortcode() {
+        let test_input = "{{! test(a=1, b=2) !}}
+hello world
+{{! end !}}";
+
+        let items = parse(test_input).unwrap().1;
+        assert_eq!(
+            items,
+            vec![
+                Item::Shortcode(Shortcode {
+                    name: "test".to_string(),
+                    arguments: vec![
+                        ("a".to_string(), Value::Number(1)),
+                        ("b".to_string(), Value::Number(2))
+                    ]
+                    .into_iter()
+                    .collect(),
+                    body: "hello world\n".to_string()
+                }),
+                Item::Text(String::new())
+            ]
+        );
+    }
+
+    #[test]
     fn test_parse_shortcode_arguments() {
         let test_input = "
 {{! test(a=1, b=2) !}}
