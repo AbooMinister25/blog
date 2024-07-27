@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use color_eyre::Result;
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
@@ -10,6 +11,10 @@ use nom::{
     sequence::{delimited, pair, preceded},
     IResult, Parser,
 };
+use serde::Serialize;
+use tera::Context as TeraContext;
+
+use crate::context::Context;
 
 #[derive(Debug, PartialEq)]
 pub enum Item {
@@ -24,12 +29,21 @@ pub struct Shortcode {
     pub body: String,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub enum Value {
     Bool(bool),
     Number(i32),
     String(String),
     List(Vec<Value>),
+}
+
+#[tracing::instrument(level = tracing::Level::DEBUG)]
+pub fn evaluate_shortcode(ctx: &Context, shortcode: Shortcode) -> Result<String> {
+    let mut context = TeraContext::from_serialize(shortcode.arguments)?;
+    context.insert("body", &shortcode.body);
+
+    let rendered = ctx.tera.render(&shortcode.name, &context)?;
+    Ok(rendered)
 }
 
 #[tracing::instrument(level = tracing::Level::DEBUG)]
@@ -223,6 +237,14 @@ hello world
                 Item::Text(String::new())
             ]
         );
+    }
+
+    #[test]
+    fn parse_empty() {
+        let test_input = "";
+
+        let items = parse(test_input).unwrap().1;
+        assert_eq!(items, vec![Item::Text(String::new())]);
     }
 
     #[test]
