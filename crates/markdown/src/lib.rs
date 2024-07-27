@@ -5,7 +5,7 @@ use std::{fmt::Debug, path::Path};
 use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use color_eyre::Result;
 use comrak::{
-    format_html_with_plugins,
+    format_html_with_plugins, markdown_to_html,
     nodes::{AstNode, NodeCode, NodeValue},
     parse_document,
     plugins::syntect::{SyntectAdapter, SyntectAdapterBuilder},
@@ -119,6 +119,11 @@ impl<'c> MarkdownRenderer<'c> {
             frontmatter,
             toc,
         })
+    }
+
+    #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
+    pub fn render_one_off(&self, content: &str) -> Result<String> {
+        Ok(markdown_to_html(content, &self.options))
     }
 
     #[tracing::instrument(level = tracing::Level::DEBUG, skip(self))]
@@ -408,6 +413,17 @@ hi
         let document = renderer.render(content)?;
 
         assert_eq!(document.toc, vec!["First", "Second", "Third"]);
+        Ok(())
+    }
+
+    #[test]
+    fn test_render_one_off() -> Result<()> {
+        let content = "**test**";
+        let renderer = get_renderer()?;
+        let html = renderer.render_one_off(content)?;
+
+        assert_eq!(html, "<p><strong>test</strong></p>\n");
+
         Ok(())
     }
 }
