@@ -57,7 +57,8 @@ pub fn evaluate_shortcodes(ctx: &Context, input: &'static str) -> Result<String>
 
 fn evaluate_shortcode(ctx: &Context, shortcode: &Shortcode) -> Result<String> {
     let mut context = TeraContext::from_serialize(&shortcode.arguments)?;
-    context.insert("body", &shortcode.body);
+    let rendered = ctx.markdown_renderer.render_one_off(&shortcode.body)?;
+    context.insert("body", &rendered);
 
     let rendered = ctx
         .tera
@@ -377,7 +378,7 @@ hello world
 
         assert_eq!(
             evaluated,
-            "<div class=\"blog-note\">\nthis is a note!\n        \n</div>"
+            "<div class=\"blog-note\">\n<p>this is a note!</p>\n\n</div>"
         );
     }
 
@@ -405,7 +406,7 @@ hello world
 
         assert_eq!(
             evaluated,
-            "<div class=\"blog-note\">\n<h1>testing</h1>\nthis is a note!\n        \n</div>"
+            "<div class=\"blog-note\">\n<h1>testing</h1>\n<p>this is a note!</p>\n\n</div>"
         );
     }
 
@@ -448,7 +449,7 @@ this is a thing
 
 <div class="blog-note">
 <h1>testing</h1>
-this is a note!
+<p>this is a note!</p>
 
 </div>
 
