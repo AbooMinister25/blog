@@ -30,6 +30,7 @@ pub struct Shortcode {
 }
 
 #[derive(Debug, PartialEq, Serialize)]
+#[serde(untagged)]
 pub enum Value {
     Bool(bool),
     Number(i32),
@@ -38,11 +39,13 @@ pub enum Value {
 }
 
 #[tracing::instrument(level = tracing::Level::DEBUG)]
-pub fn evaluate_shortcode(ctx: &Context, shortcode: Shortcode) -> Result<String> {
-    let mut context = TeraContext::from_serialize(shortcode.arguments)?;
+pub fn evaluate_shortcode(ctx: &Context, shortcode: &Shortcode) -> Result<String> {
+    let mut context = TeraContext::from_serialize(&shortcode.arguments)?;
     context.insert("body", &shortcode.body);
 
-    let rendered = ctx.tera.render(&shortcode.name, &context)?;
+    let rendered = ctx
+        .tera
+        .render(&format!("{}.html.tera", shortcode.name), &context)?;
     Ok(rendered)
 }
 
@@ -149,7 +152,51 @@ where
 
 #[cfg(test)]
 mod tests {
+    use markdown::MarkdownRenderer;
+    use r2d2::{Pool, PooledConnection};
+    use r2d2_sqlite::SqliteConnectionManager;
+    use tempfile::tempdir;
+    use tera::Tera;
+
+    use crate::config::Config;
+
     use super::*;
+
+    fn setup_db() -> PooledConnection<SqliteConnectionManager> {
+        let manager = SqliteConnectionManager::memory();
+        let pool = Pool::new(manager).unwrap();
+        let conn = pool.get().unwrap();
+
+        conn.execute(
+            "
+            CREATE TABLE IF NOT EXISTS entries (
+                entry_id INTEGER PRIMARY KEY,
+                path VARCHAR NOT NULL,
+                hash TEXT NOT NULL
+            )
+        ",
+            (),
+        )
+        .unwrap();
+
+        conn
+    }
+
+    fn build_dummy_ctx<'a>() -> Context<'a> {
+        let tmp_dir = tempdir().unwrap();
+        std::fs::create_dir(tmp_dir.path().join("themes/")).unwrap();
+
+        let conn = setup_db();
+        let config = Config::default();
+        let tera = Tera::default();
+
+        Context::new(
+            conn,
+            tera,
+            MarkdownRenderer::new(tmp_dir.path(), "Solarized (light)").unwrap(),
+            config,
+        )
+    }
 
     #[test]
     fn test_parse_content() {
@@ -289,6 +336,61 @@ hello world
                 arguments: HashMap::new(),
                 body: "hello world\n".to_string()
             }
+        );
+    }
+
+    #[test]
+    fn test_evaluate_shortcode() {
+        let mut ctx = build_dummy_ctx();
+        let template_str = r#"<div class="blog-note">
+{{ body }}
+</div>"#;
+        ctx.tera
+            .add_raw_template("note.html.tera", template_str)
+            .unwrap();
+
+        let test_input = "{{! note !}}
+        this is a note!
+        {{! end !}}";
+
+        let items = parse(test_input).unwrap().1;
+        let Item::Shortcode(s) = items.first().unwrap() else {
+            panic!("not a shortcode")
+        };
+
+        let evaluated = evaluate_shortcode(&ctx, s).unwrap();
+
+        assert_eq!(
+            evaluated,
+            "<div class=\"blog-note\">\nthis is a note!\n        \n</div>"
+        );
+    }
+
+    #[test]
+    fn test_evaluate_shortcode_arguments() {
+        let mut ctx = build_dummy_ctx();
+        let template_str = r#"<div class="blog-note">
+<h1>{{title}}</h1>
+{{ body }}
+</div>"#;
+        ctx.tera
+            .add_raw_template("note.html.tera", template_str)
+            .unwrap();
+
+        let test_input = r#"{{! note(title="testing") !}}
+        this is a note!
+        {{! end !}}"#;
+
+        let items = parse(test_input).unwrap().1;
+        let Item::Shortcode(s) = items.first().unwrap() else {
+            panic!("not a shortcode")
+        };
+
+        let evaluated = evaluate_shortcode(&ctx, s).unwrap();
+
+        assert_eq!(
+            evaluated,
+            "<div class=\"blog-note\">\n<h1>testing</h1>\nthis is a note!\n        \n</div>"
         );
     }
 }
