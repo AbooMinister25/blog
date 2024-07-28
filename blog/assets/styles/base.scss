@@ -4,6 +4,7 @@
 body {
     font-family: fonts.$sans-serif;
     color: latte.$text;
+    font-variant-ligatures: none;
 }
 
 a {
