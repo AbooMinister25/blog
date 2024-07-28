@@ -12,7 +12,10 @@ use serde::{Deserialize, Serialize};
 use tera::Context as TeraContext;
 use tracing::trace;
 
-use crate::{context::Context, output::Output, utils::fs::ensure_directory, DATE_FORMAT};
+use crate::{
+    context::Context, output::Output, shortcodes::evaluate_shortcodes, utils::fs::ensure_directory,
+    DATE_FORMAT,
+};
 
 /// Represents a single markdown page.
 #[derive(Debug, Serialize, Deserialize, Clone, Eq)]
@@ -50,7 +53,8 @@ impl Page {
     ) -> Result<Self> {
         trace!("Processing page at {path:?}");
 
-        let document = ctx.markdown_renderer.render(&raw_content)?;
+        let evaluated_content = evaluate_shortcodes(ctx, &raw_content)?;
+        let document = ctx.markdown_renderer.render(&evaluated_content)?;
         let out_path = out_path(
             &path,
             &ctx.config.output_path,

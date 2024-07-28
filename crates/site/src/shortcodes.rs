@@ -39,9 +39,9 @@ pub enum Value {
 }
 
 #[tracing::instrument(level = tracing::Level::DEBUG)]
-pub fn evaluate_shortcodes(ctx: &Context, input: &'static str) -> Result<String> {
+pub fn evaluate_shortcodes(ctx: &Context, input: &str) -> Result<String> {
     let mut ret = Vec::new();
-    let (_, items) = parse(input)?;
+    let ((), items) = parse(input)?;
 
     for item in items {
         let parsed = match item {
@@ -62,19 +62,21 @@ fn evaluate_shortcode(ctx: &Context, shortcode: &Shortcode) -> Result<String> {
 
     let rendered = ctx
         .tera
-        .render(&format!("{}.html.tera", shortcode.name), &context)?;
+        .render(&format!("shortcodes/{}.html.tera", shortcode.name), &context)?;
     Ok(rendered)
 }
 
-fn parse(input: &str) -> IResult<&str, Vec<Item>> {
+#[allow(clippy::redundant_closure_for_method_calls)]
+fn parse(input: &str) -> IResult<(), Vec<Item>, nom::error::Error<String>> {
     let (input, mut items) = many0(alt((
         map(shortcode, Item::Shortcode),
         map(text, Item::Text),
-    )))(input)?;
+    )))(input)
+    .map_err(|e| e.to_owned())?;
 
     items.push(Item::Text(input.to_string()));
 
-    Ok((input, items))
+    Ok(((), items))
 }
 
 fn text(input: &str) -> IResult<&str, String> {
