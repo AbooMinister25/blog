@@ -7,3 +7,5 @@ perf.data
 perf.data.old
 .idea/
 profile.json
+.direnv
+.envrc
