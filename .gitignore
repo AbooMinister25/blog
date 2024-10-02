@@ -9,3 +9,4 @@ perf.data.old
 profile.json
 .direnv
 .envrc
+node_modules/
