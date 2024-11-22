@@ -463,7 +463,7 @@ What I _could_ do though was add these executables to the build inputs of my she
 
 The next alternative was to further nixify everything and create nix expressions for my project. Like I mentioned earlier, though, I didn't want to do this, and instead continue using the tools I had always been using. After some looking around, I found [poetry2nix](https://github.com/nix-community/poetry2nix), which autogenerates Nix derivations on the fly by parsing your `pyproject.toml` and `poetry.lock` files. Now, this is nice enough if I was using poetry, but I don't, and neither `uv` or `pdm` have any established alternatives. However, it turns out that `poetry2nix` is implemented using a project called [pyproject.nix](https://github.com/nix-community/pyproject.nix), which is a collection of Nix utilitites to work with python project metadata. I took a quick crack at using it, but the issue was that it is a lot more barebones than `poetry2nix`, and I pretty much needed to figure out everything myself, including all the special cases with how `uv` and `pdm` handle things, to get it to work. That was too much of a time commitment than I was willing to make just to get a python development environment working.
 
-At this point, it turns out that NixOS has an escape hatch — `buildFHSEnv`, which essentially lets me create a lightweight FHS-compatible sandbox. This is usually a last resort, but I figured I was already at that point anyways. Here's a shell for python and `uv`, which works pretty great:
+At this point, it turns out that NixOS has an escape hatch — `buildFHSUserEnv`, which essentially lets me create a lightweight FHS-compatible sandbox. This is usually a last resort, but I figured I was already at that point anyways. Here's a shell for python and `uv`, which works pretty great:
 
 ```nix
 {
@@ -505,7 +505,7 @@ Now that everything worked, I figured I'd round out the corners of my workflow f
 
 ### Direnv
 
-[Direnv](https://direnv.net/) is a pretty neat tool that exists. What it does is it can load and unload environment variables depending on your current directory. You can use it to automatically load/unload nix shells upon navigating to your project's directory. [Nix-direnv](https://github.com/nix-community/nix-direnv) makes the process even easier.
+[Direnv](https://direnv.net/) is a pretty neat tool that exists. What it does is it loads and unloads environment variables depending on your current directory. You can use it to automatically load/unload nix shells upon navigating to your project's directory. [Nix-direnv](https://github.com/nix-community/nix-direnv) makes the process even easier.
 
 Getting it working is fairly simple. You enable it via home-manager
 
@@ -520,4 +520,13 @@ Getting it working is fairly simple. You enable it via home-manager
 }
 ```
 
-add `use flake` to a `.envrc` file in your project directory, and run `direnv allow`.  
+add `use flake` to a `.envrc` file in your project directory, and run `direnv allow`. Anytime you navigate into this directory, direnv will automatically activate the nix shell.
+
+`direnv` also has a nice side effect of automatically putting me into a `fish` shell, instead of the default `bash` shell that devshells use.
+
+There was a small issue, though. It turns out that `direnv` doesn't work in FHS-sandboxes, like the devshell I created for my python projects with `buildFHSUserEnv`. It's not a dealbreaker, it's not that much additional work to run `nix develop`, it's just kind of annoying.
+
+### VSCode
+The whole FHS situation popped up again with VSCode — It turns out that extensions I have installed traditionally through VSCode won't be able to run any pre-compiled binaries they come with. Now, I could configure VSCode via nix, and use the nix expressions available at [nix-vscode-extensions](https://github.com/nix-community/nix-vscode-extensions), and everything probably would've worked fine. At the moment, though, I didn't want to spend too much more time configuring my system, so I opted to use `vscode.fhs` instead, which launches the editor inside a FHS compliant environment with `buildFHSUserEnv`.
+
+However, that had its own issues. If I run it within a FHS environment, VSCode won't launch properly — it just shows me a blank, transparent square. Some sort of rendering issue. The fix was to run VSCode with the `--disable-gpu-compositing` flag, which works for now, but I intend to move to a fully nixified configuration for VSCode in the future, once I have the time to sit down and further configure everything.
