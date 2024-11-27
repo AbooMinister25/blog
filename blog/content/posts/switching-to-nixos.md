@@ -530,3 +530,5 @@ There was a small issue, though. It turns out that `direnv` doesn't work in FHS-
 The whole FHS situation popped up again with VSCode — It turns out that extensions I have installed traditionally through VSCode won't be able to run any pre-compiled binaries they come with. Now, I could configure VSCode via nix, and use the nix expressions available at [nix-vscode-extensions](https://github.com/nix-community/nix-vscode-extensions), and everything probably would've worked fine. At the moment, though, I didn't want to spend too much more time configuring my system, so I opted to use `vscode.fhs` instead, which launches the editor inside a FHS compliant environment with `buildFHSUserEnv`.
 
 However, that had its own issues. If I run it within a FHS environment, VSCode won't launch properly — it just shows me a blank, transparent square. Some sort of rendering issue. The fix was to run VSCode with the `--disable-gpu-compositing` flag, which works for now. I intend to move to a more permanent, fully nixified configuration in the future, once I have the time to sit down and further configure everything.
+
+## SSH
