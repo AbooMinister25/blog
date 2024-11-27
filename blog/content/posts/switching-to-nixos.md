@@ -532,3 +532,6 @@ The whole FHS situation popped up again with VSCode — It turns out that extens
 However, that had its own issues. If I run it within a FHS environment, VSCode won't launch properly — it just shows me a blank, transparent square. Some sort of rendering issue. The fix was to run VSCode with the `--disable-gpu-compositing` flag, which works for now. I intend to move to a more permanent, fully nixified configuration in the future, once I have the time to sit down and further configure everything.
 
 ## SSH
+
+
+SSH
