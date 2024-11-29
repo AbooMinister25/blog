@@ -527,11 +527,136 @@ add `use flake` to a `.envrc` file in your project directory, and run `direnv al
 There was a small issue, though. It turns out that `direnv` doesn't work in FHS-sandboxes, like the devshell I created for my python projects with `buildFHSUserEnv`. It's not a dealbreaker, it's not that much additional work to run `nix develop`, it's just kind of annoying.
 
 ### VSCode
+
 The whole FHS situation popped up again with VSCode — It turns out that extensions I have installed traditionally through VSCode won't be able to run any pre-compiled binaries they come with. Now, I could configure VSCode via nix, and use the nix expressions available at [nix-vscode-extensions](https://github.com/nix-community/nix-vscode-extensions), and everything probably would've worked fine. At the moment, though, I didn't want to spend too much more time configuring my system, so I opted to use `vscode.fhs` instead, which launches the editor inside a FHS compliant environment with `buildFHSUserEnv`.
 
 However, that had its own issues. If I run it within a FHS environment, VSCode won't launch properly — it just shows me a blank, transparent square. Some sort of rendering issue. The fix was to run VSCode with the `--disable-gpu-compositing` flag, which works for now. I intend to move to a more permanent, fully nixified configuration in the future, once I have the time to sit down and further configure everything.
 
 ## SSH
 
+Setting SSH up took longer than I expected it to. My primary use of it is for authenticating with GitHub, which is simple enough in principle. I generated a keypair, registered the public key with my GitHub account, and everything worked fine. The issue came when I wanted my workflow to be more convenient.
 
-SSH
+So, I'm running a fairly barebones system, which means that I didn't have any sort of SSH agent or keychain installed. What an SSH agent does is it runs in the background and manages your SSH keys, so that once a key is registered, you don't need to enter in a passkey every time you want to use it. Without this, every time I wanted to push to GitHub, for example, I had to re-enter my SSH passphrase. So naturally, I set up `ssh-agent` via my home-manager configuration.
+
+```nix
+# home.nix
+{
+  # ...
+  services.ssh-agent.enable = true;
+}
+```
+
+I could then use `ssh-add` to add my keys to the agent. However, what I really wanted was to replicate the functionality that my previous systems had, namely barely ever needing to enter an SSH passphrase, and have all of my keys auto-add to the agent on login. It turns out this functionality is provided by a keyring.
+
+What a keyring does is it stores passwords and encryption keys, and is usually unlocked with your login password upon login. I can use it to store my SSH keys, and have those open and available once I log into my system.
+
+I decided to use `gnome-keyring` since it already seemed fairly prevalent. `gnome-keyring` provides its own ssh-agent, so I needed to disable `ssh-agent` to proceed.
+
+```nix
+# configuration.nix
+{
+  # ...
+  services.gnome.gnome-keyring.enable = true;
+  programs.seahorse.enable = true;
+  security.pam.services.greetd.enableGnomeKeyring = true;
+  security.pam.services.login.enableGnomeKeyring = true;
+}
+```
+
+```nix
+# home.nix
+{
+  # ...
+  services.gnome-keyring.enable = true;
+  services.gnome-keyring.components = [
+    "ssh"
+    "secrets"
+  ];
+}
+```
+
+{{! note !}}  
+`seahorse` is sort of a graphical frontend for `gnome-keyring`, you can use it to manage your keyring.
+{{! end !}}
+
+Upon restart, I could see that `gnome-keyring-daemon` was now running, and `seahorse` was showing me that my keyring was unlocked, but for some reason `git` was still prompting me for my SSH passphrase when pushing to a GitHub remote. After some looking into it, turns out I need to set `SSH_AUTH_SOCK` accordingly, which is used by the ssh agent. The `ssh-agent` service set it automatically, but now I needed to set it myself.
+
+```nix
+# home.nix
+{
+  # ...
+  home.sessionVariables = {
+    # ...
+    SSH_AUTH_SOCK = "/run/user/$(id -u)/keyring/ssh";
+  };
+}
+```
+
+On reboot, everything worked fine.
+
+## Links not opening in Firefox
+
+I noticed that apps (namely VSCode and Discord) weren't opening links in my browser (Firefox). At first, I thought this might be because they were both electron apps, but that didn't make some sense. After looking through [many GitHub issue threads](https://github.com/NixOS/nixpkgs/issues/160923), it turns out that the root of the issue was that apps sandboxed with `buildFHSUserEnv` were unable to properly use `xdg-open`.
+
+The solution was to enable `xdg.portal.xdgOpenUsePortal` and install `xdg-utils`. I'm still not sure _exactly_ why this was happening in the first place, and I figure that this should probably be better documented somewhere, but I'm glad it works.
+
+```nix
+# configuration.nix
+{
+  # ...
+  xdg = {
+    portal = {
+      enable = true;
+      xdgOpenUsePortal = true;
+      # ...
+    }
+  }
+}
+```
+
+```nix
+# home.nix
+# ...
+{
+  # ...
+  home.packages = with pkgs; [
+    # ...
+    xdg-utils
+  ]
+  # ...
+}
+```
+
+## Personal Thoughts
+
+So far, most of what I've discussed has been in regards to the issues I've encountered with NixOS (and it wasn't an exhaustive list either), but I think that paints a more negative view of the operating system than what I genuinely feel towards it. I'll go over some things I both like and dislike about this operating system.
+
+### What I Like
+
+-   The universal declarative configuration is nice, I'm liking it a lot more than I thought I would. The majority of the software I use supports being configured with nix, and everything comes together very neatly. Additionally, just having my system configuration consolidated in a single location, and edited through a single interface, makes the system itself just that much easier to reason about.
+    -   Being able to consolidate the configuration for all of my user-level programs and software with `home-manager`, and compose the entire thing with flakes is a good user experience.
+-   I'll reiterate in more depth how nice it's been to configure system-level things with nix. Getting Nvidia drivers working was trivial, enabling and configuring audio via pipewire was easy, and working with things such as bluetooth (among the other [hardware options](https://search.nixos.org/options?channel=24.05&from=100&size=50&sort=relevance&type=packages&query=hardware) NixOS makes available) is very convenient.
+    -   Additionally, swapping out componenents of your system, such as your desktop environment, is made incredibly easy. It's a few line changes for me to go ahead and install Gnome, for example, and everything just works.
+-   It's reproducible and atomic — one of the main "tenets" of NixOS is that package builds are isolated and reproducible, and you're able to easily roll back to previous revisions of your system configuration in case something breaks without any hassle. This makes system updates significantly less of a stressful endeavor.
+-   I did complain about the pitfalls of shell environments in regards to Python development shells, but aside from that I have found myself really liking them. I can create reproducable shell environments for different types of projects, and it keeps projects and their development dependencies isolated from the rest of the system, and thus my user level environment is kept clean.
+-   Being able to manage my system's configuration with `git`, store it on `GitHub`, and prospectively replicate it on any machine I use in the future is pretty appealing. Granted, I don't know how true this will actually hold in practice, but it's an appealing idea.
+-   nixpkgs is huge and frequently updated, and I'm impressed that I can use both the stable and unstable versions of nixpkgs without so much as a second thought.
+
+### What I Don't Like
+
+-   I haven't mentioned it yet, but I'm not fond of the Nix language. Maybe it's a lack of experience or exposure to functional languages in general, but it's just...not very wieldy to me. I've seen it described as "JSON with functions", and I see the appeal when you're configuring something without much programatic logic, but it becomes less intuitive once you breach that. Granted, like I mentioned, this could all be attributed to my own inexperience. That said, aside from writing Nix, I've found that it isn't much fun to debug it either. The errors aren't great, in my experience, and make debugging failed configurations _that_ much harder.
+-   The fact that I can't run dynamically linked scripts off of GitHub, without having them packaged by Nix. This stems from the operating system not adhering to the filesystem hierarchy standard, but it's still not fun. Granted, tools such as [`nix-alien`](https://github.com/thiagokokada/nix-alien) and [`nix-ld`](https://github.com/nix-community/nix-ld) exist, but they aren't foolproof. Nix was designed with this in mind, so I won't villainize the operating system for it, but it does make for a frustrating experience at times, and was ultimately the root of most of the major issues I had while using Nix.
+-   I mentioned that I'm fond of how easy it is to do things like switching out a desktop environment, or handling various system and hardware level configurations with Nix. On the flip side of the coin, though, anything that isn't "officially" supported by Nix ends up being a pain to implement. My earlier issues with getting `nody-greeter` packaged for `lightdm` is an example of this. It's not that Nix is incapable of doing so, but rather the scarcity of documentation, precedence, and examples for workflows and setups that may be less common or unconventional end up making it such that a lot more effort is required to find solutions for these issues.
+-   And that leads me into the issue of documentation. Resources and documentation have improved a _lot_, but at the same time it's still lacking a lot of things. My earlier issue with sandboxed applications being unable to open links in my default browser seems like it should be better documented, and it's easy to be confused at first as to what sort of tooling you should be using for things like development shells (flakes with `nix shell` or no flakes?).
+
+I think in general, NixOS has a fairly steep learning curve. It'll be fine enough if you're using a straightforward and conventional workflow, but a lack of experience with functional languages, how packaging with Nix works, and other intricacies of the operating system might make it more of a pain to use than most people are willing.
+
+And on top of that, if all someone is looking for is a consolidated and declarative system configuration, there's other tools out there that can achieve this, without the additional complexity that `NixOS` brings. Or, using `nix` as a package manager on a non NixOS system is another option.
+
+Was it worth it for me?
+
+It was definitely a time sink, I put in a _lot_ of work, maybe more than was warranted, but I did enjoy myself. I ultimately like NixOS, at this point my system is at a state where it's just working, and I don't need to be worried about stuff breaking. The benefits of Nix appeal to me, and the ecosystem is in the process of growing. As it stands, I don't see myself switching operating systems for now — I'll probably continue to use NixOS for the time being. Many of the issues I encountered can likely be attributed to just my lack of experience; NixOS is different from most other operating systems, and it's unfamiliar. I made somewhat of an impulsive blind jump, and switched up nearly all aspects of the software I daily drive (X to Wayland, `zsh` to `fish`, and so on), which created a greater pit of unfamiliarity that I had thrown myself into.
+
+I won't decide if it was worth it or not yet, but I'm sticking with it for now.
+
+My system configuration is all [on GitHub](https://github.com/AbooMinister25/dotfiles).
