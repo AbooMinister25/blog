@@ -55,7 +55,8 @@ impl<'c> MarkdownRenderer<'c> {
     #[tracing::instrument(level = tracing::Level::DEBUG)]
     pub fn new<P: AsRef<Path> + Debug>(path: P, theme: &str) -> Result<Self> {
         // Load the theme set
-        let ss = SyntaxSet::load_defaults_newlines();
+        // let ss = SyntaxSet::load_defaults_newlines();
+        let ss = two_face::syntax::extra_newlines();
         let mut theme_set = ThemeSet::load_defaults();
         theme_set.add_from_folder(path.as_ref().join("themes/"))?;
 
