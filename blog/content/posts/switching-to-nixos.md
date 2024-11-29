@@ -1,7 +1,7 @@
 ---
 title = "My Thoughts on NixOS"
 tags = ["programming", "nix", "nixos"]
-date = "2024-10-02T9:00:00"
+date = "2024-11-29T4:00:00"
 ---
 
 Up until recently, I daily drove Fedora on the main machine I use for development. However, I recently decided to wipe my system and make the jump to [NixOS](https://nixos.org/).
