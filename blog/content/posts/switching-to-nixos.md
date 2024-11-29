@@ -34,11 +34,16 @@ I'll start by providing a brief overview of how I've got my NixOS system set up,
 The [downloads page](https://nixos.org/download/) on the NixOS website provides a graphical installer for both GNOME and the KDE Plasma desktop environments. I didn't intend to use either of these, however, and so I went with the minimal ISO image instead. I followed through with the installation without many problems, and ended up at the TTY with the operating system installed. The default configuration for the system is located at `/etc/nixos`, with two files in the folder: `configuration.nix`, which is where the system configuration lives, and `hardware-configuration.nix`, which is generated automatically by the NixOS installer. In `configuration.nix`, you can make changes to essentially part of your system configuration - including setting up users, default programs or services, SSH, your boot settings, and so on. To configure a new user, for example, you'd do the following.
 
 ```nix
-users.users.rcyclegar = {
+# configuration.nix
+# ...
+{
+  # ...
+  users.users.rcyclegar = {
     isNormalUser = true;
-    extraGroups = [ "wheel", "networkmanager" ];
+    extraGroups = [ "wheel" "networkmanager" "docker" ];
     shell = pkgs.fish;
-};
+  };
+}
 ```
 
 Any time a change is made to the system configuration, you need to run `sudo nixos-rebuild switch` to apply the changes. What this does specifcally is it builds the new configuration, sets it as the default, and attemps to realize it in the running system.
@@ -58,12 +63,17 @@ The package source used by NixOS is called `nixpkgs` - it consist of over 100,00
 Currently, `configuration.nix` details my system configuration. For a more streamlined way of managing using-level configuration, [Home Manager](https://nix-community.github.io/home-manager/) comes into play. What Home Manager does is it allows me to manage my user-level configuration, such as my programs, configuration files, environment variables, and whatever else might be in my home directory with nix. If I install and configure `git` via Home Manager, it will generate a file a `~/.config/git` for me.
 
 ```nix
-programs.git = {
-  enable = true;
-  userEmail = "aboominister@gmail.com";
-  userName = "AbooMinister25";
-  delta.enable = true;
-};
+# home.nix
+# ...
+{
+  # ...
+  programs.git = {
+    enable = true;
+    userEmail = "aboominister@gmail.com";
+    userName = "AbooMinister25";
+    delta.enable = true;
+  };
+}
 ```
 
 And the resulting `~/.config/git/config`.
@@ -116,17 +126,22 @@ So, I created a file at `/etc/nixos/home/home.nix`, added the `home-manager` inp
                 };
             }
         ];
-    }
+    };
 }
 ```
 
 Being able to modularize my configuration is pretty convenient. I can create a new nix file in the `home/` directory for every user level program I want to manage with nix, and if I can't (or don't wish to) configure a specific program with nix, I can still have those configurations managed by home-manager by adding to `home.file`:
 
 ```nix
+# home.nix
+# ...
+{
+  # ...
   home.file.".config/rofi/" = {
     source = ./rofi;
     recursive = true;
   };
+}
 ```
 
 ### Managing with Git
@@ -144,11 +159,16 @@ I decided to opt for [Hyprland](https://hyprland.org/) as my wayland compositor 
 Nix made it pretty straightforward to get Hyprland running on my system. I can enable the existing NixOS module in `configuration.nix`
 
 ```nix
-programs.hyprland = {
+# configuration.nix
+# ...
+{
+  # ...
+  programs.hyprland = {
     enable = true;
-};
+  };
 
-programs.xwayland.enable = true;
+  programs.xwayland.enable = true;
+}
 ```
 
 And use the Hyprland module for Home Manager to have it manage the configuration.
@@ -157,31 +177,35 @@ And use the Hyprland module for Home Manager to have it manage the configuration
 # home/hyprland.nix
 # ...
 {
-    wayland.windowManager.hyprland = {
-        enable = true;
-        xwayland.enable = true;
-        settings = {
-            # ...
-        };
-    }
+  wayland.windowManager.hyprland = {
+      enable = true;
+      xwayland.enable = true;
+      settings = {
+          # ...
+      };
+  };
 }
 ```
 
 One more thing to note is that I'm running an Nvidia GPU, so getting the drivers working was another concern. Surprisingly, I didn't have much trouble — I was even able to get the newer 555 drivers running.
 
 ```nix
-hardware.nvidia = {
+# configuration.nix
+# ...
+{
+  hardware.nvidia = {
     modesetting.enable = true;
     open = false;
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-        version = "555.58.02";
-        sha256_64bit = "sha256-xctt4TPRlOJ6r5S54h5W6PT6/3Zy2R4ASNFPu8TSHKM=";
-        sha256_aarch64 = "sha256-xctt4TPRlOJ6r5S54h5W6PT6/3Zy2R4ASNFPu8TSHKM=";
-        openSha256 = "sha256-ZpuVZybW6CFN/gz9rx+UJvQ715FZnAOYfHn5jt5Z2C8=";
-        settingsSha256 = "sha256-ZpuVZybW6CFN/gz9rx+UJvQ715FZnAOYfHn5jt5Z2C8=";
-        persistencedSha256 = lib.fakeSha256;
+      version = "555.58.02";
+      sha256_64bit = "sha256-xctt4TPRlOJ6r5S54h5W6PT6/3Zy2R4ASNFPu8TSHKM=";
+      sha256_aarch64 = "sha256-xctt4TPRlOJ6r5S54h5W6PT6/3Zy2R4ASNFPu8TSHKM=";
+      openSha256 = "sha256-ZpuVZybW6CFN/gz9rx+UJvQ715FZnAOYfHn5jt5Z2C8=";
+      settingsSha256 = "sha256-ZpuVZybW6CFN/gz9rx+UJvQ715FZnAOYfHn5jt5Z2C8=";
+      persistencedSha256 = lib.fakeSha256;
     };
+  };
 }
 ```
 
@@ -202,7 +226,7 @@ To install plugins, Hyprland provides the Hyprland Plugin Manager, `hyprpm`, but
             inputs.hyprland.follows = "hyprland";
         };
         # ...
-    }
+    };
     # ...
 }
 ```
@@ -271,16 +295,21 @@ Nody greeter wasn't already packaged for Nix, so I figured I'd try and package i
 I decided to use SDDM instead, found a decent looking theme that I _did_ manage to package correctly, and that worked for a while, until I eventually ended up switching to greetd and [tuigreet](https://github.com/apognu/tuigreet). Nix made this very straightforward.
 
 ```nix
-services.greetd = {
+# configuration.nix
+# ...
+{
+  # ...
+  services.greetd = {
     enable = true;
     settings = {
-        default_session = {
-            command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --issue --user-menu --remember -
+      default_session = {
+        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --issue --user-menu --remember -
     -cmd Hyprland --remember-user-session --asterisks";
-            user = "greeter";
-        };
+        user = "greeter";
+      };
     };
-};
+  };
+}
 ```
 
 Overall, I think this reveals one of the issues with NixOS — it's great when it works and tools exist for your usecase, but when doing something somewhat unconventional, it can end up being a pain, especially given the lack of precedence or documentation in regards to some of these things. I'm not sure how unconventional using a custom LightDM greeter was, but I couldn't find many people who had already done it, and so I was left pretty much in the dark as to how I wanted to go about it. With any other Linux distribution, I wouldn't have had nearly as much of a problem trying to get these tools working.
@@ -609,8 +638,8 @@ The solution was to enable `xdg.portal.xdgOpenUsePortal` and install `xdg-utils`
       enable = true;
       xdgOpenUsePortal = true;
       # ...
-    }
-  }
+    };
+  };
 }
 ```
 
@@ -622,7 +651,7 @@ The solution was to enable `xdg.portal.xdgOpenUsePortal` and install `xdg-utils`
   home.packages = with pkgs; [
     # ...
     xdg-utils
-  ]
+  ];
   # ...
 }
 ```
