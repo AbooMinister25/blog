@@ -119,6 +119,7 @@ impl Output for Page {
         let mut context = TeraContext::new();
         context.insert("title", &frontmatter.title);
         context.insert("tags", &frontmatter.tags.join(", "));
+        context.insert("slug", &frontmatter.slug);
         context.insert("series", &frontmatter.series);
         context.insert("date", &self.document.date.format(DATE_FORMAT).to_string());
         context.insert("toc", &self.document.toc);

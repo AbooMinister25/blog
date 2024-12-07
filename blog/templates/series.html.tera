@@ -10,7 +10,11 @@
 <meta name="twitter:description" content="{{ title }}" />
 {% endblock head %} {% block content %}
 <div class="series-content">
-    {% set posts_for_series = posts_in_series(series=title, posts=posts) %}
+    {% if slug is string %}
+        {% set posts_for_series = posts_in_series(series=slug, posts=posts) %}
+    {% else %}
+        {% set posts_for_series = posts_in_series(series=title, posts=posts) %}
+    {% endif %}
     <h1>{{ title }}</h1>
     <p class="details">
         {{ date }} * {{ tags }} * {{ posts_for_series | length }} post{{
