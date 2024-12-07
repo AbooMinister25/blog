@@ -6,14 +6,14 @@ use color_eyre::{eyre::ContextCompat, Result};
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::Connection;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::page::Page;
 
 /// Represents a post stored in the database
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PostInIndex {
-    path: PathBuf,
+    pub out_path: PathBuf,
     permalink: String,
     title: String,
     tags: Vec<String>,
@@ -33,7 +33,7 @@ impl PostInIndex {
         summary: String,
     ) -> Self {
         Self {
-            path,
+            out_path: path,
             permalink,
             title,
             tags,
@@ -150,7 +150,7 @@ pub fn insert_post(conn: &Connection, post: &Page) -> Result<()> {
     VALUES (?1, ?2, ?3, json(?4), datetime(?5), datetime(?6), ?7)
     ",
         (
-            &post.path.to_str().context("Path should be valid unicode")?,
+            &post.out_path.to_str().context("Path should be valid unicode")?,
             &post.permalink,
             &post.document.frontmatter.title,
             &serde_json::to_string(&post.document.frontmatter.tags)?,
@@ -184,7 +184,7 @@ pub fn update_post(conn: &Connection, post: &Page) -> Result<()> {
             &post.document.date,
             &post.document.updated,
             &post.document.summary,
-            &post.path.to_str().context("Path should be valid unicode")?,
+            &post.out_path.to_str().context("Path should be valid unicode")?,
         ),
     )?;
 

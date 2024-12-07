@@ -50,7 +50,7 @@
         loop.index > 4 %} {% break %} {% endif %}
         <div class="post-card">
             <h1 class="post-header">
-                <a href="{{ post.permalink }}"> {{ page.document.frontmatter.title }} </a>
+                <a href="{{ post.permalink }}"> {{ post.document.frontmatter.title }} </a>
             </h1>
             <div>
                 {{ post.document.summary | safe }}

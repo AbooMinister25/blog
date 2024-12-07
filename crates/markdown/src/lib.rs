@@ -12,7 +12,7 @@ use comrak::{
     Arena, ComrakOptions, ComrakPlugins,
 };
 use serde::{Deserialize, Serialize};
-use syntect::{highlighting::ThemeSet, parsing::SyntaxSet};
+use syntect::highlighting::ThemeSet;
 
 /// The frontmatter for a parsed document
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -20,6 +20,7 @@ pub struct Frontmatter {
     pub title: String,
     pub tags: Vec<String>,
     pub template: Option<String>,
+    pub copmleted: Option<bool>,
     pub date: Option<String>,
     pub updated: Option<String>,
     pub series: Option<SeriesInfo>,

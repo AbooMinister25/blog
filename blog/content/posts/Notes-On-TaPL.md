@@ -1,9 +1,13 @@
 ---
 title = "Notes on Types and Programming Languages"
 tags = ["programming", "type theory", "notes"]
-date = "2024-07-21T8:00:00"
-draft = true
+date = "2024-11-30T4:00:00"
 ---
+
+{{! note !}}  
+**This is a live document, and will be updated as I read through the book.**
+{{! end !}}
+
 
 I've recently taken to reading [Types and Programming Languages](https://www.cis.upenn.edu/~bcpierce/tapl/) by Benjamin C. Pierce in an attempt to introduce myself to the basics of type theory and the like. The book in question is, from what I've found, considered an apt introduction to the aforementioned concepts, and seems to read well from my brief skimming of it thus far. I'll be using this document to consolidate my notes on the content as I read. 
 
