@@ -1,7 +1,7 @@
 ---
 title = "Advent of Code 2024"
 tags = ["programming", "adventofcode"]
-date = "2024-12-01T4:00:00"
+date = "2024-12-08T4:00:00"
 template = "series.html.tera"
 slug = "adventofcode2024"
 ---
