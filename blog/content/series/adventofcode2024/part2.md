@@ -107,7 +107,6 @@ Here's my entire solution for the puzzle:
 import functools
 import itertools
 
-
 from aoc_lube import fetch, submit  # type: ignore
 
 
