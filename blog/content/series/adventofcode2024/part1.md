@@ -8,7 +8,7 @@ slug = "day1"
 part=1
 ---
 
-Work over the past week kept me busy, so I wasn't able to tackle any of the puzzles until this weekend. School and college applications have taken up a lot of my time, making the time I spend programming to gradually dwindle. I had some time free up this winter, though, so AoC will serve as a nice way to get back into things.
+Work over the past week kept me busy, so I wasn't able to tackle any of the puzzles until this weekend. School and college applications have taken up a lot of my time, giving me less time to spend programming. I had some time free up this winter, though, so AoC will serve as a nice way to get back into things.
 
 I'll do most of my solutions in Python, but if I have the time I might attempt the languages from the Python Discord's _Language Roulette_ challenge, where a random language is selected from a predetermined pool every day to do the solutions in.
 
