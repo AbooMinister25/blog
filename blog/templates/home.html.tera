@@ -25,7 +25,7 @@
         <a href="/posts" class="inline-link"> >> View All</a>
     </h1>
     <div class="post-list">
-        {% for post in posts %} {% if loop.index > 4 %} {% break %} {% endif %}
+        {% for post in posts %} {% if loop.index > 5 %} {% break %} {% endif %}
         <div class="post-card">
             <h1 class="post-header">
                 <a href="{{ post.permalink }}"> {{ post.title }} </a>
