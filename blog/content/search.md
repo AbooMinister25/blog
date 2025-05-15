@@ -4,7 +4,9 @@ tags = []
 template = "search.html.tera"
 ---
 
-Hi, I'm Rayyan Cyclegar. Over here, I'll occasionally write about tech, and sometimes about non-tech.
+Hi, I'm Rayyan Cyclegar, current high schooler and programming enthusiast.
+
+Over here, I'll occasionally write about tech, and sometimes about non-tech.
 
 You can find me and my projects over on my [GitHub](https://github.com/AbooMinister25).
 
