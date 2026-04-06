@@ -1,0 +1,32 @@
+---
+title = ""
+slug = "archive"
+---
+
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<title>Archive</title>
+<link rel="stylesheet" href="/styles/archive.css" />
+{% endblock head %}
+
+{% block content %}
+<section class="archive">
+    <h1 class="archive__heading">All Posts</h1>
+    <div class="archive__page-list">
+        {% for page in pages %}
+        {% if loop.index <= 5 and page.document.frontmatter.title != "" %}
+        <div class="archive__page-item">
+            <h1 class="archive__page-header"><a href="{{page.permalink}}">{{ page.document.frontmatter.title }}</a></h1>
+            <p class="archive__page-details">
+                {{ page.document.date | dateformat(format="medium") }} *
+                {{ page.document.frontmatter.tags | join(", ") }}
+            </p>
+            <p class="archive__page-summary">{{ page.document.summary | safe }}</p>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</section>
+{% endblock content %}

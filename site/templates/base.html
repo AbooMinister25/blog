@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="eng">
+    {% block head %}
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charset="utf-8" />
+        <meta name="author" content="Rayyan Cyclegar" />
+        <link rel="stylesheet" href="/styles/base.css" />
+    </head>
+    {% endblock head %}
+    <body>
+        <div class="wrapper">
+            <div class="content-grid">
+                <div>
+                    <nav class="nav" aria-label="Primary">
+                        <a class="nav__item" href="/">~rayyancyclegar</a>
+                        <a class="nav__item" href="/archive">archive</a>
+                        <a class="nav__item" href="/about/">about</a>
+                        <a class="nav__item" href="/projects/">projects</a>
+                    </nav>
+
+                    {% block content %} {% endblock content %}
+
+                    <footer class="footer">
+                        © 2026 - Rayyan Cyclegar
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

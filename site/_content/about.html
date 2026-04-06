@@ -1,0 +1,71 @@
+---
+title = ""
+slug = "about"
+---
+
+{% extends "base.html" %} {% block head %} {{ super() }}
+<title>About</title>
+<link rel="stylesheet" href="/styles/about.css" />
+{% endblock head %} {% block content %}
+<section class="about">
+    <h1 class="about__heading">About</h1>
+    <p>
+        I'm Rayyan Cyclegar, a full time student studying Computer Science.
+
+        <br /><br />
+        I am also a programming enthusiast, a hobby photographer, a wannabe
+        sysadmin, and a practicing Muslim. I'm passionate about a lot of things,
+        including programming, Islamic theology, politics, and privacy.
+        <br /><br />
+        On this website I will occasionally write about tech, other topics I am
+        interested in, or anything else I wish to share with the wider internet.
+        <br />
+        <br />
+        I primarily work with Python and Rust for my own
+        <a href="/projects">projects</a>, which you can typically find the
+        source code for on my
+        <a href="https://github.com/AbooMinister25" target="_blank">GitHub</a>.
+        <br />
+        I've been programming for several years now, and I've grown passionate about programming languages,
+        tooling, and writing correct and performant software. <span class="sidenote-number">1</span>
+        <aside class="sidenote">
+            <span class="sidenote-number">1</span>
+            or at the very least, I <i>try</i> to write correct and performant software.
+        </aside>
+
+        I wrote this website using a home-grown <a href="https://github.com/AbooMinister25/yar" target="_blank">static site generator</a> cobbled together
+        with Rust, grit, and not nearly enough tests.
+    </p>
+
+    <h2>Where You can Find Me</h2>
+    I'm present on various places on the internet. Most notably, you can contact
+    me on
+    <ul>
+        <li>
+            <strong>Email</strong> via
+            <a href="mailto:aboominister@gmail.com">aboominister@gmail.com</a>.
+        </li>
+        <li>
+            <strong>Discord</strong> under the username
+            <code>aboominister</code>.
+        </li>
+        <li><strong>Instagram</strong> under <code>@rcyclegar</code>.</li>
+        <li>
+            <strong>LinkedIn</strong>
+            <a href="https://www.linkedin.com/in/rayyanc/" target="_blank"
+                >through my profile</a
+            >
+        </li>
+    </ul>
+
+    <h2>Stuff I Use</h2>
+    I thought it might be appropriate to include a small list of the stuff I
+    use.
+    <ul>
+        <li><strong>Editor:</strong> VSCode, helix</li>
+        <li><strong>Operating System:</strong> MacOS and NixOS.</li>
+        <li><strong>Development Machine:</strong> Macbook Air M3</li>
+        <li><strong>Note-taking:</strong> Obsidian</li>
+    </ul>
+</section>
+{% endblock content %}

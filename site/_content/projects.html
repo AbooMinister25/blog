@@ -1,0 +1,101 @@
+---
+title = ""
+slug = "projects"
+---
+
+{% extends "base.html" %} {% block head %} {{ super() }}
+<title>Projects</title>
+<link rel="stylesheet" href="/styles/projects.css" />
+{% endblock head %} {% block content %}
+
+<section class="projects">
+    <h1>Projects</h1>
+    <p>
+        This is a curated list of some of my projects. You can find a more
+        exahustive list if you scroll through my
+        <a href="https://github.com/AbooMinister25" target="_blank">GitHub</a>.
+    </p>
+    <ul class="projects__list">
+        <li>
+            <strong
+                ><a href="https://github.com/AbooMinister25/yar" target="_blank"
+                    >yar:</a
+                ></strong
+            >
+            an incremental static site generator written in Rust. It's
+            relatively fast, dead simple to use, and powers this website.
+        </li>
+        <li>
+            <strong
+                ><a
+                    href="https://github.com/AbooMinister25/pint"
+                    target="_blank"
+                    >pint:</a
+                ></strong
+            >
+            a user friendly parser combinator library for Python. Parsers are
+            fun, higher order functions are cool, so it stands to reason that
+            combining them is probably even better.
+        </li>
+        <li>
+            <strong
+                ><a
+                    href="https://github.com/AbooMinister25/Lite"
+                    target="_blank"
+                    >Lite:</a
+                ></strong
+            >
+            a friendly imperative toy programming language running on a bytecode
+            VM.
+        </li>
+        <li>
+            <strong
+                ><a href="https://github.com/AbooMinister25/gol" target="_blank"
+                    >gol:</a
+                ></strong
+            >
+            Conway's Game of Life implemented in Rust, capable of running on the
+            web via WASM.
+        </li>
+        <li>
+            <strong
+                ><a
+                    href="https://github.com/vipyrsec/dragonfly-mainframe"
+                    target="_blank"
+                    >dragonfly-mainframe (contributor):</a
+                ></strong
+            >
+            A Python FastAPI distributed computing control server that powers
+            <a href="https://vipyrsec.com" target="_blank">Vipyr Security's</a>
+            security infrastructure.
+        </li>
+    </ul>
+
+    <p>
+        Additionally, while it's less of a tangible project, I do self-host and administrate a handful of services for my personal use, including
+        <ul>
+            <li>
+                <a href="https://immich.app" target="_blank">
+                    Immich
+                </a>
+            </li>
+            <li>
+                <a href="https://forgejo.org" target="_blank">
+                    Forgejo
+                </a>
+            </li>
+            <li>
+                <a href="https://mealie.io" target="_blank">
+                    Mealie
+                </a>
+            </li>
+            <li>
+                <a href="https://komo.do" target="_blank">
+                    Komodo
+                </a>
+            </li>
+        </ul>
+    </p>
+</section>
+
+{% endblock content %}

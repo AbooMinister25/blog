@@ -1,0 +1,16 @@
+@use "theme.scss";
+
+.archive__page-item {
+    margin-bottom: 1em;
+    border-top: 1px dashed rgba(theme.$color-text-muted, 0.5);
+}
+
+.archive__page-header {
+    font-size: 1.1em;
+}
+
+.archive__page-details {
+    color: theme.$color-text-muted;
+    font-size: 0.8rem;
+    font-family: theme.$font-monospace;
+}

@@ -1,0 +1,62 @@
+@use "theme.scss";
+
+.page__details {
+    color: theme.$color-text-muted;
+    font-size: 0.8rem;
+    font-family: theme.$font-monospace;
+    padding-bottom: 0.5em;
+}
+
+.toc {
+    list-style: none;
+    padding: 1em 2em 2em;
+    background-color: rgba(theme.$color-card, 0.75);
+    color: theme.$color-card-fg;
+}
+
+.toc__header {
+    padding: none;
+    margin: none;
+    color: theme.$color-card-fg;
+}
+
+.toc__item {
+    font-size: 1.1rem;
+    line-height: 1.7rem;
+    
+    &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    &:before {
+        content: "#";
+    }
+    
+    a {
+        all: unset;
+    }
+
+    @media (max-width: 600px) {
+        font-size: 1rem;
+    }
+}
+
+.page__content {
+    margin: 0 auto;
+}
+
+.page__content h2 a {
+    text-decoration: none;
+}
+
+.page__content h2 a::before {
+    content: "";
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    margin-right: 0.2em;
+    background-image: url("data:image/svg+xml,%3Csvg%20width%3D%2224px%22%20height%3D%2224px%22%20stroke-width%3D%221.5%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20color%3D%22%23000000%22%3E%3Cpath%20d%3D%22M21.4383%2011.6622L12.2483%2020.8522C11.1225%2021.9781%209.59552%2022.6106%208.00334%2022.6106C6.41115%2022.6106%204.88418%2021.9781%203.75834%2020.8522C2.63249%2019.7264%202%2018.1994%202%2016.6072C2%2015.015%202.63249%2013.4881%203.75834%2012.3622L12.9483%203.17222C13.6989%202.42166%2014.7169%202%2015.7783%202C16.8398%202%2017.8578%202.42166%2018.6083%203.17222C19.3589%203.92279%2019.7806%204.94077%2019.7806%206.00222C19.7806%207.06368%2019.3589%208.08166%2018.6083%208.83222L9.40834%2018.0222C9.03306%2018.3975%208.52406%2018.6083%207.99334%2018.6083C7.46261%2018.6083%206.95362%2018.3975%206.57834%2018.0222C6.20306%2017.6469%205.99222%2017.138%205.99222%2016.6072C5.99222%2016.0765%206.20306%2015.5675%206.57834%2015.1922L15.0683%206.71222%22%20stroke%3D%22%23000000%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E");
+    background-size: 100%;
+    opacity: 0.5;
+}

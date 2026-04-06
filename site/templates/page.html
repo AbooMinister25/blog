@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<title>{{ document.frontmatter.title }}</title>
+<link rel="stylesheet" href="/styles/page.css" />
+<meta name="description" content="{{ document.summary }}" />
+{% endblock head %}
+
+{% block content %}
+<article class="page">
+    <h1 class="page__title">{{ document.frontmatter.title }}</h1>
+    <p class="page__details">
+        {{ document.date | dateformat(format="medium") }} *
+        {{ document.frontmatter.tags | join(", ") }}
+    </p>
+    {% if document.toc %}
+        <ul class="toc">
+            <h2 class="toc__header">Contents</h2>
+            {% for item in document.toc %}
+                <li class="toc__item">
+                    <a href={{ permalink ~ '#' ~ item.text | replace(" ", "-") }}>{{ item.text }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <div class="page__content">
+        {{ document.content | safe }}
+    </div>
+</article>
+{% endblock content %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<title>Rayyan Cyclegar</title>
+<link rel="stylesheet" href="/styles/home.css" />
+{% endblock head %}
+
+{% block content %}
+    {{ document.content | safe }}
+        
+    <section class="home">
+        <h1 class="home__heading">Latest Posts</h1>
+        <div class="home__page-list">
+            {% for page in pages %}
+            {% if loop.index <= 5 and page.document.frontmatter.title != "" %}
+            <div class="home__page-item">
+                <h1 class="home__page-header"><a href="{{page.permalink}}">{{ page.document.frontmatter.title }}</a></h1>
+                <p class="home__page-details">
+                    {{ page.document.date | dateformat(format="medium") }} *
+                    {{ page.document.frontmatter.tags | join(", ") }}
+                </p>
+                <p class="home__page-summary">{{ page.document.summary | safe }}</p>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+<!-- </div> -->
+
+{% endblock content %}

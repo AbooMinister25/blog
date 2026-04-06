@@ -1,0 +1,149 @@
+@use "./theme.scss";
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: theme.$color-bg;
+    color: theme.$color-fg;
+    font-family: theme.$font-sans-serif;
+    font-size: clamp(1.02rem, 0.98rem + 0.22vw, 1.14rem);
+}
+
+a {
+    color: theme.$color-link;
+    text-decoration: underline;
+
+    &:visited {
+        color: theme.$color-link;
+    }
+
+    &:hover {
+        opacity: 75%;
+    }
+}
+
+code {
+    font-size: 0.8rem;
+    font-family: theme.$font-monospace;
+}
+
+pre code pre {
+    display: block;
+    overflow: auto;
+    font-size: 0.8rem;
+    line-height: 1.15rem;
+    border-radius: 5px;
+    padding: 1em;
+    margin: 1em 0 1em;
+    font-family: theme.$font-monospace;
+}
+
+h1, h2, h3, h4 {
+    color: theme.$color-text-strong;
+}
+
+ul {
+    list-style: square;
+}
+
+.wrapper {
+    width: 100%;
+    max-width: clamp(44rem, 64vw, 76rem);
+    margin-left: clamp(1rem, 8vw, 6rem);
+    margin-inline: auto;
+}
+
+.content-grid {
+    max-width: clamp(50ch, 43vw, 60rem);
+    padding-inline: clamp(1rem, 2vw, 2rem);
+}
+
+.content-grid::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.sidenote {
+    float: right;
+    clear: right;
+
+    margin-right: -60%;
+    width: 50%;
+    margin-top: 0.2rem;
+    margin-bottom: 0;
+
+    font-size: clamp(0.8rem, 0.75rem + 0.15vw, 0.9rem);
+    line-height: 1.45;
+    color: theme.$color-text-muted;
+
+    vertical-align: baseline;
+    position: relative;
+
+    padding-top: 0.5rem;
+    border-top: 1px dashed rgba(theme.$color-fg, 0.3);
+}
+
+.sidenote-number {
+    font-size: 0.7em;
+    vertical-align: super;
+}
+
+.nav {
+    margin: 2em auto;
+    padding-bottom: 1em;
+    border-bottom: 1px solid rgba(theme.$color-fg, 0.3);
+
+    display: flex;
+    gap: 0.8rem;
+}
+
+.nav__item {
+    text-decoration: none;
+    color: theme.$color-text-strong;
+    border-bottom: 1px solid transparent;
+
+    &:hover {
+        opacity: 75%;
+        border-bottom: 1px solid theme.$color-text-strong;
+    }
+
+    &:visited {
+        color: theme.$color-text-strong;
+    }
+}
+
+.footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+
+    border-top: 1px solid rgba(theme.$color-fg, 0.15);
+    font-size: 1rem;
+}
+
+@media (max-width: 800px) {
+    .sidenote {
+        float: none;
+        margin-right: 0;
+        width: 100%;
+        display: block;
+        margin: 1.5rem 0;
+
+        padding-top: 0.5rem;
+        border-top: 1px dashed rgba(theme.$color-fg, 0.3);
+    }
+
+    .wrapper {
+        margin-left: 0;
+    }
+
+    .content-grid {
+        max-width: 100%;
+    }
+}
+
