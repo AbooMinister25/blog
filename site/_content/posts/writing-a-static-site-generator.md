@@ -1,6 +1,7 @@
 ---
 title = "Writing a Static Site Generator"
 tags = ["rust", "programming"]
+date = "2024-07-17T6:00:00"
 template = "page.html"
 ---
 
@@ -25,7 +26,9 @@ Something that would fit these requirements seemed simple enough to implement, s
 
 So at it's core, what a static site generator does is it takes a set of input files (markdown, some form of stylesheet, etc), processes them (parsing the markdown and emitting HTML, compiling the stylesheets, formatting everything with templates, and so on), and writes all this to disk. However, most mainstream static site generators tend to regenerate the entire site every time you build, but with a blog, most of your changes are really only going to be centered around whatever post you're writing/editing at the time. As a result, it'd be convenient if _only_ the content that has changed since the last build of a site were rebuilt.
 
-
+{{! sidenote !}}
+This said, plenty of static site generators are fast enough that, especially with smaller sites, build times aren't really going to be a problem when iterating on some content. But that's not much fun, is it.
+{{! end !}}
 
 I decided to try my hand at implementing incremental builds. Taking this alongside my list of requirements, I got a basic workflow for what I wanted this to look like:
 
@@ -42,12 +45,17 @@ I'll start at the top.
 
 The starting point for the static site generator is to discover all the input files that need to be built, presumably from a root directory that will be crawled, and stick them all into an array. For incremental builds, however, there's an extra step involved: it'll need to determine whether or not a file has changed since the last run of the static site generator. I decided to do this with hashes, hash all the files that were read in, and compare them to hashes that were persisted for the same files from a previous run of the static site generator. If the hash had changed, the entry was updated. If there isn't an existing hash for the file, it means that it's a new entry, and also needs to be built.
 
+{{! sidenote !}}
+I added some exceptions for this, however; there's a set of files, mostly "index" files, which will always be built, regardless of whether or not they've changed since the last run. This is because the home page, for example, won't be re-built to include any new or updated posts since a previous run, since technically the hash for its file hadn't changed.
+
+I considered an alternative to this, in which I'd represent all the entries of the static site generator in a tree-like structure, and then use that to determine which entries were linked to another, and decide what to rebuild based on that, but that's more complexity than I'd like for now. It stands as something I might play with implementing later.
+{{! end !}}
 
 For persisting this hash data in between runs, I opted to use an [SQLite](https://www.sqlite.org/) database. I don't need some full fledged database server, and SQLite only needing a single file made things simpler. I also persist other things in between runs, but I'll get into that later.
 
 What I got, then, was having the static site generator recursively traverse the files in the provided root of the site using the [ignore](https://crates.io/crates/ignore) crate, compare the hashes of all the files, and put everything that needed to be built into the following `Entry` struct:
 
-```rust
+```rs
 #[derive(Debug)]
 pub struct Entry {
     pub path: PathBuf,
@@ -105,7 +113,7 @@ Blah blah blah
 
 `comrak` lets me define what delimiter I use for my frontmatter (in this case, `---`), so that it knows where to start parsing the markdown from. Aside from this, it's pretty trivial to just read in all the frontmatter into a string, use Rust's [toml](https://lib.rs/crates/toml) crate to parse that, and deserialize it into a struct.
 
-```rust
+```rs
 fn parse_frontmatter(&self, content: &str) -> Result<Frontmatter> {
     let mut opening_delim = false;
     let mut frontmatter_content = String::new();
@@ -131,7 +139,7 @@ fn parse_frontmatter(&self, content: &str) -> Result<Frontmatter> {
 
 I also want to automatically generate a table of contents for each post, compiled of all the (second) headings in the document. `comrak` makes this easy, since it generates an AST I can work with.
 
-```rust
+```rs
 // Adapted from https://github.com/kivikakk/comrak/blob/main/examples/headers.rs
 fn parse_toc<'a>(&self, root: &'a AstNode<'a>) -> Vec<String> {
     let mut toc_headers = Vec::new();
@@ -158,7 +166,7 @@ fn parse_toc<'a>(&self, root: &'a AstNode<'a>) -> Vec<String> {
 
 A markdown document is parsed and formatted, and then turned into the following struct:
 
-```rust
+```rs
 pub struct Document {
     pub date: DateTime<Utc>,
     pub updated: DateTime<Utc>,
@@ -173,7 +181,7 @@ I also wanted syntax highlighting for code blocks, which `comrak` has built in s
 
 What happens then, is that an `Entry` will be converted into a `Document`, which is then in turn converted into the following `Page` struct.
 
-```rust
+```rs
 #[derive(Debug, Serialize, Deserialize, Eq, Clone)]
 pub struct Page {
     pub path: PathBuf,
@@ -212,10 +220,13 @@ I opted to use the [rsass](https://lib.rs/crates/rsass) crate; although incomple
 
 So now I needed to choose a bundler. I didn't have many requirements, but I did want something fast, and it turns out [esbuild](https://esbuild.github.io/) is about as fast as it gets. It's written in Go, but I found [esbuild-rs](https://lib.rs/crates/esbuild-rs) which wraps Go API that esbuild exposes. The downside of this is that my Rust static site generator now requires Go to build, which is somewhat cursed.
 
+{{! sidenote !}}
+A Rust alternative to esbuild _does_ exist: [swc](https://swc.rs) is pretty fast, and it ships with a bundler, all of which I could invoke via the Rust API that it exposes. However the bundler for swc (swcpack) isn't something that will be actively developed as per the docs, and I didn't discover the Rust API until after I'd already gotten everything working with esbuild.
+{{! end !}}
 
 This is all the preprocessing I do for now, but I do intend on expanding this at some point. The next step would be to have a better preprocessing pipeline for images, converting them to preferred formats and such. But everything else as of now is just copied over to the output location as-is.
 
-```rust
+```rs
 fn preprocess_and_write<T: AsRef<Path> + Debug>(
     &self,
     out_dir: T,
@@ -264,7 +275,7 @@ I mentioned support for [excalidraw](https://excalidraw.com/) diagrams as someth
 
 The first solution didn't seem very wieldy, I didn't want to depend on `inkscape` as part of my workflow, so I decided to opt for embedding the fonts. To embed the fonts, I needed to parse the SVG file, find the URLs in the file, fetch their contents, and encode them with base64 before substituting the URL with a data uri. I opted to use the [xmltree](https://lib.rs/crates/xmltree) crate to parse the SVG files, and [base64](https://lib.rs/crates/base64) to encode the fonts.
 
-```rust
+```rs
 pub fn embed_font<P: AsRef<Path> + Debug>(path: P) -> Result<()> {
     let mut file = File::open(&path)?;
 
@@ -306,7 +317,7 @@ pub fn embed_font<P: AsRef<Path> + Debug>(path: P) -> Result<()> {
 
 and `Cacher`
 
-```rust
+```rs
 #[derive(Debug)]
 struct Cacher {
     cache: HashMap<String, String>,
@@ -376,6 +387,11 @@ impl Index {
 
 ```
 
+{{! sidenote !}}
+Rather than using `HashSet::replace`, I could have also used a `HashMap` with `None` values and the `Entry` API, which may have been more ergonomic.
+
+Of course, it would have been even better if `HashSet`s in Rust exposed something reminiscent of the `Entry` API themselves, but it's whatever.
+{{! end !}}
 
 Aside from search indexes, though, I also need to worry about persisting data when generating the Atom feed and the index pages. At this point, I figured that since I was already persisting the hashes and locations of input files in an SQLite database, I might as well use the database to persist the necessary information to generate these aforementioned indexes. For generating the search index I needed to also have access to the raw content of the file for the search engine to index, but I didn't want to store the contents of every file in the database, which is why I didn't use SQLite then. But for the Atom feed and the index pages, I don't need to store the content, which made storing it in the database more bearable.
 

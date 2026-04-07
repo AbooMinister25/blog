@@ -1,6 +1,7 @@
 ---
 title = "My Thoughts on NixOS"
 tags = ["programming", "nix", "nixos"]
+date = "2024-11-29T4:00:00"
 template = "page.html"
 ---
 
@@ -14,14 +15,13 @@ For those that aren't aware, NixOS is an operating system that's centered around
 
 What NixOS does is it allows for you to describe the entire state of your system declaratively using Nix configuration files. So, in addition to packages being handled by Nix, the entire system configuration is handled by it as well. This allows for reproducable configurations, atomic upgrades and rollbacks, and lets you describe the entire state of your system configruation declaratively. This brings in some additional overhead complexity, but yields a reproducible system environment and well composed configurations.
 
+{{! sidenote !}}  
+For some clarification, `nix` can refer to both the nix package manager as well as the nix language — the nix language is a purely functional programming language that's used to define nix packages and such.
+{{! end !}}
 
 I thought a composable and reproducable approach to handling my system configuration, as well as my user environment (via [home-manager](https://github.com/nix-community/home-manager)), seemed cool, so Nix seemed pretty appealing.
 
 Figuring that since I was already making the switch to NixOS, I decided that I may as well take the opportunity to experiment with some other changes to my workflow as well. Up until this point, I had been running AwesomeWM under X, but I decided to give Wayland a shot this time around. I had also stuck with ZSH for the past couple of years, but `fish` seemed interesting, and who really needs POSIX compliance anyways.
-
-<aside class="sidenote">
-        hey what's up! this is a side note :)
-</aside>
 
 And, so, I spent a couple of weeks setting up NixOS, and this post details my experience, and some thoughts I have after having used it for a month. And, well, it was definitely an experience.
 
@@ -54,6 +54,9 @@ Nix flakes are an experimental feature of Nix, but they've been generally deemed
 
 By default, NixOS doesn't use flakes for its system configuration, but they can be enabled by setting `nix.settings.experimental-features = [ "nix-command" "flakes" ];` in `configuration.nix`. I ended up composing my system configuration using flakes, adding a `flake.nix` file to `/etc/nixos`, and importing `configuration.nix` as a module into the flake.
 
+{{! sidenote !}}
+The package source used by NixOS is called `nixpkgs` - it consist of over 100,000 packages packaged for Nix, and is an input to the flake for my system configuration.
+{{! end !}}
 
 ### Home Manager
 
@@ -228,7 +231,9 @@ To install plugins, Hyprland provides the Hyprland Plugin Manager, `hyprpm`, but
 }
 ```
 
-
+{{! sidenote !}}
+Note that I also added `hyprland` as a flake input here, since `split-monitor-workspaces` required it.
+{{! end !}}
 and then added it as a plugin through the exposed `plugins` option in Hyprland's `home-manager` module.
 
 ```nix
@@ -414,13 +419,13 @@ Now, when flakes came around, so did the Nix command line interface, `nix`, whic
 }
 ```
 
-
+{{! sidenote !}}
 
 To obtain `rust` and `cargo`, I used the versions provided by [https://github.com/oxalica/rust-overlay](https://github.com/oxalica/rust-overlay). It also turns out that in order to build, rust wanted access to libssl, so I added `pkgs.openssl` to the dev shell's build inputs as well.
 
 My static site generator also depends on Go and Node, so I added those.
 
-
+{{! end !}}
 
 Great, that wasn't too bad, and now I had a functional development environment for Rust. Doing the same for Python shouldn't be too bad, yeah?
 
@@ -521,7 +526,9 @@ At this point, it turns out that NixOS has an escape hatch — `buildFHSUserEnv`
 }
 ```
 
-
+{{! sidenote !}}
+Another option I had was to use a tool called [distrobox](https://github.com/89luca89/distrobox), which lets me use a multitude of different linux distributions in my terminal, while being closely tied to the host system.
+{{! end !}}
 
 Now that everything worked, I figured I'd round out the corners of my workflow for niceties and convenience.
 
@@ -597,7 +604,9 @@ I decided to use `gnome-keyring` since it already seemed fairly prevalent. `gnom
 }
 ```
 
-
+{{! sidenote !}}  
+`seahorse` is sort of a graphical frontend for `gnome-keyring`, you can use it to manage your keyring.
+{{! end !}}
 
 Upon restart, I could see that `gnome-keyring-daemon` was now running, and `seahorse` was showing me that my keyring was unlocked, but for some reason `git` was still prompting me for my SSH passphrase when pushing to a GitHub remote. After some looking into it, turns out I need to set `SSH_AUTH_SOCK` accordingly, which is used by the ssh agent. The `ssh-agent` service set it automatically, but now I needed to set it myself.
 
