@@ -8,11 +8,11 @@
 
 {% block content %}
     {{ document.content | safe }}
-        
+
     <section class="home">
         <h1 class="home__heading">Latest Posts</h1>
         <div class="home__page-list">
-            {% for page in pages %}
+            {% for page in page|sort(attribute="document.date", reverse=true)s %}
             {% if loop.index <= 5 and page.document.frontmatter.title != "" %}
             <div class="home__page-item">
                 <h1 class="home__page-header"><a href="{{page.permalink}}">{{ page.document.frontmatter.title }}</a></h1>

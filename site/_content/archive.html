@@ -15,8 +15,8 @@ slug = "archive"
 <section class="archive">
     <h1 class="archive__heading">All Posts</h1>
     <div class="archive__page-list">
-        {% for page in pages %}
-        {% if loop.index <= 5 and page.document.frontmatter.title != "" %}
+        {% for page in pages|sort(attribute="document.date", reverse=true) %}
+        {% if page.document.frontmatter.title != "" %}
         <div class="archive__page-item">
             <h1 class="archive__page-header"><a href="{{page.permalink}}">{{ page.document.frontmatter.title }}</a></h1>
             <p class="archive__page-details">

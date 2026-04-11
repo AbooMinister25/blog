@@ -3,6 +3,7 @@ title = "Notes on Types and Programming Languages"
 tags = ["programming", "type-theory", "notes"]
 date = "2024-11-30T4:00:00"
 template = "page.html"
+draft = true
 ---
 
 
