@@ -15,3 +15,4 @@ I'm passionate about programming languages, tooling, and writing correct and per
 {{! sidenote !}}
     This site takes some inspiration from [Tufte CSS](https://edwardtufte.github.io/tufte-css/), which in turn takes inspiration from [Edward Tufte](https://en.wikipedia.org/wiki/Edward_Tufte/) and his books, which are characterized, among other things, by their ample use of sidenotes.
 {{! end !}}
+

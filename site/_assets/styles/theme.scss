@@ -3,11 +3,12 @@
 
 // Colors
 $color-bg: #fffff8;
-$color-fg: solarized.$base0;
-$color-text-muted: solarized.$base1;
-$color-text-strong: solarized.$base01;
+$color-fg: #111111;
+$color-text-muted: rgba(solarized.$base01, 0.9);
+
+$color-text-strong: #111111;
 $color-accent: solarized.$yellow;
-$color-link: solarized.$base00;
+$color-link: #111111;
 $color-card-bg: solarized.$base03;
 $color-card-fg: solarized.$base0;
 
