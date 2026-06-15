@@ -4,7 +4,7 @@ title = "Rayyan Cyclegar"
 description = "My little corner of the internet, where I occasionally write about tech and life."
 email = "aboominister@gmail.com"
 url = "https://rayyanc.com/"
-syntax_theme = "Solarized Dark"
+syntax_theme = "Solarized (dark)"
 
 [hooks]
 # Hook related config.
