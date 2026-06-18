@@ -31,13 +31,13 @@ code {
     font-family: theme.$font-monospace;
 }
 
-pre {
+code pre {
+    padding: 1em;
     display: block;
     overflow: auto;
     font-size: 0.8rem;
     line-height: 1.15rem;
     border-radius: 5px;
-    padding: 1em;
     margin: 1em 0 1em;
     font-family: theme.$font-monospace;
 }
